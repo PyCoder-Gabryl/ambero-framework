@@ -11,19 +11,19 @@
 //                   użytkownika w całym frameworku Ambero.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/ui.ab
-// VERSION:         0.1.0
+// VERSION:         0.1.4
 // CREATED:         2026-07-16
 // ============================================================================
 
 
 // Kolory ANSI
-pub const clr_reset = "\u{001b}[0m"
-pub const clr_bold = "\u{001b}[1m"
-pub const clr_amber = "\u{001b}[38;5;214m"
-pub const clr_green = "\u{001b}[0;32m"
-pub const clr_red = "\u{001b}[0;31m"
-pub const clr_blue = "\u{001b}[0;34m"
-pub const clr_cyan = "\u{001b}[0;36m"
+pub const clr_reset = "[0m"
+pub const clr_bold  = "[1m"
+pub const clr_amber = "[38;5;214m"
+pub const clr_green = "[32m"
+pub const clr_red   = "[31m"
+pub const clr_blue  = "[34m"
+pub const clr_cyan  = "[36m"
 
 // Ikony podstawowe
 pub const ico_ok = "✅"

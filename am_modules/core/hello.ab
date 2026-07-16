@@ -14,7 +14,6 @@
 // CREATED:         2026-07-16
 // ============================================================================
 
-
 import {
     clr_reset,
     clr_amber,
@@ -23,6 +22,7 @@ import {
     ico_ok,
     ico_hello
 } from "../../am_core/ui.ab"
+
 
 main {
     echo("{clr_amber}{clr_bold}{ico_hello} Cześć, jestem Ambero :){clr_reset}")
