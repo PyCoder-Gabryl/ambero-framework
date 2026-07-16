@@ -1,0 +1,31 @@
+# ============================================================================
+# PROJECT:         Ambero Framework CLI
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:      Szablon pliku konfiguracyjnego dla frameworku Ambero.
+#                   Zawiera domyślne ustawienia ścieżek, interfejsu użytkownika
+#                   oraz parametry konserwacji systemu.
+# ----------------------------------------------------------------------------
+# PATH:            config/config.example.toml
+# VERSION:         0.1.0
+# CREATED:         2026-07-16
+# ============================================================================
+
+[system]
+# Bezwzględna ścieżka do katalogu głównego Ambero (ustawiana przez instalator)
+ambero_home = ""
+# Typ systemu operacyjnego (macos-arm64, debian-x86_64 itp.)
+os_type = ""
+
+[ui]
+# Tryb wyświetlania ikon: "emoji" (domyślny) lub "nerd" (wymaga Nerd Fonts)
+ui_mode = "emoji"
+
+[maintenance]
+# Data ostatniego sprawdzenia aktualizacji systemowych (YYYY-MM-DD)
+last_update_check = ""
+# Co ile dni sprawdzać aktualizacje (domyślnie 7)
+update_interval_days = 7
