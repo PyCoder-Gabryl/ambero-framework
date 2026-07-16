@@ -10,12 +10,21 @@
 //                   wywołań: Alias -> Justfile -> Amber.
 // ----------------------------------------------------------------------------
 // PATH:            am_modules/core/hello.ab
-// VERSION:         0.1.1
+// VERSION:         0.1.3
 // CREATED:         2026-07-16
 // ============================================================================
 
 
+import {
+    clr_reset,
+    clr_amber,
+    clr_bold,
+    clr_green,
+    ico_ok,
+    ico_hello
+} from "../../am_core/ui.ab"
+
 main {
-    echo ("👋 Cześć, jestem Ambero :)")
-    echo ("Wszystkie systemy działają poprawnie!")
+    echo("{clr_amber}{clr_bold}{ico_hello} Cześć, jestem Ambero :){clr_reset}")
+    echo("{clr_green}{ico_ok} Wszystkie systemy działają poprawnie!{clr_reset}")
 }
