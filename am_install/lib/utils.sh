@@ -11,7 +11,7 @@
 #                   interwałów czasowych dla aktualizacji.
 # ----------------------------------------------------------------------------
 # PATH:            am_install/lib/utils.sh
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-17
 # ============================================================================
 
@@ -74,10 +74,10 @@ get_date_diff() {
 update_config_value() {
     local key=$1
     local value=$2
-    local config_file="${AMBERO_DIR}/config/config.toml"
+    local config_file="${AMBERO_SOURCE_DIR}/config/config.toml"
 
     if [ -f "$config_file" ]; then
         # Używamy zmiennej SED_INPLACE zdefiniowanej w głównym instalatorze
-        $SED_INPLACE "s/^${key} = .*/${key} = \"${value}\"/" "$config_file"
+        "${SED_INPLACE[@]}" "s/^${key} = .*/${key} = \"${value}\"/" "$config_file"
     fi
 }

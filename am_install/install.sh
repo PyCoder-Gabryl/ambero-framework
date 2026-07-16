@@ -14,7 +14,7 @@
 #                   oraz tworzenie wrapperów CLI w ~/.local/bin.
 # ----------------------------------------------------------------------------
 # PATH:            am_install/install.sh
-# VERSION:         0.1.1
+# VERSION:         0.1.2
 # CREATED:         2026-07-17
 # ============================================================================
 
@@ -38,13 +38,11 @@ OS_TYPE="unknown"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS_TYPE="macos"
     source "$INSTALLER_SELF_PATH/lib/platforms/macos.sh"
-    SED_INPLACE="sed -i ''"
-    export SED_INPLACE
+    SED_INPLACE=(sed -i '')
 elif [[ -f /etc/debian_version ]]; then
     OS_TYPE="debian"
     source "$INSTALLER_SELF_PATH/lib/platforms/debian.sh"
-    SED_INPLACE="sed -i"
-    export SED_INPLACE
+    SED_INPLACE=(sed -i)
 else
     echo -e "\033[0;31m❌ Nieobsługiwany system operacyjny.\033[0m"
     exit 1
