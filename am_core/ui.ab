@@ -17,13 +17,13 @@
 
 
 // Kolory ANSI
-pub const clr_reset = "\e[0m"
-pub const clr_bold = "\e[1m"
-pub const clr_amber = "\e[38;5;214m"
-pub const clr_green = "\e[0;32m"
-pub const clr_red = "\e[0;31m"
-pub const clr_blue = "\e[0;34m"
-pub const clr_cyan = "\e[0;36m"
+pub const clr_reset = "\x1b[0m"
+pub const clr_bold = "\x1b[1m"
+pub const clr_amber = "\x1b[38;5;214m"
+pub const clr_green = "\x1b[0;32m"
+pub const clr_red = "\x1b[0;31m"
+pub const clr_blue = "\x1b[0;34m"
+pub const clr_cyan = "\x1b[0;36m"
 
 // Ikony podstawowe
 pub const ico_ok = "✅"
