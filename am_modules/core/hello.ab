@@ -10,13 +10,12 @@
 //                   wywołań: Alias -> Justfile -> Amber.
 // ----------------------------------------------------------------------------
 // PATH:            am_modules/core/hello.ab
-// VERSION:         0.1.0
+// VERSION:         0.1.1
 // CREATED:         2026-07-16
 // ============================================================================
 
-import { stdout } from "std"
 
-main() {
-    echo "👋 Cześć, jestem Ambero :)"
-    echo "Wszystkie systemy działają poprawnie!"
+main {
+    echo ("👋 Cześć, jestem Ambero :)"
+    echo ("Wszystkie systemy działają poprawnie!")
 }
