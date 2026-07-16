@@ -21,13 +21,21 @@ setup_icons() {
     local mode=$1
 
     if [ "$mode" = "nerd" ]; then
-        # Ikony dla Nerd Fonts
+        # Ikony systemowe
         ICO_INFO="󰋽"
         ICO_OK="󰄬"
         ICO_WARN=""
         ICO_ERROR="󰅙"
         ICO_PKG="󰏖"
         ICO_WAIT="󱑮"
+
+        # Ikony technologii (Nerd Font / Material Design)
+        ICO_AMBER="󰽂"    # Gemstone (pasuje do bursztynu)
+        ICO_JUST="󱖫"     # Clipboard check (zadania/taski)
+        ICO_BASH="󱆃"     # Terminal prompt
+        ICO_ZSH="󱆃"      # Terminal prompt
+        ICO_MAKE="󱁆"     # Cog/Gear (budowanie)
+        ICO_ADA="󰯀"      # Alpha A box
     else
         # Ikony standardowe (Emoji)
         ICO_INFO="ℹ️"
@@ -36,5 +44,13 @@ setup_icons() {
         ICO_ERROR="❌"
         ICO_PKG="📦"
         ICO_WAIT="⏳"
+
+        # Fallback dla technologii
+        ICO_AMBER="💎"
+        ICO_JUST="⚖️"
+        ICO_BASH="🐚"
+        ICO_ZSH="🐚"
+        ICO_MAKE="🛠️"
+        ICO_ADA="🅰️"
     fi
 }

@@ -1,0 +1,37 @@
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com/PyCoder-Gabryl
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:
+// ----------------------------------------------------------------------------
+// PATH:            am_core/ui.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-16
+// ============================================================================
+
+
+// Kolory ANSI
+pub let clr_reset = "\e[0m"
+pub let clr_bold = "\e[1m"
+pub let clr_amber = "\e[38;5;214m"
+pub let clr_green = "\e[0;32m"
+pub let clr_red = "\e[0;31m"
+pub let clr_blue = "\e[0;34m"
+pub let clr_cyan = "\e[0;36m"
+
+// Ikony podstawowe
+pub let ico_ok = "✅"
+pub let ico_info = "ℹ️"
+pub let ico_warn = "⚠️"
+pub let ico_error = "❌"
+pub let ico_hello = "👋"
+
+// Ikony technologii [NOWE]
+pub let ico_amber = "💎"
+pub let ico_just = "⚖️"
+pub let ico_bash = "🐚"
+pub let ico_make = "🛠️"
+pub let ico_ada = "🅰️"
