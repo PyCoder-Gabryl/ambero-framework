@@ -1,0 +1,22 @@
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com/PyCoder-Gabryl
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:      Minimalny skrypt powitalny i testowy frameworku.
+//                   Służy do weryfikacji poprawnego działania łańcucha
+//                   wywołań: Alias -> Justfile -> Amber.
+// ----------------------------------------------------------------------------
+// PATH:            am_modules/core/hello.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-16
+// ============================================================================
+
+import { stdout } from "std"
+
+main() {
+    echo "👋 Cześć, jestem Ambero :)"
+    echo "Wszystkie systemy działają poprawnie!"
+}

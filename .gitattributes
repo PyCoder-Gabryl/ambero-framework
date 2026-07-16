@@ -1,0 +1,44 @@
+# ============================================================================
+# PROJECT:         Ambero Framework CLI
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:      Konfiguracja zachowania systemu Git. Wymusza uniksowe
+#                   końce linii (LF) dla skryptów, co zapobiega błędom
+#                   uruchamiania na różnych systemach. Dodaje mapowanie
+#                   składni dla języka Amber na GitHubie.
+# ----------------------------------------------------------------------------
+# PATH:            .gitattributes
+# VERSION:         0.1.0
+# CREATED:         2026-07-16
+# ============================================================================
+
+
+# Domyślne zachowanie: auto-wykrywanie tekstu, ale wymuszanie LF (uniksowe końce linii)
+# Jest to absolutnie krytyczne dla skryptów Shell i Amber.
+* text=auto eol=lf
+
+# Wyraźne wymuszenie LF dla plików wykonywalnych i konfiguracyjnych
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.ab text eol=lf
+Justfile text eol=lf
+*.toml text eol=lf
+
+# Pliki binarne (Git nie będzie próbował robić z nich diffów tekstowych)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# -----------------------------------------------------------------------------
+# GITHUB LINGUIST (Statystyki i kolorowanie składni na GitHubie)
+# -----------------------------------------------------------------------------
+# Ponieważ Amber jest nowym językiem, każemy GitHubowi kolorować pliki .ab
+# używając silnika dla języka Bash (najbardziej zbliżona składnia skryptowa).
+*.ab linguist-language=Bash
