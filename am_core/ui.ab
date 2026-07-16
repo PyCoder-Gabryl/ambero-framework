@@ -17,24 +17,24 @@
 
 
 // Kolory ANSI
-pub let clr_reset = "\e[0m"
-pub let clr_bold = "\e[1m"
-pub let clr_amber = "\e[38;5;214m"
-pub let clr_green = "\e[0;32m"
-pub let clr_red = "\e[0;31m"
-pub let clr_blue = "\e[0;34m"
-pub let clr_cyan = "\e[0;36m"
+pub const clr_reset = "\e[0m"
+pub const clr_bold = "\e[1m"
+pub const clr_amber = "\e[38;5;214m"
+pub const clr_green = "\e[0;32m"
+pub const clr_red = "\e[0;31m"
+pub const clr_blue = "\e[0;34m"
+pub const clr_cyan = "\e[0;36m"
 
 // Ikony podstawowe
-pub let ico_ok = "✅"
-pub let ico_info = "ℹ️"
-pub let ico_warn = "⚠️"
-pub let ico_error = "❌"
-pub let ico_hello = "👋"
+pub const ico_ok = "✅"
+pub const ico_info = "ℹ️"
+pub const ico_warn = "⚠️"
+pub const ico_error = "❌"
+pub const ico_hello = "👋"
 
 // Ikony technologii
-pub let ico_amber = "💎"
-pub let ico_just = "⚖️"
-pub let ico_bash = "🐚"
-pub let ico_make = "🛠️"
-pub let ico_ada = "🅰️"
+pub const ico_amber = "💎"
+pub const ico_just = "⚖️"
+pub const ico_bash = "🐚"
+pub const ico_make = "🛠️"
+pub const ico_ada = "🅰️"
