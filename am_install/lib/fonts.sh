@@ -44,7 +44,7 @@ install_fonts_menu() {
     echo -e "5) Pomiń instalację czcionek"
 
     local choice
-    read -p "Wybór [1-5]: " choice
+    read -rp "Wybór [1-5]: " choice
 
     case $choice in
         1) install_font "JetBrainsMono" ;;

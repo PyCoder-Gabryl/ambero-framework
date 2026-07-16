@@ -14,7 +14,7 @@
 #                   oraz tworzenie wrapperów CLI w ~/.local/bin.
 # ----------------------------------------------------------------------------
 # PATH:            am_install/install.sh
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-17
 # ============================================================================
 
@@ -39,10 +39,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     OS_TYPE="macos"
     source "$INSTALLER_SELF_PATH/lib/platforms/macos.sh"
     SED_INPLACE="sed -i ''"
+    export SED_INPLACE
 elif [[ -f /etc/debian_version ]]; then
     OS_TYPE="debian"
     source "$INSTALLER_SELF_PATH/lib/platforms/debian.sh"
     SED_INPLACE="sed -i"
+    export SED_INPLACE
 else
     echo -e "\033[0;31m❌ Nieobsługiwany system operacyjny.\033[0m"
     exit 1
@@ -64,7 +66,7 @@ echo -e "2) ${CLR_BOLD}DEV${CLR_RESET}  (Ustawienie projektu w bieżącym katalo
 echo -e "3) ${CLR_BOLD}OBA${CLR_RESET}  (Zalecane dla twórców frameworku)"
 echo -e "4) Anuluj"
 
-read -p "Wybór [1-4]: " INSTALL_MODE_CHOICE
+read -rp "Wybór [1-4]: " INSTALL_MODE_CHOICE
 
 case $INSTALL_MODE_CHOICE in
     1) MODE="PROD" ;;
