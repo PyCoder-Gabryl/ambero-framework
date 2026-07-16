@@ -25,9 +25,12 @@ fi
 # Sprawdza czy jakakolwiek czcionka Nerd Font jest w systemie
 check_nerd_font_installed() {
     mkdir -p "$FONT_DIR"
-    if ls "$FONT_DIR" | grep -iq "Nerd Font"; then
-        return 0
-    fi
+    local f # [ZMIENIONE]
+    for f in "$FONT_DIR"/*Nerd*Font*; do
+        if [ -e "$f" ]; then
+            return 0
+        fi
+    done # [ZMIENIONE]
     return 1
 }
 
@@ -63,21 +66,16 @@ install_font() {
 
     echo -e "${CLR_BLUE}${ICO_PKG} Instalowanie ${font_slug}...${CLR_RESET}"
 
-    # Poprawka ShellCheck: deklaracja i przypisanie osobno
     tmp_dir=$(mktemp -d)
 
-    # Pobieranie (Nerd Fonts używa konkretnych nazw w URL)
     curl -L -o "$tmp_dir/font.zip" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_slug}.zip"
 
-    # Rozpakowanie (tylko pliki .ttf i .otf)
     unzip -o "$tmp_dir/font.zip" "*.ttf" "*.otf" -d "$FONT_DIR" > /dev/null
 
-    # Odświeżenie cache na Linuxie
     if [ "$OS_TYPE" != "macos" ]; then
         fc-cache -f "$FONT_DIR" > /dev/null
     fi
 
-    # Sprzątanie
     rm -rf "$tmp_dir"
 
     echo -e "${CLR_GREEN}${ICO_OK} Czcionka ${font_slug} gotowa!${CLR_RESET}"
