@@ -16,6 +16,6 @@
 
 
 main {
-    echo ("👋 Cześć, jestem Ambero :)"
+    echo ("👋 Cześć, jestem Ambero :)")
     echo ("Wszystkie systemy działają poprawnie!")
 }
