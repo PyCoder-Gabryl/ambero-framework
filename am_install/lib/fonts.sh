@@ -13,6 +13,8 @@
 # CREATED:         2026-07-16
 # ============================================================================
 
+# shellcheck disable=SC2162
+
 # Ścieżki czcionek zależne od OS
 if [ "$OS_TYPE" = "macos" ]; then
     FONT_DIR="$HOME/Library/Fonts"
@@ -20,25 +22,63 @@ else
     FONT_DIR="$HOME/.local/share/fonts"
 fi
 
-check_nerd_font() {
-    local font_name=$1
-    # Proste sprawdzenie czy plik czcionki istnieje w katalogu
-    # shellcheck disable=SC2010
-    if ls "$FONT_DIR" | grep -iq "$font_name"; then
-        return 0 # Jest
-    else
-        return 1 # Brak
+# Sprawdza czy jakakolwiek czcionka Nerd Font jest w systemie
+check_nerd_font_installed() {
+    mkdir -p "$FONT_DIR"
+    if ls "$FONT_DIR" | grep -iq "Nerd Font"; then
+        return 0
     fi
+    return 1
 }
 
-install_jb_mono_nerd() {
-    echo -e "${CLR_BLUE}${ICO_PKG} Pobieranie JetBrains Mono Nerd Font...${CLR_RESET}"
-    local tmp_dir=$(mktemp -d)
-    curl -L -o "$tmp_dir/jb.zip" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
-    unzip -o "$tmp_dir/jb.zip" -d "$FONT_DIR"
+# Główna funkcja instalacyjna z menu wyboru
+install_fonts_menu() {
+    echo -e "${CLR_CYAN}${ICO_INFO} Wybierz czcionkę Nerd Font do zainstalowania:${CLR_RESET}"
+    echo -e "1) JetBrains Mono Nerd Font (Zalecane)"
+    echo -e "2) Hack Nerd Font"
+    echo -e "3) Fira Code Nerd Font"
+    echo -e "4) Wszystkie powyższe"
+    echo -e "5) Pomiń instalację czcionek"
 
+    local choice
+    read -p "Wybór [1-5]: " choice
+
+    case $choice in
+        1) install_font "JetBrainsMono" ;;
+        2) install_font "Hack" ;;
+        3) install_font "FiraCode" ;;
+        4)
+            install_font "JetBrainsMono"
+            install_font "Hack"
+            install_font "FiraCode"
+            ;;
+        *) return 0 ;;
+    esac
+}
+
+# Funkcja pomocnicza do pobierania i rozpakowywania
+install_font() {
+    local font_slug=$1
+    local tmp_dir
+
+    echo -e "${CLR_BLUE}${ICO_PKG} Instalowanie ${font_slug}...${CLR_RESET}"
+
+    # Poprawka ShellCheck: deklaracja i przypisanie osobno
+    tmp_dir=$(mktemp -d)
+
+    # Pobieranie (Nerd Fonts używa konkretnych nazw w URL)
+    curl -L -o "$tmp_dir/font.zip" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_slug}.zip"
+
+    # Rozpakowanie (tylko pliki .ttf i .otf)
+    unzip -o "$tmp_dir/font.zip" "*.ttf" "*.otf" -d "$FONT_DIR" > /dev/null
+
+    # Odświeżenie cache na Linuxie
     if [ "$OS_TYPE" != "macos" ]; then
-        fc-cache -f "$FONT_DIR"
+        fc-cache -f "$FONT_DIR" > /dev/null
     fi
-    echo -e "${CLR_GREEN}${ICO_OK} Zainstalowano pomyślnie!${CLR_RESET}"
+
+    # Sprzątanie
+    rm -rf "$tmp_dir"
+
+    echo -e "${CLR_GREEN}${ICO_OK} Czcionka ${font_slug} gotowa!${CLR_RESET}"
 }
