@@ -30,7 +30,7 @@ main {
     let ambero_home = env("AMBERO_HOME") failed { "." }
 
     // 2. Inicjalizacja konfiguracji
-    let config: AmberoConfig = load_config("{ambero_home}/config/config.toml")
+    let config = load_config("{ambero_home}/config/config.toml")
 
     // 3. Nagłówek raportu
     log_header(config, "AMBERO SYSTEM REPORT")
