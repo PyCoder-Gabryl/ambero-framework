@@ -23,9 +23,10 @@ import {
     get_os_long_info
 } from "../../../../am_core/system.ab"
 import { clr_cyan, clr_reset } from "../../../../am_core/ui.ab"
+import { env } from "std/env"
 
 main {
-    // 1. Inicjalizacja konfiguracji (zakładamy ścieżkę relatywną dla DEV)
+    // 1. Pobieramy ścieżkę domową z otoczenia ustawionego przez Just
     let config = load_config("./config/config.toml")
 
     // 2. Nagłówek

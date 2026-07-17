@@ -11,7 +11,7 @@
 #                   przekazywanie wykonania do skryptów Amber.
 # ----------------------------------------------------------------------------
 # PATH:            Justfile
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-16
 # ============================================================================
 
@@ -20,25 +20,26 @@ set shell := ["bash", "-c"]
 # =============================================================================
 # ZMIENNE GLOBALNE I ŚCIEŻKI
 # =============================================================================
-# justfile_directory() zwraca absolutną ścieżkę do katalogu, w którym leży ten Justfile.
-# Dzięki temu aliasy globalne działają niezależnie od obecnego katalogu roboczego (PWD).
 AMBERO_DIR := justfile_directory()
 CONFIG_FILE := AMBERO_DIR + "/config/config.toml"
+
+# Eksportujemy ścieżkę domową, aby skrypty Amber mogły ją łatwo odczytać z otoczenia
+export AMBERO_HOME := AMBERO_DIR
+
+# Importujemy automatycznie generowaną listę zadań z wtyczek
+import 'am_plugins/plugins.just' # [NOWA]
 
 # =============================================================================
 # GŁÓWNA LOGIKA CLI
 # =============================================================================
 
-# Domyślna komenda wywoływana, gdy użytkownik wpisze samo 'am' lub 'ambero'
 @_default:
     just --list
 
 # =============================================================================
-# UKRYTE ZADANIA SYSTEMOWE (Zaczynają się od '_')
+# UKRYTE ZADANIA SYSTEMOWE
 # =============================================================================
 
-# Klauzula bezpieczeństwa (Self-healing sanity check).
-# Uruchamiana jako zależność przed właściwymi komendami.
 @_check_config:
     if [ ! -f "{{CONFIG_FILE}}" ]; then \
         echo "❌ Błąd krytyczny: Brak pliku konfiguracyjnego {{CONFIG_FILE}}!"; \
@@ -47,9 +48,9 @@ CONFIG_FILE := AMBERO_DIR + "/config/config.toml"
     fi
 
 # =============================================================================
-# MODUŁ: CORE
+# MODUŁ: OFFICIAL (AMBERO)
 # =============================================================================
 
 # Powitanie Ambero (Test środowiska i poprawnego linkowania)
 @ambero: _check_config
-    amber run {{AMBERO_DIR}}/am_modules/core/hello.ab
+    amber run {{AMBERO_DIR}}/am_plugins/official/ambero/hello/hello.ab # [ZMIENIONA ŚCIEŻKA]
