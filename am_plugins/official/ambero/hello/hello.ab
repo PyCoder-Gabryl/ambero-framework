@@ -10,7 +10,7 @@
 //                   wywołań: Alias -> Justfile -> Amber.
 // ----------------------------------------------------------------------------
 // PATH:            am_modules/core/hello.ab
-// VERSION:         0.1.14
+// VERSION:         0.1.15
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -48,6 +48,6 @@ main {
 
     log_edu(config,
         "O tym poleceniu",
-        "Weryfikacja linkowania modułów oraz uprawnień do zapisu logów w {home_path}/logs."
+        "Weryfikacja linkowania modulow oraz uprawnien do zapisu logow w {home_path}/logs."
     )
 }
