@@ -1,0 +1,72 @@
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com/PyCoder-Gabryl
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:
+// ----------------------------------------------------------------------------
+// PATH:            am_core/i18n_engine.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-17
+// ============================================================================
+
+
+import { read_file, file_exists } from "std/fs"
+import {
+    clr_red,
+    clr_reset,
+    ico_error
+} from "./ui.ab"
+import { AmberoConfig } from "./config_parser.ab"
+
+// Funkcja budująca ścieżkę do pliku tłumaczeń
+// Format: i18n/{lang}/{plugin_type}/{target}.toml
+fun build_i18n_path(home: text, lang: text, p_type: text, target: text): text {
+    return "{home}/i18n/{lang}/{p_type}/{target}.toml"
+}
+
+// Pobiera konkretny klucz z pliku tłumaczeń
+pub fun tr(config: AmberoConfig, p_type: text, target: text, key: text): text {
+    let lang = config.language
+    let path = build_i18n_path(config.home, lang, p_type, target)
+
+    // 1. Próba wczytania wybranego języka
+    if file_exists(path) {
+        let content = read_file(path) failed { "" }
+        let val = get_key_from_content(content, key)
+        if val != "" {
+            return val
+        }
+    }
+
+    // 2. Fallback do języka polskiego, jeśli wybrany język zawiódł
+    if lang != "pl" {
+        let fallback_path = build_i18n_path(config.home, "pl", p_type, target)
+        if file_exists(fallback_path) {
+            let content = read_file(fallback_path) failed { "" }
+            return get_key_from_content(content, key)
+        }
+    }
+
+    return "!! MISSING_KEY: {key} !!"
+}
+
+// Prosty parser kluczy dla plików i18n
+fun get_key_from_content(content: text, key: text): text {
+    let lines = content.split("\n")
+    loop line in lines {
+        let trimmed = line.trim()
+        if trimmed.starts_with(key) and trimmed.contains("=") {
+            let parts = trimmed.split("=")
+            if parts.len() >= 2 {
+                let val = parts[1].trim().split("\"")
+                if val.len() >= 2 {
+                    return val[1]
+                }
+            }
+        }
+    }
+    return ""
+}

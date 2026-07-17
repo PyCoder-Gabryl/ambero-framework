@@ -11,7 +11,7 @@
 #                   w podziale na oficjalne, użytkownika i eksperymentalne.
 # ----------------------------------------------------------------------------
 # PATH:            config/config.example.toml
-# VERSION:         0.1.1
+# VERSION:         0.1.2
 # CREATED:         2026-07-16
 # ============================================================================
 
@@ -22,12 +22,6 @@ ambero_home = ""
 os_type = ""
 # Wersja frameworku
 version = "0.1.0-dev"
-
-[ui]
-# Tryb ikon: "emoji" (standard) lub "nerd" (wymaga Nerd Fonts)
-ui_mode = "emoji"
-# Język komunikatów: "pl" lub "en"
-language = "pl"
 
 [shell]
 # Główna powłoka użytkownika (zsh / bash)
@@ -53,3 +47,11 @@ system = { enabled = true, version = "0.1.0" }
 [plugins.experimental]
 # Wtyczki w fazie testów (am_plugins/experimental/)
 # Przykład: new_feature = { enabled = false }
+
+[ui]
+# Tryb ikon: "emoji" (standard) lub "nerd" (wymaga Nerd Fonts)
+ui_mode = "emoji"
+# Język komunikatów: "pl" lub "en"
+language = "pl"
+# Poziom komunikatów: "quiet", "minimal", "normal", "edu" [NOWE]
+verbosity = "normal"

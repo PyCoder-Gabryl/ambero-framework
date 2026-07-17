@@ -12,7 +12,7 @@
 //                   kluczowych parametrów przy starcie systemu.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.1
+// VERSION:         0.1.2
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -32,7 +32,8 @@ pub struct AmberoConfig {
     os: text,
     ui_mode: text,
     language: text,
-    shell: text
+    shell: text,
+    verbosity: text
 }
 
 // Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
@@ -77,6 +78,19 @@ pub fun load_config(config_path: text): AmberoConfig {
     let ui_mode = get_toml_value(config_content, "ui_mode")
     let language = get_toml_value(config_content, "language")
     let default_shell = get_toml_value(config_content, "default_shell")
+    let verbosity = get_toml_value(config_content, "verbosity")
+
+    // Walidacja poziomu gadatliwości (fallback do normal)
+    let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
+
+    return AmberoConfig {
+        home: ambero_home,
+        os: os_type,
+        ui_mode: ui_mode,
+        language: language,
+        shell: default_shell,
+        verbosity: final_verbosity
+    }
 
     // Walidacja absolutnego minimum
     if ambero_home == "" {
