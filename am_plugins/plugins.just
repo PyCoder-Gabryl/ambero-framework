@@ -5,7 +5,10 @@
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
-# DESCRIPTION:
+# DESCRIPTION:      Automatycznie generowany plik indeksujący zadania
+#                   wszystkich zainstalowanych wtyczek. Jest importowany
+#                   przez główny Justfile, co pozwala na dynamiczne
+#                   rozszerzanie komend frameworku Ambero.
 # ----------------------------------------------------------------------------
 # PATH:            am_plugins/plugins.just
 # VERSION:         0.1.0

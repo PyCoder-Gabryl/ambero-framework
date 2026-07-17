@@ -23,11 +23,12 @@ import {
     get_os_long_info
 } from "../../../../am_core/system.ab"
 import { clr_cyan, clr_reset } from "../../../../am_core/ui.ab"
-import { env } from "std/env"
+import { env } from "std/env" // [NOWA]
 
 main {
-    // 1. Pobieramy ścieżkę domową z otoczenia ustawionego przez Just
-    let config = load_config("./config/config.toml")
+    // 1. Pobieramy ścieżkę domową z otoczenia ustawionego przez Just (naprawa błędu ścieżki)
+    let ambero_home = env("AMBERO_HOME") failed { "." } // [NOWA]
+    let config = load_config("{ambero_home}/config/config.toml") // [ZMIANA]
 
     // 2. Nagłówek
     log_header(config, "AMBERO SYSTEM REPORT")
