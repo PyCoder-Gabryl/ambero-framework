@@ -12,13 +12,13 @@
 //                   zgodnie z ustawieniami w config.toml.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/logger.ab
-// VERSION:         0.1.2
+// VERSION:         0.1.3
 // CREATED:         2026-07-17
 // ============================================================================
 
 
 import { append_file, dir_exists } from "std/fs"
-import { AmberoConfig, get_home, get_verbosity } from "./config_parser.ab" // [ZMIANA]
+import { AmberoConfig, get_home, get_verbosity } from "./config_parser.ab"
 import {
     clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
     ico_ok, ico_info, ico_warn, ico_error
@@ -26,7 +26,7 @@ import {
 
 fun write_to_disk(config: AmberoConfig, level: text, message: text) {
     let timestamp = unsafe "date +%Y-%m-%dT%H:%M:%S"
-    let home = get_home(config) // [ZMIANA] Użycie gettera
+    let home = get_home(config)
     let log_dir = "{home}/logs"
 
     if not dir_exists("{log_dir}/plain") { unsafe "mkdir -p {log_dir}/plain" }
@@ -49,9 +49,50 @@ fun get_verbosity_weight(level: text): int {
 
 pub fun log_success(config: AmberoConfig, message: text) {
     write_to_disk(config, "SUCCESS", message)
-    let verbosity = get_verbosity(config) // [ZMIANA] Użycie gettera
-    let weight = get_verbosity_weight(verbosity)
-    if weight >= 1 {
+    let v = get_verbosity(config)
+    if get_verbosity_weight(v) >= 1 {
         echo("{clr_green}{ico_ok} {message}{clr_reset}")
+    }
+}
+
+pub fun log_step(config: AmberoConfig, message: text) {
+    write_to_disk(config, "STEP", message)
+    let v = get_verbosity(config)
+    if get_verbosity_weight(v) >= 2 {
+        echo("{clr_blue}  ➜ {message}{clr_reset}")
+    }
+}
+
+pub fun log_error(config: AmberoConfig, message: text) {
+    write_to_disk(config, "ERROR", message)
+    let v = get_verbosity(config)
+    if get_verbosity_weight(v) >= 0 {
+        echo("{clr_red}{clr_bold}{ico_error} BŁĄD: {message}{clr_reset}")
+    }
+}
+
+pub fun log_warn(config: AmberoConfig, message: text) {
+    write_to_disk(config, "WARN", message)
+    let v = get_verbosity(config)
+    if get_verbosity_weight(v) >= 1 {
+        echo("{clr_amber}{ico_warn} OSTRZEŻENIE: {message}{clr_reset}")
+    }
+}
+
+pub fun log_edu(config: AmberoConfig, title: text, content: text) {
+    write_to_disk(config, "EDU", "{title}: {content}")
+    let v = get_verbosity(config)
+    if get_verbosity_weight(v) >= 3 {
+        echo("")
+        echo("{clr_cyan}{clr_bold}🎓 EDUKACJA: {title}{clr_reset}")
+        echo("{clr_cyan}│ {content}{clr_reset}")
+        echo("")
+    }
+}
+
+pub fun log_header(config: AmberoConfig, title: text) {
+    let v = get_verbosity(config)
+    if get_verbosity_weight(v) >= 1 {
+        echo("{clr_amber}{clr_bold}=== {title} ==={clr_reset}")
     }
 }

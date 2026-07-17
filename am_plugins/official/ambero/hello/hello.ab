@@ -10,7 +10,7 @@
 //                   wywołań: Alias -> Justfile -> Amber.
 // ----------------------------------------------------------------------------
 // PATH:            am_modules/core/hello.ab
-// VERSION:         0.1.13
+// VERSION:         0.1.14
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -32,8 +32,7 @@ main {
 
     log_header(config, "AMBERO SYSTEM REPORT")
 
-    // Naprawa błędu Unexpected token: użycie gettera zamiast kropki
-    let home_path = get_home(config) // [ZMIANA]
+    let home_path = get_home(config)
     let ambero_v = get_ambero_version(home_path)
 
     let amber_v = get_amber_version()
@@ -49,6 +48,6 @@ main {
 
     log_edu(config,
         "O tym poleceniu",
-        "Weryfikacja linkowania modulow oraz uprawnien do zapisu logow w {home_path}/logs."
+        "Weryfikacja linkowania modułów oraz uprawnień do zapisu logów w {home_path}/logs."
     )
 }

@@ -12,7 +12,7 @@
 //                   kluczowych parametrów przy starcie systemu.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.8
+// VERSION:         0.1.9
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -26,17 +26,17 @@ import {
     ico_error
 } from "./ui.ab"
 
-// 1. Definicja struktury TYLKO TUTAJ (na poziomie globalnym)
+// Definicja struktury (Pola bez pub, brak przecinków)
 pub struct AmberoConfig {
-    pub home: text
-    pub os: text
-    pub ui_mode: text
-    pub language: text
-    pub shell: text
-    pub verbosity: text
+    home: text
+    os: text
+    ui_mode: text
+    language: text
+    shell: text
+    verbosity: text
 }
 
-// 2. Funkcje dostępowe (Gettery) - niezbędne dla stabilności w wersji alpha
+// Funkcje dostępowe (Gettery)
 pub fun get_home(c: AmberoConfig): text {
     return c.home
 }
@@ -49,7 +49,7 @@ pub fun get_language(c: AmberoConfig): text {
     return c.language
 }
 
-// Funkcja pomocnicza TOML
+// Pomocnik TOML
 fun get_toml_value(content: text, key: text): text {
     let lines = content.split("\n")
     loop line in lines {
@@ -70,8 +70,7 @@ fun get_toml_value(content: text, key: text): text {
 
 pub fun load_config(config_path: text): AmberoConfig {
     if not file_exists(config_path) {
-        echo("{clr_red}{clr_bold}{ico_error} BŁĄD KRYTYCZNY: Brak pliku konfiguracji pod ścieżką:{clr_reset}")
-        echo("   {config_path}")
+        echo("{clr_red}{clr_bold}{ico_error} BŁĄD KRYTYCZNY: Brak pliku: {config_path}{clr_reset}")
         exit(1)
     }
 
@@ -90,11 +89,10 @@ pub fun load_config(config_path: text): AmberoConfig {
     let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
 
     if ambero_home == "" {
-        echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty w config.toml{clr_reset}")
+        echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty{clr_reset}")
         exit(1)
     }
 
-    // WAŻNE: W Amber 0.6.0-alpha NIE UŻYWAMY przecinków w inicjalizacji struktury
     return AmberoConfig {
         home: ambero_home
         os: os_type
