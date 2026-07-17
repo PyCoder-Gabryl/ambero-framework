@@ -5,11 +5,14 @@
 // EMAIL:           pycoder.gabryl@gmail.com
 // LICENSE:         Apache License 2.0
 // ----------------------------------------------------------------------------
-// DESCRIPTION:      Kluczowy moduł parsujący konfigurację TOML.
-//                   Odpowiada za inicjalizację zmiennych środowiskowych,
-//                   weryfikację ścieżek oraz ustawienie trybu UI (Nerd/Emoji).
+// DESCRIPTION:      Rozbudowany moduł parsujący konfigurację TOML.
+//                   Implementuje strukturę AmberoConfig, która przechowuje
+//                   stan całego frameworku (ścieżki, system, UI, powłokę).
+//                   Zapewnia bezpieczne wczytywanie danych i walidację
+//                   kluczowych parametrów przy starcie systemu.
+// ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.0
+// VERSION:         0.1.1
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -23,23 +26,39 @@ import {
     ico_error
 } from "./ui.ab"
 
-// Funkcja pomocnicza do wyciągania wartości z prostego TOML (bez zewnętrznych bibliotek)
-// Szuka linii zaczynającej się od klucza i wycina wartość z cudzysłowów
-fun get_toml_value(content: text, key: string): text {
+// Struktura przechowująca sparsowane ustawienia frameworku
+pub struct AmberoConfig {
+    home: text,
+    os: text,
+    ui_mode: text,
+    language: text,
+    shell: text
+}
+
+// Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
+// Obsługuje format: klucz = "wartość"
+fun get_toml_value(content: text, key: text): text {
     let lines = content.split("\n")
     loop line in lines {
-        if line.starts_with(key) {
-            let parts = line.split("\"")
+        let trimmed = line.trim()
+        // Szukamy linii, która zaczyna się od klucza i zawiera znak równości
+        if trimmed.starts_with(key) and trimmed.contains("=") {
+            let parts = trimmed.split("=")
             if parts.len() >= 2 {
-                return parts[1]
+                let val_part = parts[1].trim()
+                // Wyciągamy zawartość spomiędzy cudzysłowów
+                let val_parts = val_part.split("\"")
+                if val_parts.len() >= 2 {
+                    return val_parts[1]
+                }
             }
         }
     }
     return ""
 }
 
-// Główna funkcja inicjująca framework
-pub fun init_framework(config_path: text): text {
+// Główna funkcja inicjująca i walidująca konfigurację
+pub fun load_config(config_path: text): AmberoConfig {
     if not file_exists(config_path) {
         echo("{clr_red}{clr_bold}{ico_error} BŁĄD KRYTYCZNY: Brak pliku konfiguracji pod ścieżką:{clr_reset}")
         echo("   {config_path}")
@@ -52,12 +71,25 @@ pub fun init_framework(config_path: text): text {
         exit(1)
     }
 
-    let home_path = get_toml_value(config_content, "ambero_home")
+    // Parsowanie poszczególnych sekcji
+    let ambero_home = get_toml_value(config_content, "ambero_home")
+    let os_type = get_toml_value(config_content, "os_type")
+    let ui_mode = get_toml_value(config_content, "ui_mode")
+    let language = get_toml_value(config_content, "language")
+    let default_shell = get_toml_value(config_content, "default_shell")
 
-    if home_path == "" {
+    // Walidacja absolutnego minimum
+    if ambero_home == "" {
         echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty w config.toml{clr_reset}")
         exit(1)
     }
 
-    return home_path
+    // Zwracamy wypełnioną strukturę
+    return AmberoConfig {
+        home: ambero_home,
+        os: os_type,
+        ui_mode: ui_mode,
+        language: language,
+        shell: default_shell
+    }
 }
