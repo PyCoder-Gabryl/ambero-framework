@@ -5,27 +5,51 @@
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
-# DESCRIPTION:      Szablon pliku konfiguracyjnego dla frameworku Ambero.
-#                   Zawiera domyślne ustawienia ścieżek, interfejsu użytkownika
-#                   oraz parametry konserwacji systemu.
+# DESCRIPTION:      Główny szablon konfiguracji frameworku Ambero.
+#                   Definiuje parametry systemowe, preferencje wizualne,
+#                   ustawienia powłok oraz zarządza stanem wtyczek
+#                   w podziale na oficjalne, użytkownika i eksperymentalne.
 # ----------------------------------------------------------------------------
 # PATH:            config/config.example.toml
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-16
 # ============================================================================
 
 [system]
-# Bezwzględna ścieżka do katalogu głównego Ambero (ustawiana przez instalator)
+# Bezwzględna ścieżka do instalacji Ambero (ustawiana przez instalator)
 ambero_home = ""
-# Typ systemu operacyjnego (macos-arm64, debian-x86_64 itp.)
+# Wykryty system operacyjny (np. macos, debian)
 os_type = ""
+# Wersja frameworku
+version = "0.1.0-dev"
 
 [ui]
-# Tryb wyświetlania ikon: "emoji" (domyślny) lub "nerd" (wymaga Nerd Fonts)
+# Tryb ikon: "emoji" (standard) lub "nerd" (wymaga Nerd Fonts)
 ui_mode = "emoji"
+# Język komunikatów: "pl" lub "en"
+language = "pl"
+
+[shell]
+# Główna powłoka użytkownika (zsh / bash)
+default_shell = "zsh"
+# Czy automatycznie odświeżać powłokę po zmianach?
+auto_reload = true
 
 [maintenance]
-# Data ostatniego sprawdzenia aktualizacji systemowych (YYYY-MM-DD)
+# Data ostatniej weryfikacji aktualizacji (YYYY-MM-DD)
 last_update_check = ""
-# Co ile dni sprawdzać aktualizacje (domyślnie 7)
+# Interwał sprawdzania aktualizacji w dniach
 update_interval_days = 7
+
+[plugins.official]
+# Status oficjalnych wtyczek frameworku
+ambero = { enabled = true, version = "0.1.0" }
+system = { enabled = true, version = "0.1.0" }
+
+[plugins.user]
+# Miejsce na Twoje prywatne wtyczki (am_plugins/user/)
+# Przykład: my_tool = { enabled = true }
+
+[plugins.experimental]
+# Wtyczki w fazie testów (am_plugins/experimental/)
+# Przykład: new_feature = { enabled = false }
