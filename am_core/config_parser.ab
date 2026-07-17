@@ -12,7 +12,7 @@
 //                   kluczowych parametrów przy starcie systemu.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.2
+// VERSION:         0.1.5
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -28,12 +28,12 @@ import {
 
 // Struktura przechowująca sparsowane ustawienia frameworku
 pub struct AmberoConfig {
-    home: text,      // [ZMIANA] Usunięto 'pub' sprzed pola
-    os: text,        // [ZMIANA] Usunięto 'pub' sprzed pola
-    ui_mode: text,   // [ZMIANA] Usunięto 'pub' sprzed pola
-    language: text,  // [ZMIANA] Usunięto 'pub' sprzed pola
-    shell: text,     // [ZMIANA] Usunięto 'pub' sprzed pola
-    verbosity: text  // [ZMIANA] Usunięto 'pub' sprzed pola
+    pub home: text      // [ZMIANA] Dodano pub, usunięto przecinek
+    pub os: text        // [ZMIANA] Dodano pub, usunięto przecinek
+    pub ui_mode: text   // [ZMIANA] Dodano pub, usunięto przecinek
+    pub language: text  // [ZMIANA] Dodano pub, usunięto przecinek
+    pub shell: text     // [ZMIANA] Dodano pub, usunięto przecinek
+    pub verbosity: text // [ZMIANA] Dodano pub, usunięto przecinek
 }
 
 // Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML

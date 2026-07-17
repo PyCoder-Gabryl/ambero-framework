@@ -10,9 +10,10 @@
 //                   wywołań: Alias -> Justfile -> Amber.
 // ----------------------------------------------------------------------------
 // PATH:            am_modules/core/hello.ab
-// VERSION:         0.1.6
+// VERSION:         0.1.10
 // CREATED:         2026-07-16
 // ============================================================================
+
 
 import { load_config, AmberoConfig } from "../../../../am_core/config_parser.ab"
 import { log_header, log_success, log_step, log_edu } from "../../../../am_core/logger.ab"
@@ -29,7 +30,7 @@ main {
     // 1. Pobieramy ścieżkę domową z otoczenia (ustawione przez Justfile)
     let ambero_home = env("AMBERO_HOME") failed { "." }
 
-    // 2. Inicjalizacja konfiguracji
+    // 2. Inicjalizacja konfiguracji (wnioskowanie typu)
     let config = load_config("{ambero_home}/config/config.toml")
 
     // 3. Nagłówek raportu
@@ -50,7 +51,7 @@ main {
     // 6. Status końcowy
     log_success(config, "Wszystkie systemy działają poprawnie!")
 
-    // 7. Blok edukacyjny (krótka linia)
+    // 7. Blok edukacyjny
     log_edu(config,
         "O tym poleceniu",
         "Weryfikacja linkowania modułów oraz uprawnień do zapisu logów w {config.home}/logs."
