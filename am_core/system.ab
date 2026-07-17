@@ -1,0 +1,43 @@
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com/PyCoder-Gabryl
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:      Moduł diagnostyki systemowej. Odpowiada za pobieranie
+//                   informacji o wersji frameworku, wersji narzędzi
+//                   zależnych (Just, Amber) oraz szczegółów systemu
+//                   operacyjnego (OS, Kernel).
+// ----------------------------------------------------------------------------
+// PATH:            am_core/system.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-17
+// ============================================================================
+
+
+import { read_file } from "std/fs"
+
+// Pobiera wersję frameworku z pliku VERSION
+pub fun get_ambero_version(home: text): text {
+    let v = read_file("{home}/VERSION") failed { return "unknown" }
+    return v.trim()
+}
+
+// Pobiera wersję Ambera
+pub fun get_amber_version(): text {
+    let v = unsafe "amber --version | head -n 1"
+    return v.trim()
+}
+
+// Pobiera wersję Justa
+pub fun get_just_version(): text {
+    let v = unsafe "just --version | head -n 1"
+    return v.trim()
+}
+
+// Pobiera nazwę i wersję systemu operacyjnego
+pub fun get_os_long_info(): text {
+    let info = unsafe "uname -sm"
+    return info.trim()
+}

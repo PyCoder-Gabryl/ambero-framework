@@ -1,0 +1,54 @@
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com/PyCoder-Gabryl
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:      Minimalny skrypt powitalny i testowy frameworku.
+//                   Służy do weryfikacji poprawnego działania łańcucha
+//                   wywołań: Alias -> Justfile -> Amber.
+// ----------------------------------------------------------------------------
+// PATH:            am_modules/core/hello.ab
+// VERSION:         0.1.4
+// CREATED:         2026-07-16
+// ============================================================================
+
+import { load_config } from "../../../../am_core/config_parser.ab"
+import { log_header, log_success, log_step, log_edu } from "../../../../am_core/logger.ab"
+import {
+    get_ambero_version,
+    get_amber_version,
+    get_just_version,
+    get_os_long_info
+} from "../../../../am_core/system.ab"
+import { clr_cyan, clr_reset } from "../../../../am_core/ui.ab"
+
+main {
+    // 1. Inicjalizacja konfiguracji (zakładamy ścieżkę relatywną dla DEV)
+    let config = load_config("./config/config.toml")
+
+    // 2. Nagłówek
+    log_header(config, "AMBERO SYSTEM REPORT")
+
+    // 3. Zbieranie danych
+    let ambero_v = get_ambero_version(config.home)
+    let amber_v = get_amber_version()
+    let just_v = get_just_version()
+    let os_info = get_os_long_info()
+
+    // 4. Wyświetlanie informacji (log_step widoczne w trybie normal)
+    log_step(config, "Framework: {clr_cyan}{ambero_v}{clr_reset}")
+    log_step(config, "System:    {os_info}")
+    log_step(config, "Amber:     {amber_v}")
+    log_step(config, "Just:      {just_v}")
+
+    // 5. Sukces
+    log_success(config, "Wszystkie systemy działają poprawnie!")
+
+    // 6. Blok edukacyjny (widoczny tylko w trybie edu)
+    log_edu(config,
+        "O tym poleceniu",
+        "Polecenie 'hello' weryfikuje poprawność linkowania modułów core oraz uprawnienia do zapisu logów w katalogu {config.home}/logs."
+    )
+}
