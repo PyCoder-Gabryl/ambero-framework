@@ -37,17 +37,14 @@ pub struct AmberoConfig {
 }
 
 // Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
-// Obsługuje format: klucz = "wartość"
 fun get_toml_value(content: text, key: text): text {
     let lines = content.split("\n")
     loop line in lines {
         let trimmed = line.trim()
-        // Szukamy linii, która zaczyna się od klucza i zawiera znak równości
         if trimmed.starts_with(key) and trimmed.contains("=") {
             let parts = trimmed.split("=")
             if parts.len() >= 2 {
                 let val_part = parts[1].trim()
-                // Wyciągamy zawartość spomiędzy cudzysłowów
                 let val_parts = val_part.split("\"")
                 if val_parts.len() >= 2 {
                     return val_parts[1]
@@ -72,7 +69,6 @@ pub fun load_config(config_path: text): AmberoConfig {
         exit(1)
     }
 
-    // Parsowanie poszczególnych sekcji
     let ambero_home = get_toml_value(config_content, "ambero_home")
     let os_type = get_toml_value(config_content, "os_type")
     let ui_mode = get_toml_value(config_content, "ui_mode")
@@ -80,30 +76,19 @@ pub fun load_config(config_path: text): AmberoConfig {
     let default_shell = get_toml_value(config_content, "default_shell")
     let verbosity = get_toml_value(config_content, "verbosity")
 
-    // Walidacja poziomu gadatliwości (fallback do normal)
     let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
 
-    pub struct AmberoConfig {
-        pub home: text,
-        pub os: text,
-        pub ui_mode: text,
-        pub language: text,
-        pub shell: text,
-        pub verbosity: text
-    }
-
-    // Walidacja absolutnego minimum
     if ambero_home == "" {
         echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty w config.toml{clr_reset}")
         exit(1)
     }
 
-    // Zwracamy wypełnioną strukturę
     return AmberoConfig {
         home: ambero_home,
         os: os_type,
         ui_mode: ui_mode,
         language: language,
-        shell: default_shell
+        shell: default_shell,
+        verbosity: final_verbosity // [ZMIANA] Dodano brakujące pole
     }
 }
