@@ -28,12 +28,12 @@ import {
 
 // Struktura przechowująca sparsowane ustawienia frameworku
 pub struct AmberoConfig {
-    home: text,
-    os: text,
-    ui_mode: text,
-    language: text,
-    shell: text,
-    verbosity: text
+    pub home: text,
+    pub os: text,
+    pub ui_mode: text,
+    pub language: text,
+    pub shell: text,
+    pub verbosity: text
 }
 
 // Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
