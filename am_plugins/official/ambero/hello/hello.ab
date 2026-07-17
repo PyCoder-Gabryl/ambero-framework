@@ -14,78 +14,45 @@
 // CREATED:         2026-07-16
 // ============================================================================
 
-import { read_file, file_exists } from "std/fs"
-import { exit } from "std/env"
+import { load_config, AmberoConfig } from "../../../../am_core/config_parser.ab"
+import { log_header, log_success, log_step, log_edu } from "../../../../am_core/logger.ab"
 import {
-    clr_red,
-    clr_reset,
-    clr_bold,
-    ico_error
-} from "./ui.ab"
+    get_ambero_version,
+    get_amber_version,
+    get_just_version,
+    get_os_long_info
+} from "../../../../am_core/system.ab"
+import { clr_cyan, clr_reset } from "../../../../am_core/ui.ab"
+import { env } from "std/env"
 
-// Struktura przechowująca sparsowane ustawienia frameworku
-pub struct AmberoConfig {
-    pub home: text,
-    pub os: text,
-    pub ui_mode: text,
-    pub language: text,
-    pub shell: text,
-    pub verbosity: text
-}
+main {
+    // 1. Pobieramy ścieżkę domową z otoczenia (ustawione przez Justfile)
+    let ambero_home = env("AMBERO_HOME") failed { "." }
 
-// Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
-fun get_toml_value(content: text, key: text): text {
-    let lines = content.split("\n")
-    loop line in lines {
-        let trimmed = line.trim()
-        if trimmed.starts_with(key) and trimmed.contains("=") {
-            let parts = trimmed.split("=")
-            if parts.len() >= 2 {
-                let val_part = parts[1].trim()
-                let val_parts = val_part.split("\"")
-                if val_parts.len() >= 2 {
-                    return val_parts[1]
-                }
-            }
-        }
-    }
-    return ""
-}
+    // 2. Inicjalizacja konfiguracji
+    let config: AmberoConfig = load_config("{ambero_home}/config/config.toml")
 
-// Główna funkcja inicjująca i walidująca konfigurację
-pub fun load_config(config_path: text): AmberoConfig {
-    if not file_exists(config_path) {
-        echo("{clr_red}{clr_bold}{ico_error} BŁĄD KRYTYCZNY: Brak pliku konfiguracji pod ścieżką:{clr_reset}")
-        echo("   {config_path}")
-        echo("👉 Uruchom ponownie am_install/install.sh")
-        exit(1)
-    }
+    // 3. Nagłówek raportu
+    log_header(config, "AMBERO SYSTEM REPORT")
 
-    let config_content = read_file(config_path) failed {
-        echo("{clr_red}{ico_error} Nie można odczytać pliku konfiguracji.{clr_reset}")
-        exit(1)
-    }
+    // 4. Zbieranie danych diagnostycznych
+    let ambero_v = get_ambero_version(config.home)
+    let amber_v = get_amber_version()
+    let just_v = get_just_version()
+    let os_info = get_os_long_info()
 
-    let ambero_home = get_toml_value(config_content, "ambero_home")
-    let os_type = get_toml_value(config_content, "os_type")
-    let ui_mode = get_toml_value(config_content, "ui_mode")
-    let language = get_toml_value(config_content, "language")
-    let default_shell = get_toml_value(config_content, "default_shell")
-    let verbosity = get_toml_value(config_content, "verbosity")
+    // 5. Wyświetlanie informacji
+    log_step(config, "Framework: {clr_cyan}{ambero_v}{clr_reset}")
+    log_step(config, "System:    {os_info}")
+    log_step(config, "Amber:     {amber_v}")
+    log_step(config, "Just:      {just_v}")
 
-    let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
+    // 6. Status końcowy
+    log_success(config, "Wszystkie systemy działają poprawnie!")
 
-    if ambero_home == "" {
-        echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty w config.toml{clr_reset}")
-        exit(1)
-    }
-
-    return AmberoConfig {
-        home: ambero_home,
-        os: os_type,
-        ui_mode: ui_mode,
-        language: language,
-        shell: default_shell,
-        verbosity: final_verbosity // [ZMIANA] Dodano brakujące pole
-    }
+    // 7. Blok edukacyjny (krótka linia)
+    log_edu(config,
+        "O tym poleceniu",
+        "Weryfikacja linkowania modułów oraz uprawnień do zapisu logów w {config.home}/logs."
+    )
 }

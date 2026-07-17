@@ -28,12 +28,12 @@ import {
 
 // Struktura przechowująca sparsowane ustawienia frameworku
 pub struct AmberoConfig {
-    pub home: text,
-    pub os: text,
-    pub ui_mode: text,
-    pub language: text,
-    pub shell: text,
-    pub verbosity: text
+    home: text,      // [ZMIANA] Usunięto 'pub' sprzed pola
+    os: text,        // [ZMIANA] Usunięto 'pub' sprzed pola
+    ui_mode: text,   // [ZMIANA] Usunięto 'pub' sprzed pola
+    language: text,  // [ZMIANA] Usunięto 'pub' sprzed pola
+    shell: text,     // [ZMIANA] Usunięto 'pub' sprzed pola
+    verbosity: text  // [ZMIANA] Usunięto 'pub' sprzed pola
 }
 
 // Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
@@ -89,6 +89,6 @@ pub fun load_config(config_path: text): AmberoConfig {
         ui_mode: ui_mode,
         language: language,
         shell: default_shell,
-        verbosity: final_verbosity // [ZMIANA] Dodano brakujące pole
+        verbosity: final_verbosity
     }
 }
