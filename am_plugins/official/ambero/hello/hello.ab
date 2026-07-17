@@ -10,12 +10,12 @@
 //                   wywołań: Alias -> Justfile -> Amber.
 // ----------------------------------------------------------------------------
 // PATH:            am_modules/core/hello.ab
-// VERSION:         0.1.10
+// VERSION:         0.1.11
 // CREATED:         2026-07-16
 // ============================================================================
 
 
-import { load_config, AmberoConfig } from "../../../../am_core/config_parser.ab"
+import { load_config, get_home, AmberoConfig } from "../../../../am_core/config_parser.ab"
 import { log_header, log_success, log_step, log_edu } from "../../../../am_core/logger.ab"
 import {
     get_ambero_version,
@@ -27,33 +27,28 @@ import { clr_cyan, clr_reset } from "../../../../am_core/ui.ab"
 import { env } from "std/env"
 
 main {
-    // 1. Pobieramy ścieżkę domową z otoczenia (ustawione przez Justfile)
     let ambero_home = env("AMBERO_HOME") failed { "." }
-
-    // 2. Inicjalizacja konfiguracji (wnioskowanie typu)
     let config = load_config("{ambero_home}/config/config.toml")
 
-    // 3. Nagłówek raportu
     log_header(config, "AMBERO SYSTEM REPORT")
 
-    // 4. Zbieranie danych diagnostycznych
-    let ambero_v = get_ambero_version(config.home)
+    // Używamy gettera zamiast kropki (naprawa błędu Unexpected token)
+    let home_path = get_home(config)
+    let ambero_v = get_ambero_version(home_path)
+
     let amber_v = get_amber_version()
     let just_v = get_just_version()
     let os_info = get_os_long_info()
 
-    // 5. Wyświetlanie informacji
     log_step(config, "Framework: {clr_cyan}{ambero_v}{clr_reset}")
     log_step(config, "System:    {os_info}")
     log_step(config, "Amber:     {amber_v}")
     log_step(config, "Just:      {just_v}")
 
-    // 6. Status końcowy
     log_success(config, "Wszystkie systemy działają poprawnie!")
 
-    // 7. Blok edukacyjny
     log_edu(config,
         "O tym poleceniu",
-        "Weryfikacja linkowania modułów oraz uprawnień do zapisu logów w {config.home}/logs."
+        "Weryfikacja linkowania modułów oraz uprawnień do zapisu logów w {home_path}/logs."
     )
 }

@@ -12,7 +12,7 @@
 //                   kluczowych parametrów przy starcie systemu.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.5
+// VERSION:         0.1.6
 // CREATED:         2026-07-16
 // ============================================================================
 
@@ -26,17 +26,24 @@ import {
     ico_error
 } from "./ui.ab"
 
-// Struktura przechowująca sparsowane ustawienia frameworku
 pub struct AmberoConfig {
-    pub home: text      // [ZMIANA] Dodano pub, usunięto przecinek
-    pub os: text        // [ZMIANA] Dodano pub, usunięto przecinek
-    pub ui_mode: text   // [ZMIANA] Dodano pub, usunięto przecinek
-    pub language: text  // [ZMIANA] Dodano pub, usunięto przecinek
-    pub shell: text     // [ZMIANA] Dodano pub, usunięto przecinek
-    pub verbosity: text // [ZMIANA] Dodano pub, usunięto przecinek
+    home: text
+    os: text
+    ui_mode: text
+    language: text
+    shell: text
+    verbosity: text
 }
 
-// Funkcja pomocnicza do wyciągania wartości tekstowych z prostego TOML
+// Gettery - funkcje umożliwiające dostęp do danych z innych modułów
+pub fun get_home(c: AmberoConfig): text {
+    return c.home
+}
+
+pub fun get_verbosity(c: AmberoConfig): text {
+    return c.verbosity
+}
+
 fun get_toml_value(content: text, key: text): text {
     let lines = content.split("\n")
     loop line in lines {
@@ -55,12 +62,10 @@ fun get_toml_value(content: text, key: text): text {
     return ""
 }
 
-// Główna funkcja inicjująca i walidująca konfigurację
 pub fun load_config(config_path: text): AmberoConfig {
     if not file_exists(config_path) {
         echo("{clr_red}{clr_bold}{ico_error} BŁĄD KRYTYCZNY: Brak pliku konfiguracji pod ścieżką:{clr_reset}")
         echo("   {config_path}")
-        echo("👉 Uruchom ponownie am_install/install.sh")
         exit(1)
     }
 
@@ -77,11 +82,6 @@ pub fun load_config(config_path: text): AmberoConfig {
     let verbosity = get_toml_value(config_content, "verbosity")
 
     let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
-
-    if ambero_home == "" {
-        echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty w config.toml{clr_reset}")
-        exit(1)
-    }
 
     return AmberoConfig {
         home: ambero_home,
