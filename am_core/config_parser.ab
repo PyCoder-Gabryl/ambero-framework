@@ -83,13 +83,13 @@ pub fun load_config(config_path: text): AmberoConfig {
     // Walidacja poziomu gadatliwości (fallback do normal)
     let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
 
-    return AmberoConfig {
-        home: ambero_home,
-        os: os_type,
-        ui_mode: ui_mode,
-        language: language,
-        shell: default_shell,
-        verbosity: final_verbosity
+    pub struct AmberoConfig {
+        pub home: text,
+        pub os: text,
+        pub ui_mode: text,
+        pub language: text,
+        pub shell: text,
+        pub verbosity: text
     }
 
     // Walidacja absolutnego minimum
