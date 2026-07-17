@@ -14,9 +14,9 @@
 // CREATED:         2026-07-16
 // ============================================================================
 
-import "../../../../am_core/config_parser.ab" as parser //
-import "../../../../am_core/logger.ab" as logger //
-import "../../../../am_core/system.ab" as sys //
+import "../../../../am_core/config_parser.ab" as parser
+import "../../../../am_core/logger.ab" as logger
+import "../../../../am_core/system.ab" as sys
 import { clr_cyan, clr_reset } from "../../../../am_core/ui.ab"
 import { env } from "std/env"
 
@@ -24,28 +24,28 @@ main {
     // 1. Pobieramy ścieżkę domową z otoczenia
     let ambero_home = env("AMBERO_HOME") failed { "." }
     // Jawne określenie typu zmiennej config
-    let config: parser.AmberoConfig = parser.load_config("{ambero_home}/config/config.toml") //
+    let config: parser.AmberoConfig = parser.load_config("{ambero_home}/config/config.toml")
 
     // 2. Nagłówek
-    logger.log_header(config, "AMBERO SYSTEM REPORT") //
+    logger.log_header(config, "AMBERO SYSTEM REPORT")
 
     // 3. Zbieranie danych
-    let ambero_v = sys.get_ambero_version(config.home) //
-    let amber_v = sys.get_amber_version() //
-    let just_v = sys.get_just_version() //
-    let os_info = sys.get_os_long_info() //
+    let ambero_v = sys.get_ambero_version(config.home)
+    let amber_v = sys.get_amber_version()
+    let just_v = sys.get_just_version()
+    let os_info = sys.get_os_long_info()
 
     // 4. Wyświetlanie informacji
-    logger.log_step(config, "Framework: {clr_cyan}{ambero_v}{clr_reset}") //
-    logger.log_step(config, "System:    {os_info}") //
-    logger.log_step(config, "Amber:     {amber_v}") //
-    logger.log_step(config, "Just:      {just_v}") //
+    logger.log_step(config, "Framework: {clr_cyan}{ambero_v}{clr_reset}")
+    logger.log_step(config, "System:    {os_info}")
+    logger.log_step(config, "Amber:     {amber_v}")
+    logger.log_step(config, "Just:      {just_v}")
 
     // 5. Sukces
-    logger.log_success(config, "Wszystkie systemy działają poprawnie!") //
+    logger.log_success(config, "Wszystkie systemy działają poprawnie!")
 
     // 6. Blok edukacyjny (skrócona linia)
-    logger.log_edu(config, //
+    logger.log_edu(config,
         "O tym poleceniu",
         "Weryfikacja linkowania modułów core oraz uprawnień do zapisu logów w {config.home}/logs."
     )
