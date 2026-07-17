@@ -5,7 +5,10 @@
 // EMAIL:           pycoder.gabryl@gmail.com
 // LICENSE:         Apache License 2.0
 // ----------------------------------------------------------------------------
-// DESCRIPTION:
+// DESCRIPTION:      Silnik lokalizacji (i18n) odpowiedzialny za dynamiczne
+//                   wczytywanie komunikatów z plików TOML. Obsługuje strukturę
+//                   katalogów zgodną z hierarchią pluginów oraz mechanizm
+//                   fallbacku do języka polskiego w przypadku braku tłumaczenia.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/i18n_engine.ab
 // VERSION:         0.1.0

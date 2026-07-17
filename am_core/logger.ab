@@ -1,0 +1,101 @@
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com/PyCoder-Gabryl
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:      Zaawansowany moduł logowania obsługujący poziomy
+//                   gadatliwości (verbosity). Pozwala na filtrowanie
+//                   komunikatów (quiet, minimal, normal, edu) oraz
+//                   standaryzację wyświetlania błędów, ostrzeżeń i sukcesów
+//                   zgodnie z ustawieniami w config.toml.
+// ----------------------------------------------------------------------------
+// PATH:            am_core/logger.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-17
+// ============================================================================
+
+
+import { AmberoConfig } from "./config_parser.ab"
+import {
+    clr_reset,
+    clr_bold,
+    clr_amber,
+    clr_green,
+    clr_red,
+    clr_blue,
+    clr_cyan,
+    ico_ok,
+    ico_info,
+    ico_warn,
+    ico_error
+} from "./ui.ab"
+
+// Pomocnicza funkcja zamieniająca tekstowy poziom na liczbę dla łatwiejszego porównania
+fun get_verbosity_weight(level: text): int {
+    if level == "quiet" {
+        return 0
+    }
+    if level == "minimal" {
+        return 1
+    }
+    if level == "normal" {
+        return 2
+    }
+    if level == "edu" {
+        return 3
+    }
+    return 2 // Domyślnie normal
+}
+
+// Wyświetla komunikat sukcesu (dostępny od poziomu minimal)
+pub fun log_success(config: AmberoConfig, message: text) {
+    let weight = get_verbosity_weight(config.verbosity)
+    if weight >= 1 {
+        echo("{clr_green}{ico_ok} {message}{clr_reset}")
+    }
+}
+
+// Wyświetla informację o operacji (dostępna od poziomu normal)
+pub fun log_step(config: AmberoConfig, message: text) {
+    let weight = get_verbosity_weight(config.verbosity)
+    if weight >= 2 {
+        echo("{clr_blue}  ➜ {message}{clr_reset}")
+    }
+}
+
+// Wyświetla błąd (zawsze widoczny, chyba że tryb quiet całkowicie wycisza system)
+pub fun log_error(config: AmberoConfig, message: text) {
+    let weight = get_verbosity_weight(config.verbosity)
+    if weight >= 0 {
+        echo("{clr_red}{clr_bold}{ico_error} BŁĄD: {message}{clr_reset}")
+    }
+}
+
+// Wyświetla ostrzeżenie (dostępne od poziomu minimal)
+pub fun log_warn(config: AmberoConfig, message: text) {
+    let weight = get_verbosity_weight(config.verbosity)
+    if weight >= 1 {
+        echo("{clr_amber}{ico_warn} OSTRZEŻENIE: {message}{clr_reset}")
+    }
+}
+
+// Wyświetla blok edukacyjny (tylko dla trybu edu)
+pub fun log_edu(config: AmberoConfig, title: text, content: text) {
+    let weight = get_verbosity_weight(config.verbosity)
+    if weight >= 3 {
+        echo("")
+        echo("{clr_cyan}{clr_bold}🎓 EDUKACJA: {title}{clr_reset}")
+        echo("{clr_cyan}│ {content}{clr_reset}")
+        echo("")
+    }
+}
+
+// Wyświetla nagłówek zadania (dostępny od poziomu minimal)
+pub fun log_header(config: AmberoConfig, title: text) {
+    let weight = get_verbosity_weight(config.verbosity)
+    if weight >= 1 {
+        echo("{clr_amber}{clr_bold}=== {title} ==={clr_reset}")
+    }
+}
