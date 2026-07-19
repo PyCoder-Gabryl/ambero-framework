@@ -1,3 +1,5 @@
+#!/usr/local/bin/amber amber
+
 // ============================================================================
 // PROJECT:         Ambero Framework CLI
 // AUTHOR:          PyCoder Gabryl
@@ -12,76 +14,88 @@
 //                   zgodnie z ustawieniami w config.toml.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/logger.ab
-// VERSION:         0.1.4
+// VERSION:         0.1.8
 // CREATED:         2026-07-17
 // ============================================================================
 
 
-import { append_file, dir_exists } from "std/fs"
-import { AmberoConfig, get_home, get_verbosity } from "./config_parser.ab"
+import { get_home, get_verbosity } from "./config_parser.ab"
 import {
-    clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
-    ico_ok, ico_info, ico_warn, ico_error
+clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
+ico_ok, ico_info, ico_warn, ico_error
 } from "./ui.ab"
 
-fun write_to_disk(config: AmberoConfig, level: text, message: text) {
-    let timestamp = unsafe "date +%Y-%m-%dT%H:%M:%S"
-    let home = get_home(config)
-    let log_dir = "{home}/logs"
+// Pomocnik zapisu: Wykorzystuje czysty trust bez pustych sekcji failed {}, co usuwa błędy ostrzeżeń
+fun write_to_disk(config: [Text], level: Text, message: Text) {
+    const home = get_home(config)
+    const log_dir = "{home}/logs"
 
-    if not dir_exists("{log_dir}/plain") { unsafe "mkdir -p {log_dir}/plain" }
-    if not dir_exists("{log_dir}/json") { unsafe "mkdir -p {log_dir}/json" }
+    // Usunięcie 'failed {}' usuwa ostrzeżenie 'Empty failed block'
+    trust $mkdir -p "{log_dir}/plain" "{log_dir}/json"$
 
-    let plain_line = "[{timestamp}] [{level}] {message}\n"
-    append_file("{log_dir}/plain/ambero.log", plain_line) failed {}
+    const timestamp = trust $date +%Y-%m-%dT%H:%M:%S$ failed {
+        return ""
+    }
 
-    let json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}\n"
-    append_file("{log_dir}/json/ambero.jsonl", json_line) failed {}
+    const plain_line = "[{timestamp}] [{level}] {message}"
+    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}"
+
+    trust $echo "{plain_line}" >> "{log_dir}/plain/ambero.log"$
+    trust $echo "{json_line}" >> "{log_dir}/json/ambero.jsonl"$
 }
 
-fun get_verbosity_weight(level: text): int {
-    if level == "quiet" { return 0 }
-    if level == "minimal" { return 1 }
-    if level == "normal" { return 2 }
-    if level == "edu" { return 3 }
-    return 2
+fun get_verbosity_weight(level: Text): Int {
+    let weight = 2
+    if level == "quiet" {
+        weight = 0
+    }
+    if level == "minimal" {
+        weight = 1
+    }
+    if level == "normal" {
+        weight = 2
+    }
+    if level == "edu" {
+        weight = 3
+    }
+    return weight
 }
 
-pub fun log_success(config: AmberoConfig, message: text) {
+pub fun log_success(config: [Text], message: Text) {
     write_to_disk(config, "SUCCESS", message)
-    let v = get_verbosity(config)
+    const v = get_verbosity(config)
     if get_verbosity_weight(v) >= 1 {
         echo("{clr_green}{ico_ok} {message}{clr_reset}")
     }
 }
 
-pub fun log_step(config: AmberoConfig, message: text) {
+pub fun log_step(config: [Text], message: Text) {
     write_to_disk(config, "STEP", message)
-    let v = get_verbosity(config)
+    const v = get_verbosity(config)
     if get_verbosity_weight(v) >= 2 {
         echo("{clr_blue}  ➜ {message}{clr_reset}")
     }
 }
 
-pub fun log_error(config: AmberoConfig, message: text) {
+pub fun log_error(config: [Text], message: Text) {
     write_to_disk(config, "ERROR", message)
-    let v = get_verbosity(config)
+    const v = get_verbosity(config)
     if get_verbosity_weight(v) >= 0 {
         echo("{clr_red}{clr_bold}{ico_error} BŁĄD: {message}{clr_reset}")
     }
 }
 
-pub fun log_warn(config: AmberoConfig, message: text) {
+pub fun log_warn(config: [Text], message: Text) {
     write_to_disk(config, "WARN", message)
-    let v = get_verbosity(config)
+    const v = get_verbosity(config)
     if get_verbosity_weight(v) >= 1 {
         echo("{clr_amber}{ico_warn} OSTRZEŻENIE: {message}{clr_reset}")
     }
 }
 
-pub fun log_edu(config: AmberoConfig, title: text, content: text) {
+pub fun log_edu(config: [Text], title: Text, content: Text) {
     write_to_disk(config, "EDU", "{title}: {content}")
-    let v = get_verbosity(config)
+    const v = get_verbosity(config)
     if get_verbosity_weight(v) >= 3 {
         echo("")
         echo("{clr_cyan}{clr_bold}🎓 EDUKACJA: {title}{clr_reset}")
@@ -90,8 +104,8 @@ pub fun log_edu(config: AmberoConfig, title: text, content: text) {
     }
 }
 
-pub fun log_header(config: AmberoConfig, title: text) {
-    let v = get_verbosity(config)
+pub fun log_header(config: [Text], title: Text) {
+    const v = get_verbosity(config)
     if get_verbosity_weight(v) >= 1 {
         echo("{clr_amber}{clr_bold}=== {title} ==={clr_reset}")
     }

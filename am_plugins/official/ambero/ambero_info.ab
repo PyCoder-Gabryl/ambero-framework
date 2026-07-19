@@ -1,0 +1,31 @@
+#!/usr/local/bin/amber amber
+
+// HELP-INFO        Wyświetla szczegółowy raport o wersjach i środowisku CLI.
+
+import { env_var_load, printf } from "std/env"
+import * from "am_core/system.ab"
+
+main {
+    const home = env_var_load("AMBERO_HOME")
+    if home == "" {
+        printf("❌ Błąd: Zmienna środowiskowej AMBERO_HOME nie jest ustawiona!\n", [])
+        trust $exit 1$
+    }
+
+    const ambero_v = get_ambero_version()
+    const os_name  = get_os_name()
+    const os_rel   = get_os_release()
+    const os_arch  = get_os_arch()
+    const sh_info  = get_shell_info()
+    const just_v   = get_just_version()
+    const amber_v  = get_amber_version()
+
+    printf("🔷 \x1b[96;1mINFORMACJE O ŚRODOWISKU SYSTEMOWYM:\x1b[0m\n", [])
+    printf("================================================================================\n", [])
+    printf("  • Ambero CLI:     \x1b[92m%s\x1b[0m\n", [ambero_v])
+    printf("  • System (OS):    \x1b[92m%s %s (%s)\x1b[0m\n", [os_name, os_rel, os_arch])
+    printf("  • Powłoka (Shell): \x1b[92m%s\x1b[0m\n", [sh_info])
+    printf("  • Narzędzie Just: \x1b[92m%s\x1b[0m\n", [just_v])
+    printf("  • Kompilator:     \x1b[92m%s\x1b[0m\n", [amber_v])
+    printf("================================================================================\n\n", [])
+}

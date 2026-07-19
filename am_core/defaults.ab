@@ -1,0 +1,31 @@
+#!/usr/local/bin/amber amber
+
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:     Centralny rejestr wartości domyślnych frameworku Ambero.
+//                   Zapewnia fallback środowiskowy przed wykonaniem instalacji.
+// ----------------------------------------------------------------------------
+// PATH:            am_core/defaults.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-18
+// ============================================================================
+
+import { env_var_load } from "std/env"
+
+// Zwraca domyślną strukturę konfiguracyjną AmberoConfig w postaci tablicy tekstowej.
+// Indeksy: 0=home, 1=os, 2=ui_mode, 3=language, 4=shell, 5=verbosity
+pub fun get_default_config(): [Text] {
+    const default_home = env_var_load("AMBERO_HOME")
+    const default_os = "unknown"
+    const default_ui = "true"
+    const default_lang = "pl"
+    const default_shell = "zsh"
+    const default_verb = "normal"
+
+    return [default_home, default_os, default_ui, default_lang, default_shell, default_verb]
+}

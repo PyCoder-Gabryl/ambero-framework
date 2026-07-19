@@ -1,0 +1,98 @@
+#!/usr/local/bin/amber amber
+
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// DESCRIPTION:     Zarządzanie ścieżkami oraz walidacja spójności frameworku.
+// ----------------------------------------------------------------------------
+// PATH:            am_core/path.ab
+// VERSION:         0.1.7
+// CREATED:         2026-07-18
+// ============================================================================
+
+import { env_var_load, echo_warning, printf } from "std/env"
+import { file_read } from "std/fs"
+import { text_contains } from "std/text"
+
+// Dynamiczny root pobierany z systemu przez Justfile
+pub const ROOT = env_var_load("AMBERO_HOME")
+
+// =============================================================================
+// SEKCJA: STAŁE ŚCIEŻKI FRAMEWORKU (PUNKT ODNIESIENIA)
+// =============================================================================
+pub const AM_CORE = "am_core"
+pub const AM_CONFIG = "config"
+pub const AM_LOGS = "logs"
+pub const AM_INSTALL = "am_install"
+pub const AM_PLATFORMS = "am_install/lib/platforms"
+pub const AM_PLUGINS = "am_plugins"
+pub const AM_EXPERIMENTAL = "am_plugins/experimental"
+pub const AM_OFFICIAL = "am_plugins/official"
+pub const AM_USER = "am_plugins/user"
+pub const AM_I18N = "i18n"
+pub const AM_EN_EXPERIMENTAL = "i18n/en/experimental"
+pub const AM_EN_OFFICIAL = "i18n/en/official"
+pub const AM_EN_USER = "i18n/en/user"
+pub const AM_PL_EXPERIMENTAL = "i18n/pl/experimental"
+pub const AM_PL_OFFICIAL = "i18n/pl/official"
+pub const AM_PL_USER = "i18n/pl/user"
+
+// =============================================================================
+// SEKCJA: INTEGRITY CHECKER (WALIDACJA Z TOML)
+// =============================================================================
+fun check_toml_key(toml_content: Text, key: Text, expected_val: Text): Text {
+    const pattern = "{key} = \"{expected_val}\""
+
+    if not (text_contains(toml_content, pattern)) {
+        printf("\x1b[31m  ⚠️  Ostrzeżenie: Rozbieżność w TOML dla klucza '%s' (Oczekiwano: \"%s\")\x1b[0m\n", [key, expected_val])
+        return "1"
+    }
+    return "0"
+}
+
+pub fun validate_paths_integrity() {
+    const toml_path = "{ROOT}/config/ambero_paths.toml"
+    let has_toml = true
+
+    // Czyste wywołanie bez 'failed {}' ucisza ostatnie ostrzeżenie kompilatora
+    trust $mkdir -p "{ROOT}/logs"$
+
+    const toml_content = file_read(toml_path) failed {
+        echo_warning("⚠️  Brak pliku ambero_paths.toml! Pomiń walidację spójności.")
+        has_toml = false
+    }
+
+    if has_toml {
+        echo_warning("🔍 Sprawdzanie spójności ścieżek z plikiem ambero_paths.toml...")
+
+        let errors = 0
+
+        if check_toml_key(toml_content, "core", AM_CORE) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "config", AM_CONFIG) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "logs", AM_LOGS) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "root", AM_INSTALL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "platforms", AM_PLATFORMS) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "root", AM_PLUGINS) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "experimental", AM_EXPERIMENTAL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "official", AM_OFFICIAL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "user", AM_USER) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "root", AM_I18N) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "en_experimental", AM_EN_EXPERIMENTAL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "en_official", AM_EN_OFFICIAL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "en_user", AM_EN_USER) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "pl_experimental", AM_PL_EXPERIMENTAL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "pl_official", AM_PL_OFFICIAL) == "1" { errors = errors + 1 }
+        if check_toml_key(toml_content, "pl_user", AM_PL_USER) == "1" { errors = errors + 1 }
+
+        if errors == 0 {
+            printf("\x1b[32m  ✅ Sukces: Wszystkie ścieżki frameworku są w 100%% spójne z plikiem TOML!\x1b[0m\n", [])
+        } else {
+            const errors_text = "{errors}"
+            printf("\x1b[33m  ❌ Zakończono walidację: Znaleziono rozbieżności (%s) w konfiguracji.\x1b[0m\n", [errors_text])
+        }
+    }
+}

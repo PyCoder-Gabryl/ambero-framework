@@ -1,0 +1,62 @@
+#!/usr/local/bin/amber amber
+
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// HELP-INFO        Oficjalny, cieniowany baner blokowy Ambero (Zielono-Niebieski).
+// DESCRIPTION:     Samodzielna wtyczka CLI generująca zaawansowaną grafikę
+//                  ASCII Art z gradientem (Żółty -> Czerwony -> Bordowy).
+// ----------------------------------------------------------------------------
+// PATH:            am_plugins/official/ambero/ambero_banner.ab
+// VERSION:         0.1.9
+// CREATED:         2026-07-18
+// ============================================================================
+
+import { env_var_load, printf } from "std/env"
+import { load_config, get_verbosity } from "am_core/config_parser.ab"
+
+// Publiczna funkcja rysująca – wyśrodkowany baner (80 znaków) w zielono-niebieskiej ramie
+pub fun print_ambero_baner() {
+    const YW = "\x1b[38;5;226m" // Żółty góra
+    const OR = "\x1b[38;5;214m" // Pomarańczowy jasny
+    const DR = "\x1b[38;5;202m" // Pomarańczowo-czerwony
+    const RD = "\x1b[38;5;196m" // Czerwony klasyczny
+    const BD = "\x1b[38;5;124m" // Bordowy dół
+    // const GN = "\x1b[38;5;46m"  // Jasny zielony (Neon)
+    const BL = "\x1b[38;5;39m"  // Jasny niebieski (Cyan/Blue)
+    const RS = "\x1b[0m"         // Reset koloru
+
+    // Nowe, zielono-niebieskie belki dopasowane szerokością do 80 znaków
+    printf("{BD}▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀{RS}\n", [])
+
+    // Wyśrodkowany blok tekstu (6 spacji marginesu z lewej strony)
+    printf("{YW}      ▄██▀▀██▄    ▄██▀▄▄▀██▄  ▀███▀███▄▄  ▀███▀███ ▀███▀███▄▄    ▄██▀▀██▄      {RS}\n", [])
+    printf("{OR}     ▓▓░    ░▓▓  ▓▓░  ▓▓  ░▓▓  ▓▓░   ▀▓▓▓  ▓▓░  ▀▓  ▓▓░   ▀▓▓▓  ▓▓░    ░▓▓     {RS}\n", [])
+    printf("{DR}     ▒▒░    ░▒▒  ▒▒░  ▒▒  ░▒▒  ▒▒░    ░▒▒  ▒▒░      ▒▒░    ░▒▒  ▒▒░    ░▒▒     {RS}\n", [])
+    printf("{RD}     ▒▒░    ░▒▒  ▒▒░  ░░  ░▒▒  ▒▒░   ▄░░▀  ▒▒░  ▄   ▒▒░   ▄░░▀  ▒▒░    ░▒▒     {RS}\n", [])
+    printf("{RD}     ▒▒▒░▀▀░▒▒▒  ▒▒░  ░░  ░▒▒  ▒▒░▀▀▀░░▄   ▒▒▒▄░░   ▒▒▒▀▀▀░░▄   ▒▒░    ░▒▒     {RS}\n", [])
+    printf("{RD}     ▒▒░    ░▒▒  ▒▒░  ▒▒  ░▒▒  ▒▒░    ░▒▒  ▒▒░      ▒▒░   ▐▒▒▌  ▒▒░    ░▒▒     {RS}\n", [])
+    printf("{DR}     ▓▓░    ░▓▓  ▓▓░      ░▓▓  ▓▓░    ░▓▓  ▓▓░   ▄  ▓▓░     ▓▓  ▓▓░    ░▓▓     {RS}\n", [])
+    printf("{OR}     ███    ███  ██░      ░██  ███ ▄▄██▀   ███ ▄██  ███     ██  ▀███▄ ▄██▀     {RS}\n", [])
+    printf("{YW}    ▀▀▀▀▀  ▀▀▀▀▀ ▀▀▀      ▀▀▀ ▀▀▀▀▀▀▀     ▀▀▀▀▀▀▀▀ ▀▀▀▀▀   ▀▀▀▀   ▀▀▀▀▀▀       {RS}\n", [])
+
+    printf("————————————————————————————————————————————————————————————————————————————————\n")
+    printf("                    A M B E R O   F R A M E W O R K    C L I\n")
+    printf("————————————————————————————————————————————————————————————————————————————————\n")
+
+    printf("{BL}▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀{RS}\n", [])
+}
+
+main {
+    const ambero_home = env_var_load("AMBERO_HOME")
+    const config = load_config("{ambero_home}/config/config.toml")
+    const verbosity = get_verbosity(config)
+
+    if verbosity != "quiet" {
+        print_ambero_baner()
+    }
+}

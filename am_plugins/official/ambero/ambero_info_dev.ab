@@ -1,0 +1,91 @@
+#!/usr/local/bin/amber amber
+
+// HELP-INFO        Wyświetla głęboki raport deweloperski bez powielania podstawowych wersji.
+
+import { env_var_load, printf } from "std/env"
+import * from "am_core/system.ab"
+import { trim } from "std/text"
+
+fun print_binary_paths() {
+    // 1. Bezpieczne odpytanie o ścieżkę just (bez słowa trust, zgodnie z dokumentacją!)
+    let j_res = ""
+    const j_path = $which just$ failed {
+        j_res = "nie znaleziono"
+    }
+    if j_res == "" {
+        j_res = trim(j_path)
+    }
+
+    // 2. Bezpieczne odpytanie o ścieżkę amber (usuwamy awk i dolary z potoku)
+    let a_res = ""
+    const a_path = $which amber$ failed {
+        a_res = "nie znaleziono"
+    }
+    if a_res == "" {
+        a_res = trim(a_path)
+    }
+
+    const s_path = env_var_load("SHELL")
+
+    // 3. Czyste i pokolorowane wyświetlanie raportu
+    printf("  • Ścieżka 'just':      \x1b[92m%s\x1b[0m\n", [j_res])
+    printf("  • Ścieżka 'amber':     \x1b[92m%s\x1b[0m\n", [a_res])
+    printf("  • Ścieżka powłoki:     \x1b[92m%s\x1b[0m\n", [trim(s_path)])
+}
+
+
+fun print_alternative_shells() {
+    const has_bash = trust $[ -x "/bin/bash" ] && echo "ZAINSTALOWANA" || echo "BRAK"$ failed { return "" }
+    const has_fish = trust $[ -x "/opt/homebrew/bin/fish" ] && echo "ZAINSTALOWANA" || echo "BRAK"$ failed { return "" }
+
+    printf("  • Powłoka /bin/bash:   \x1b[92m%s\x1b[0m\n", [trim(has_bash)])
+    printf("  • Powłoka /bin/fish:   \x1b[92m%s\x1b[0m\n", [trim(has_fish)])
+}
+
+fun print_terminal_emulators() {
+    const has_ghostty = trust $[ -d "/Applications/Ghostty.app" ] && echo "WYKRYTO (/Applications/Ghostty.app)" || echo "BRAK"$ failed { return "" }
+    const has_iterm = trust $[ -d "/Applications/iTerm.app" ] && echo "WYKRYTO (/Applications/iTerm.app)" || echo "BRAK"$ failed { return "" }
+
+    printf("  • Emulator Ghostty:    \x1b[92m%s\x1b[0m\n", [trim(has_ghostty)])
+    printf("  • Emulator iTerm2:     \x1b[92m%s\x1b[0m\n", [trim(has_iterm)])
+}
+
+main {
+    const home = env_var_load("AMBERO_HOME")
+    if home == "" {
+        printf("❌ Blad: Zmienna srodowiskowa AMBERO_HOME nie jest ustawiona!\n", [])
+        trust $exit 1$
+    }
+
+    const os_product = get_os_product_name()
+    const os_version = get_os_product_version()
+    const os_build   = get_os_build_version()
+    const log_status = get_logs_generation_info(home)
+    const cfg_status = get_config_generation_info(home)
+
+    printf("================================================================================\n", [])
+    printf("             A M B E R O   F R A M E W O R K    C L I    [DEV-MODE]\n", [])
+    printf("================================================================================\n\n", [])
+
+    printf("🔷 \x1b[96;1mPOSZERZONE INFORMACJE O SYSTEMIE OPERACYJNYM:\x1b[0m\n", [])
+    printf("  • System handlowy:    \x1b[92m%s %s\x1b[0m\n", [os_product, os_version])
+    printf("  • Kompilacja (Build): \x1b[92m%s\x1b[0m\n", [os_build])
+    printf("  • Status wejścia TOML: \x1b[92m%s\x1b[0m\n", [cfg_status])
+    printf("  • Status zapisu logów: \x1b[92m%s\x1b[0m\n\n", [log_status])
+
+    printf("================================================================================\n", [])
+    printf("🔷 \x1b[96;1mŚCIEŻKI I GENEROWANIE SYSTEMU PLIKÓW:\x1b[0m\n", [])
+    printf("================================================================================\n", [])
+    printf("  • AMBERO_HOME:         %s\n", [home])
+    printf("  • Plik konfiguracji:   %s/config/config.toml\n", [home])
+    printf("  • Plik mapowania:      %s/config/ambero_paths.toml\n", [home])
+    printf("  • Katalog zapisu logów:%s/logs\n", [home])
+    print_binary_paths()
+
+    printf("\n================================================================================\n", [])
+    printf("🔷 \x1b[96;1mMATRYCA POWŁOK SYSTEMOWYCH I TERMINALI:\x1b[0m\n", [])
+    printf("================================================================================\n", [])
+    print_alternative_shells()
+    print_terminal_emulators()
+    printf("================================================================================\n\n", [])
+}

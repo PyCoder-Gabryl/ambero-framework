@@ -1,0 +1,48 @@
+#!/usr/local/bin/amber amber
+
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          PyCoder Gabryl
+// GITHUB:          https://github.com
+// EMAIL:           pycoder.gabryl@gmail.com
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// HELP-INFO        Uruchamia pełną sekwencję powitalną i diagnostyczną frameworku.
+// DESCRIPTION:      Moduł zbiorczy (Orkiestrator) wywołujący po kolei:
+//                   Oficjalny baner -> Wizytówkę autora -> Informacje o systemie.
+// ----------------------------------------------------------------------------
+// PATH:            am_plugins/official/ambero/ambero_welcome.ab
+// VERSION:         0.1.0
+// CREATED:         2026-07-19
+// ============================================================================
+
+import { env_var_load, printf } from "std/env"
+
+main {
+    const home = env_var_load("AMBERO_HOME")
+
+    if home == "" {
+        printf("❌ Blad: Zmienna srodowiskowa AMBERO_HOME nie jest ustawiona!\n", [])
+        trust $exit 1$
+    }
+
+    // 1. WYWOŁANIE BANERU: Uruchamiamy oficjalne logo frameworku z ambero_banner.ab
+    // Wywołujemy skompilowane binaria za pomocą bezpiecznego polecenia just
+    trust $just ambero-banner$ failed {
+        printf("⚠️  Nie udalo sie wyswietlic baneru.\n", [])
+    }
+
+    printf("\n", [])
+
+    // 2. WYWOŁANIE AUTORA: Drukuje Twoją oficjalną wizytówkę deweloperską z ambero_author.ab
+    trust $just ambero-author$ failed {
+        printf("⚠️  Nie udalo sie wyswietlic informacji o autorze.\n", [])
+    }
+
+    printf("\n", [])
+
+    // 3. WYWOŁANIE INFO: Wypluwa pełny raport diagnostyki i wersji z ambero_info.ab
+    trust $just ambero-info$ failed {
+        printf("⚠️  Nie udalo sie wyswietlic informacji o srodowisku.\n", [])
+    }
+}

@@ -1,43 +1,156 @@
+#!/usr/local/bin/amber amber
+
 // ============================================================================
 // PROJECT:         Ambero Framework CLI
 // AUTHOR:          PyCoder Gabryl
-// GITHUB:          https://github.com/PyCoder-Gabryl
+// GITHUB:          https://github.com
 // EMAIL:           pycoder.gabryl@gmail.com
 // LICENSE:         Apache License 2.0
 // ----------------------------------------------------------------------------
-// DESCRIPTION:      Moduł diagnostyki systemowej. Odpowiada za pobieranie
-//                   informacji o wersji frameworku, wersji narzędzi
-//                   zależnych (Just, Amber) oraz szczegółów systemu
-//                   operacyjnego (OS, Kernel).
+// DESCRIPTION:      Centralny moduł diagnostyki jądra. Odpowiada za pobieranie
+//                   informacji o wersjach narzędzi, powłok oraz szczegółach OS.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/system.ab
-// VERSION:         0.1.1
+// VERSION:         0.2.1
 // CREATED:         2026-07-17
 // ============================================================================
 
+import { file_read } from "std/fs"
+import { trim, text_contains } from "std/text"
+import { env_var_load } from "std/env"
+import { ROOT } from "./path.ab"
 
-import { read_file } from "std/fs"
-
-// Pobiera wersję frameworku z pliku VERSION
-pub fun get_ambero_version(home: text): text {
-    let v = read_file("{home}/VERSION") failed { return "unknown" }
-    return v.trim()
+// Pobiera wersję frameworku z centralnego pliku VERSION
+pub fun get_ambero_version(): Text {
+    const raw_v = file_read("{ROOT}/VERSION") failed {
+        return "0.1.0-dev"
+    }
+    return trim(raw_v)
 }
 
-// Pobiera wersję Ambera
-pub fun get_amber_version(): text {
-    let v = unsafe "amber --version | head -n 1"
-    return v.trim()
+// Pobiera wersję kompilatora Amber
+pub fun get_amber_version(): Text {
+    const raw_v = trust $amber --version | head -n 1$ failed {
+        return "unknown"
+    }
+    return trim(raw_v)
 }
 
-// Pobiera wersję Justa
-pub fun get_just_version(): text {
-    let v = unsafe "just --version | head -n 1"
-    return v.trim()
+// Pobiera wersję narzędzia Just
+pub fun get_just_version(): Text {
+    const raw_v = trust $just --version | head -n 1$ failed { return "unknown" }
+    return trim(raw_v)
 }
 
-// Pobiera nazwę i wersję systemu operacyjnego
-pub fun get_os_long_info(): text {
-    let info = unsafe "uname -sm"
-    return info.trim()
+// Pobiera nazwę systemu operacyjnego (np. Darwin / Linux)
+pub fun get_os_name(): Text {
+    const raw_v = trust $uname -s$ failed { return "unknown" }
+    return trim(raw_v)
+}
+
+// Pobiera wersję wydania jądra (Kernel release)
+pub fun get_os_release(): Text {
+    const raw_v = trust $uname -r$ failed { return "unknown" }
+    return trim(raw_v)
+}
+
+// Pobiera architekturę procesora (np. arm64 / x86_64)
+pub fun get_os_arch(): Text {
+    const raw_v = trust $uname -m$ failed { return "unknown" }
+    return trim(raw_v)
+}
+
+// Pobiera krótką nazwę aktywnej powłoki użytkownika bez używania bloków trust i dolarów
+pub fun get_shell_info(): Text {
+    const sh_path = env_var_load("SHELL")
+
+    if sh_path == "" {
+        return "unknown"
+    }
+
+    if text_contains(sh_path, "zsh") {
+        return "zsh"
+    }
+
+    if text_contains(sh_path, "bash") {
+        return "bash"
+    }
+
+    if text_contains(sh_path, "sh") {
+        return "sh"
+    }
+
+    if text_contains(sh_path, "fish") {
+        return "fish"
+    }
+
+    return "unknown"
+}
+
+// Pobiera pełną nazwę marketingową systemu macOS
+pub fun get_os_product_name(): Text {
+    const out = trust $sw_vers -productName$ failed {
+        return "macOS"
+    }
+    return trim(out)
+}
+
+// Pobiera dokładną wersję marketingową systemu macOS (np. 15.5)
+pub fun get_os_product_version(): Text {
+    const out = trust $sw_vers -productVersion$ failed {
+        return "unknown"
+    }
+    return trim(out)
+}
+
+// Pobiera numer budowy jądra systemu macOS (Build Version)
+pub fun get_os_build_version(): Text {
+    const out = trust $sw_vers -buildVersion$ failed {
+        return "unknown"
+    }
+    return trim(out)
+}
+
+//  ==============
+
+// Sprawdza i generuje raport uprawnien oraz mechanizmu zapisu logow
+pub fun get_logs_generation_info(home: Text): Text {
+    let check_status = "DOZWOLONY (OK)"
+
+    // Próba odczytu katalogu jako pliku przez std/fs - brak trust i brak dolarów
+    file_read("{home}/logs") failed {
+        check_status = "ERROR"
+    }
+
+    // Szereg jawnych warunków logicznych if w czystym Amberze
+    if check_status == "DOZWOLONY (OK)" {
+        return "DOZWOLONY (OK)"
+    }
+
+    if check_status == "ERROR" {
+        return "BRAK UPRAWNIEN (ERROR)"
+    }
+
+    return "unknown"
+}
+
+// Sprawdza i generuje raport mechanizmu odczytu konfiguracji TOML
+pub fun get_config_generation_info(home: Text): Text {
+    let check_status = "DOZWOLONY (OK)"
+
+    // Próba odczytu pliku konfiguracyjnego przez std/fs - 100% natywny kod
+    file_read("{home}/config/config.toml") failed {
+        check_status = "ERROR"
+    }
+
+    // Szereg jawnych warunków logicznych if w czystym Amberze
+    if check_status == "DOZWOLONY (OK)" {
+        return "DOZWOLONY (OK)"
+    }
+
+    if check_status == "ERROR" {
+        return "BRAK DOSTEPU (ERROR)"
+    }
+
+    return "unknown"
 }

@@ -1,104 +1,112 @@
+#!/usr/local/bin/amber amber
+
 // ============================================================================
 // PROJECT:         Ambero Framework CLI
 // AUTHOR:          PyCoder Gabryl
-// GITHUB:          https://github.com/PyCoder-Gabryl
+// GITHUB:          https://github.com
 // EMAIL:           pycoder.gabryl@gmail.com
 // LICENSE:         Apache License 2.0
 // ----------------------------------------------------------------------------
 // DESCRIPTION:      Rozbudowany moduł parsujący konfigurację TOML.
-//                   Implementuje strukturę AmberoConfig, która przechowuje
-//                   stan całego frameworku (ścieżki, system, UI, powłokę).
-//                   Zapewnia bezpieczne wczytywanie danych i walidację
-//                   kluczowych parametrów przy starcie systemu.
+//                   Implementuje strukturę AmberoConfig na bazie bezpiecznej
+//                   tablicy indeksowanej. Współpracuje z am_core/defaults.ab.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.10
+// VERSION:         0.1.27
 // CREATED:         2026-07-16
 // ============================================================================
 
 
-import { read_file, file_exists } from "std/fs"
-import { exit } from "std/env"
-import {
-    clr_red,
-    clr_reset,
-    clr_bold,
-    ico_error
-} from "./ui.ab"
+import { file_read } from "std/fs"
+import { get_default_config } from "./defaults.ab"
 
-// Definicja struktury - rygorystyczna składnia z przecinkami
-pub struct AmberoConfig {
-    home: text,
-    os: text,
-    ui_mode: text,
-    language: text,
-    shell: text,
-    verbosity: text
+// Konfiguracja jako tablica tekstowa [Text]. Ustalona kolejność elementów:
+// Indeksy: 0=home, 1=os, 2=ui_mode, 3=language, 4=shell, 5=verbosity
+
+pub fun get_home(c: [Text]): Text {
+    const i = 0
+    return c[i]
 }
 
-// Gettery dla stabilności międzyplikowej
-pub fun get_home(c: AmberoConfig): text {
-    return c.home
+pub fun get_os(c: [Text]): Text {
+    const i = 1
+    return c[i]
 }
 
-pub fun get_verbosity(c: AmberoConfig): text {
-    return c.verbosity
+pub fun get_ui_mode(c: [Text]): Text {
+    const i = 2
+    return c[i]
 }
 
-pub fun get_language(c: AmberoConfig): text {
-    return c.language
+pub fun get_language(c: [Text]): Text {
+    const i = 3
+    return c[i]
 }
 
-fun get_toml_value(content: text, key: text): text {
-    let lines = content.split("\n")
-    loop line in lines {
-        let trimmed = line.trim()
-        if trimmed.starts_with(key) and trimmed.contains("=") {
-            let parts = trimmed.split("=")
-            if parts.len() >= 2 {
-                let val_part = parts[1].trim()
-                let val_parts = val_part.split("\"")
-                if val_parts.len() >= 2 {
-                    return val_parts[1]
-                }
-            }
-        }
-    }
-    return ""
+pub fun get_shell(c: [Text]): Text {
+    const i = 4
+    return c[i]
 }
 
-pub fun load_config(config_path: text): AmberoConfig {
-    if not file_exists(config_path) {
-        echo("{clr_red}{clr_bold}{ico_error} BŁĄD KRYTYCZNY: Brak pliku: {config_path}{clr_reset}")
-        exit(1)
+pub fun get_verbosity(c: [Text]): Text {
+    const i = 5
+    return c[i]
+}
+
+// Pomocnik TOML: Stabilne pobieranie wartości z pliku przy użyciu powłoki systemowej.
+fun get_toml_value(path: Text, target_key: Text): Text {
+    const value = trust $sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n'$ failed {
+        return ""
+    }
+    return value
+}
+
+// Główna funkcja ładująca konfigurację frameworku z obsługą trybu przedinstalacyjnego
+pub fun load_config(path: Text): [Text] {
+    let file_exists = true
+
+    // Pobieramy paczkę z domyślnymi wartościami z pliku am_core/defaults.ab
+    const defaults = get_default_config()
+
+    // Zamiana 'raw_content' na '_' wymazuje ostatnie ostrzeżenie o nieużywanej zmiennej
+    const _ = file_read(path) failed {
+        file_exists = false
     }
 
-    let config_content = read_file(config_path) failed {
-        echo("{clr_red}{ico_error} Nie mozna odczytac pliku konfiguracji.{clr_reset}")
-        exit(1)
+    // Jeśli pliku nie ma, natychmiast zwracamy centralną konfigurację domyślną
+    if not file_exists {
+        return defaults
     }
 
-    let ambero_home = get_toml_value(config_content, "ambero_home")
-    let os_type = get_toml_value(config_content, "os_type")
-    let ui_mode = get_toml_value(config_content, "ui_mode")
-    let language = get_toml_value(config_content, "language")
-    let default_shell = get_toml_value(config_content, "default_shell")
-    let verbosity = get_toml_value(config_content, "verbosity")
+    // Jeśli plik istnieje, parsujemy jego klucze
+    let home_val = get_toml_value(path, "home")
+    let os_val = get_toml_value(path, "os")
+    let ui_val = get_toml_value(path, "ui_mode")
+    let lang_val = get_toml_value(path, "language")
+    let shell_val = get_toml_value(path, "shell")
+    let verb_val = get_toml_value(path, "verbosity")
 
-    let final_verbosity = if verbosity == "" { "normal" } else { verbosity }
-
-    if ambero_home == "" {
-        echo("{clr_red}{ico_error} BŁĄD: Klucz 'ambero_home' jest pusty w config.toml{clr_reset}")
-        exit(1)
+    // Dynamiczny fallback linia po linii - jeśli dany klucz w TOML jest pusty,
+    // wyciągamy odpowiadający mu bezpieczny indeks z tablicy defaults
+    if home_val == "" {
+        home_val = defaults[0]
+    }
+    if os_val == "" {
+        os_val = defaults[1]
+    }
+    if ui_val == "" {
+        ui_val = defaults[2]
+    }
+    if lang_val == "" {
+        lang_val = defaults[3]
+    }
+    if shell_val == "" {
+        shell_val = defaults[4]
+    }
+    if verb_val == "" {
+        verb_val = defaults[5]
     }
 
-    // Inicjalizacja struktury - przecinki są tutaj kluczowe dla parsera
-    return AmberoConfig {
-        home: ambero_home,
-        os: os_type,
-        ui_mode: ui_mode,
-        language: language,
-        shell: default_shell,
-        verbosity: final_verbosity
-    }
+    // Zwracamy uzupełnioną strukturę
+    return [home_val, os_val, ui_val, lang_val, shell_val, verb_val]
 }

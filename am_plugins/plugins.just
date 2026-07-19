@@ -1,22 +1,52 @@
-# ============================================================================
-# PROJECT:         Ambero Framework CLI
-# AUTHOR:          PyCoder Gabryl
-# GITHUB:          https://github.com/PyCoder-Gabryl
-# EMAIL:           pycoder.gabryl@gmail.com
-# LICENSE:         Apache 2.0
-# ----------------------------------------------------------------------------
-# DESCRIPTION:      Automatycznie generowany plik indeksujący zadania
-#                   wszystkich zainstalowanych wtyczek. Jest importowany
-#                   przez główny Justfile, co pozwala na dynamiczne
-#                   rozszerzanie komend frameworku Ambero.
-# ----------------------------------------------------------------------------
-# PATH:            am_plugins/plugins.just
-# VERSION:         0.1.0
-# CREATED:         2026-07-17
-# ============================================================================
+# ==========================================
+# GENERATED AUTOMATICALLY - DO NOT EDIT
+# ==========================================
 
-# Ten plik jest zarządzany przez Ambero. Nie edytuj go ręcznie.
-# Instalator lub komenda 'am system-rebuild' będzie tu dopisywać importy.
+# Wyświetla informacje o autorze i licencji Ambero Framework.
+ambero-author: _check_config
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
+        /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @amber run am_plugins/official/ambero/ambero_author.ab
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
 
-# Przykład przyszłego wpisu:
-# import 'official/ambero/hello/hello.just'
+# Oficjalny, cieniowany baner blokowy Ambero (Zielono-Niebieski).
+ambero-banner: _check_config
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
+        /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @amber run am_plugins/official/ambero/ambero_banner.ab
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+
+# Służy do surowej walidacji strukturalnej plików mapowania TOML.
+ambero-dir-view: _check_config
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
+        /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @amber run am_plugins/official/ambero/ambero_dir_view.ab
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+
+# Wyświetla głęboki raport deweloperski bez powielania podstawowych wersji.
+ambero-info-dev: _check_config
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
+        /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @amber run am_plugins/official/ambero/ambero_info_dev.ab
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+
+# Wyświetla szczegółowy raport o wersjach i środowisku CLI.
+ambero-info: _check_config
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
+        /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @amber run am_plugins/official/ambero/ambero_info.ab
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+
+# Uruchamia pełną sekwencję powitalną i diagnostyczną frameworku.
+ambero-welcome: _check_config
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
+        /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+    @amber run am_plugins/official/ambero/ambero_welcome.ab
+    @rm -rf /Users/pygamiq/Documents/InteliIDEA/ambero/am_plugins/official/ambero/am_core
+
