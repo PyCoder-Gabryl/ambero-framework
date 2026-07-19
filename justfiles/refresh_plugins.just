@@ -11,7 +11,7 @@
 #                   Obsługuje głębokie skanowanie podkatalogów dostawców.
 # ----------------------------------------------------------------------------
 # PATH:            just_lib/refresh_plugins.just
-# VERSION:         0.1.1
+# VERSION:         0.1.2
 # CREATED:         2026-07-19
 # ============================================================================
 
@@ -50,14 +50,13 @@ refresh-plugins:
             v_nm=$(basename "$v"); \
             printf "  ├── 🏢 [SPRAWDZAM DOSTAWCĘ]: {{clr_b_blue}}%s{{style_reset}}\n" "$v_nm"; \
             \
-            # Głębokie szukanie plików .ab wewnątrz dostawcy \
-            F_LIST=($(find "$v" -type f -name "*.ab")); \
+            F_LIST=($(find "$v" -type f -name "*.ab" | sort)); \
             if [ ${#F_LIST[@]} -eq 0 ]; then \
                 printf "  │            {{clr_yellow}}📂 (Katalog dostawcy jest pusty){{style_reset}}\n"; \
             fi; \
             for f in "${F_LIST[@]}"; do \
                 f_nm=$(basename "$f"); \
-                rel_f=${f#{{AMBERO_DIR}}/\}; \
+                rel_f=$(echo "$f" | sed "s|{{AMBERO_DIR}}/||"); \
                 rel_dir=$(dirname "$rel_f"); \
                 \
                 if ! grep -q "main[[:space:]]*{" "$f"; then \
@@ -101,4 +100,4 @@ refresh-plugins:
     printf "  • {{clr_b_green}}Wykryte wtyczki:{{style_reset}} %d\n" "$P_CNT"; \
     printf "  • {{clr_b_cyan}}Wykryte testy:{{style_reset}}   %d\n" "$T_COUNT"; \
     echo "------------------------------------------------------------"; \
-    echo "✅ Gotowe! Wtyczki dopisane do am_plugins/plugins.just";'
+    echo "✅ Gotowe! Rejestr: am_plugins/plugins.just";'
