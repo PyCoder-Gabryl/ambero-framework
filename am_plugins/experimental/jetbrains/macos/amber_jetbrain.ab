@@ -12,16 +12,16 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.14
+// VERSION:         0.1.15
 // CREATED:         2026-07-19
 // ============================================================================
 
 
-import { load_config, get_home } from "./am_core/config_parser.ab"
+import { load_config, get_home } from "am_core/config_parser.ab"
 import {
 log_header, log_success, log_step,
 log_warn, log_error, log_edu
-} from "./am_core/logger.ab" // [ZMIANA] Dodano ./ dla symlinka
+} from "am_core/logger.ab"
 import { file_read, file_write, file_append, file_exists } from "std/fs"
 import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
@@ -35,7 +35,7 @@ main {
     const home_dir = env_var_get("HOME") failed { "" }
     if home_dir == "" {
         log_error(config, "Nie można pobrać zmiennej HOME.")
-        $ exit 1 $ failed { const _ = 0 }
+        $ exit 1 $ failed { echo("") }
     }
 
     const rc_files = [
@@ -45,7 +45,9 @@ main {
     "{home_dir}/.bash_profile"
     ]
 
-    const target_str = "eval \"\$(/opt/homebrew/bin/brew shellenv)\""
+    // Używamy Unicode dla znaku $, aby parser nie szukał interpolacji komendy
+    const dollar = "\u{0024}"
+    const target_str = "eval \"{dollar}(/opt/homebrew/bin/brew shellenv)\""
     const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
     const marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
     const full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
@@ -55,9 +57,7 @@ main {
         const content = file_read(rc) failed { "" }
 
         let should_update = false
-        let is_migration = false
 
-        // Sprawdzanie statusu pliku
         if text_contains(content, marker_start) {
             echo("❓ Wpis Ambero już istnieje w: {rc}")
             echo("   Czy chcesz go odświeżyć/nadpisać? [y/N]: ")
@@ -68,7 +68,6 @@ main {
                 log_warn(config, "Znaleziono stary wpis (bez markerów) w: {rc}")
                 echo("   Czy chcesz zmigrować ten wpis do Ambero? [y/N]: ")
                 should_update = true
-                is_migration = true
             }
             if not text_contains(content, target_str) {
                 echo("❓ Brak wpisu w: {rc}. Czy dodać? [y/N]: ")
@@ -77,7 +76,7 @@ main {
         }
 
         if should_update {
-            const ans_raw = $ read -r r < /dev/tty && echo "\$r" $ failed { "n" }
+            const ans_raw = $ read -r r < /dev/tty && echo "$r" $ failed { "n" }
             const ans = trim(ans_raw)
 
             if ans == "y" {
@@ -86,10 +85,11 @@ main {
                 let skip = false
 
                 for line in content_lines {
-                    // Usuwanie starego bloku lub starej linii
                     if text_contains(line, marker_start) { skip = true }
-                    if not skip and not text_contains(line, "brew shellenv") {
-                        new_content = "{new_content}{line}\n"
+                    if not skip {
+                        if not text_contains(line, "brew shellenv") {
+                            new_content = "{new_content}{line}\n"
+                        }
                     }
                     if text_contains(line, marker_end) { skip = false }
                 }

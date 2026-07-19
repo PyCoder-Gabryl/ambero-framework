@@ -14,41 +14,57 @@
 //                   zgodnie z ustawieniami w config.toml.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/logger.ab
-// VERSION:         0.1.10
+// VERSION:         0.1.11
 // CREATED:         2026-07-17
 // ============================================================================
 
 
-import { get_home, get_verbosity } from "./config_parser.ab"
+import { get_home, get_verbosity } from "am_core/config_parser.ab"
 import {
 clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
 ico_ok, ico_info, ico_warn, ico_error
-} from "./ui.ab"
+} from "am_core/ui.ab"
 import { file_append, dir_exists } from "std/fs"
 
-// Pomocnik zapisu: const _ = 0 ucisza ostrzeżenia o nieużywanych i niemutowalnych zmiennych
+// Pomocnik zapisu: używamy kodów Unicode dla klamer, aby nie mylić parsera
 fun write_to_disk(config: [Text], level: Text, message: Text) {
     const home = get_home(config)
     const log_dir = "{home}/logs"
 
-    // Tworzenie katalogów - blok failed nie może być pusty
+    // Kody Unicode dla klamer { i }
+    const lb = "\u{007b}"
+    const rb = "\u{007d}"
+
     if not dir_exists("{log_dir}/plain") {
-        $ mkdir -p "{log_dir}/plain" $ failed { const _ = 0 }
+        $ mkdir -p "{log_dir}/plain" $
+        failed {
+            echo("")
+        }
     }
     if not dir_exists("{log_dir}/json") {
-        $ mkdir -p "{log_dir}/json" $ failed { const _ = 0 }
+        $ mkdir -p "{log_dir}/json" $
+        failed {
+            echo("")
+        }
     }
 
-    const timestamp = $ date +%Y-%m-%dT%H:%M:%S $ failed {
+    const timestamp = $ date +%Y-%m-%dT%H:%M:%S $
+    failed {
         return ""
     }
 
     const plain_line = "[{timestamp}] [{level}] {message}\n"
-    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}\n"
+    // Budujemy JSON używając bezpiecznych zmiennych lb i rb
+    const json_line = "{lb}\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"{rb}\n"
 
-    // Zapis do plików - używamy file_append z std/fs dla większej stabilności
-    file_append("{log_dir}/plain/ambero.log", plain_line) failed { const _ = 0 }
-    file_append("{log_dir}/json/ambero.jsonl", json_line) failed { const _ = 0 }
+    file_append("{log_dir}/plain/ambero.log", plain_line)
+    failed {
+        echo("")
+    }
+    file_append("{log_dir}/json/ambero.jsonl", json_line)
+    failed {
+        echo("")
+    }
 }
 
 fun get_verbosity_weight(level: Text): Int {
@@ -107,3 +123,4 @@ pub fun log_header(config: [Text], title: Text) {
     if (get_verbosity_weight(v)) >= 1 {
         echo("{clr_amber}{clr_bold}=== {title} ==={clr_reset}")
     }
+}
