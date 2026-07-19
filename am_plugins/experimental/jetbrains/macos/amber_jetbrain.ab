@@ -12,98 +12,90 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.5
+// VERSION:         0.1.13
 // CREATED:         2026-07-19
 // ============================================================================
 
 
 import { load_config, get_home } from "am_core/config_parser.ab"
 import {
-log_header,
-log_success,
-log_step,
-log_warn,
-log_error,
-log_edu
+log_header, log_success, log_step,
+log_warn, log_error, log_edu
 } from "am_core/logger.ab"
 import { file_read, file_write, file_append, file_exists } from "std/fs"
 import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
 
 main {
-    let ambero_home = env_var_get("AMBERO_HOME") failed { "." }
-    let config = load_config("{ambero_home}/config/config.toml")
+    const ambero_home = env_var_get("AMBERO_HOME") failed { "." }
+    const config = load_config("{ambero_home}/config/config.toml")
 
     log_header(config, "JETBRAINS HOMEBREW PATH FIX (EXPERIMENTAL)")
 
-    let home_dir = env_var_get("HOME") failed { "" }
+    const home_dir = env_var_get("HOME") failed { "" }
     if home_dir == "" {
         log_error(config, "Nie można pobrać zmiennej HOME.")
-        $ exit 1 $ failed {}
+        $ exit 1 $ failed { let _ = 0 }
     }
 
-    let rc_files = [
+    const rc_files = [
     "{home_dir}/.zshrc",
     "{home_dir}/.bashrc",
     "{home_dir}/.zshenv",
     "{home_dir}/.bash_profile"
     ]
 
-    // [ZMIANA] Dodano \ przed $ aby Amber nie szukał domknięcia polecenia wewnątrz stringa
-    let target_str = "eval \"\$(/opt/homebrew/bin/brew shellenv)\""
-    let marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
-    let marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
-    let full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
+    const target_str = "eval \"\$(/opt/homebrew/bin/brew shellenv)\""
+    const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
+    const marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
+    const full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
 
     for rc in rc_files {
-        if not file_exists(rc) {
-            file_write(rc, "") failed {
-                log_error(config, "Nie można utworzyć pliku: {rc}")
+        if not file_exists(rc) { continue }
+
+        const content = file_read(rc) failed { "" }
+
+        if text_contains(content, marker_start) {
+            log_step(config, "Wpis z markerami juz istnieje w: {rc}")
+            continue
+        }
+
+        echo("❓ Wykryto plik: {rc}")
+        echo("   Czy chcesz dodac bezpieczne sciezki Ambero? [y/N/p(podglad)]: ")
+
+        const ans_raw = $ read -r r < /dev/tty && echo "\$r" $ failed { "n" }
+        const ans = trim(ans_raw)
+
+        if ans == "p" {
+            echo("\n--- PODGLAD ZMIAN DLA {rc} ---")
+            echo(full_block)
+            echo("--- KONIEC PODGLADU ---")
+            echo("Czy zastosowac te zmiany? [y/N]: ")
+            const retry_raw = $ read -r r < /dev/tty && echo "\$r" $ failed { "n" }
+            if trim(retry_raw) != "y" {
+                log_step(config, "Pominieto plik: {rc}")
                 continue
             }
         }
 
-        let content = file_read(rc) failed { "" }
-
-        if text_contains(content, marker_start) {
-            log_step(config, "Wpis z markerami już istnieje w: {rc}")
-            continue
-        }
-
-        if text_contains(content, target_str) {
-            log_warn(config, "Znaleziono stary wpis w: {rc}")
-            echo("  Czy chcesz zaktualizować ten plik? [y/N]: ")
-
-            let ans_raw = $ read -r r < /dev/tty && echo "\$r" $ failed { "n" }
-            let ans = trim(ans_raw)
-
-            if ans == "y" {
-                let content_lines = split(content, "\n")
-                let new_content = ""
-                for line in content_lines {
-                    let is_old = text_contains(line, "brew shellenv")
-                    if not is_old {
-                        new_content = "{new_content}{line}\n"
-                    }
+        if ans == "y" or ans == "p" {
+            const content_lines = split(content, "\n")
+            let new_content = ""
+            for line in content_lines {
+                if not text_contains(line, "brew shellenv") {
+                    new_content = "{new_content}{line}\n"
                 }
-                file_write(rc, new_content) failed { log_error(config, "Błąd zapisu: {rc}") }
-                file_append(rc, full_block) failed { log_error(config, "Błąd dopisywania: {rc}") }
-                log_success(config, "Zaktualizowano: {rc}")
             }
-
-            if ans != "y" {
-                log_step(config, "Pominięto: {rc}")
-            }
+            file_write(rc, new_content) failed { log_error(config, "Blad zapisu: {rc}") }
+            file_append(rc, full_block) failed { log_error(config, "Blad dopisywania: {rc}") }
+            log_success(config, "Zaktualizowano plik: {rc}")
             continue
         }
 
-        file_append(rc, full_block) failed {
-            log_error(config, "Nie udało się zapisać do: {rc}")
-        }
-        log_success(config, "Dodano ścieżki Brew do: {rc}")
+        log_step(config, "Pominieto plik: {rc}")
     }
 
-    let edu_msg = "Skrypt daje aplikacjom GUI dostęp do Homebrew.\n"
-    let edu_fix = "│ Rozwiązuje to błąd PATH we wtyczce Amber."
+    const edu_msg = "Skrypt daje aplikacjom GUI dostep do Homebrew.\n"
+    const edu_fix = "│ Rozwiazuje to blad PATH we wtyczce Amber."
     log_edu(config, "Kontekst JetBrains", "{edu_msg}{edu_fix}")
 }

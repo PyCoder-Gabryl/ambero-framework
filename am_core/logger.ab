@@ -14,7 +14,7 @@
 //                   zgodnie z ustawieniami w config.toml.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/logger.ab
-// VERSION:         0.1.8
+// VERSION:         0.1.9
 // CREATED:         2026-07-17
 // ============================================================================
 
@@ -25,23 +25,29 @@ clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
 ico_ok, ico_info, ico_warn, ico_error
 } from "./ui.ab"
 
-// Pomocnik zapisu: Wykorzystuje czysty trust bez pustych sekcji failed {}, co usuwa błędy ostrzeżeń
+// Pomocnik zapisu: Wypełnione bloki failed uciszają ostrzeżenia kompilatora
 fun write_to_disk(config: [Text], level: Text, message: Text) {
     const home = get_home(config)
     const log_dir = "{home}/logs"
 
-    $ mkdir -p "{log_dir}/plain" "{log_dir}/json" $ failed {}
+    // Używamy zmiennej pomocniczej, aby blok failed nie był pusty
+    $ mkdir -p "{log_dir}/plain" "{log_dir}/json" $ failed {
+        let _ = 0
+    }
 
     const timestamp = $ date +%Y-%m-%dT%H:%M:%S $ failed {
         return ""
     }
 
     const plain_line = "[{timestamp}] [{level}] {message}"
-    // [ZMIANA] Usunięto \ przed ostatnią klamrą }
-    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"}"
+    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}"
 
-    $ echo "{plain_line}" >> "{log_dir}/plain/ambero.log" $ failed {}
-    $ echo "{json_line}" >> "{log_dir}/json/ambero.jsonl" $ failed {}
+    $ echo "{plain_line}" >> "{log_dir}/plain/ambero.log" $ failed {
+        let _ = 0
+    }
+    $ echo "{json_line}" >> "{log_dir}/json/ambero.jsonl" $ failed {
+        let _ = 0
+    }
 }
 
 fun get_verbosity_weight(level: Text): Int {
