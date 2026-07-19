@@ -12,28 +12,25 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.16
+// VERSION:         0.1.17
 // CREATED:         2026-07-19
 // ============================================================================
 
 
 import { load_config, get_home } from "am_core/config_parser.ab"
 import {
-log_header,
-log_success,
-log_step,
-log_warn,
-log_error,
-log_edu
+log_header, log_success, log_step,
+log_warn, log_error, log_edu
 } from "am_core/logger.ab"
 import { file_read, file_write, file_append, file_exists } from "std/fs"
 import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
 
 main {
+    // 1. Inicjalizacja środowiska (w bloku failed podajemy tylko wartość, bez return)
     const ambero_home = env_var_get("AMBERO_HOME") failed (e) {
         const _ = e
-        return "."
+        "."
     }
     const config = load_config("{ambero_home}/config/config.toml")
 
@@ -41,7 +38,7 @@ main {
 
     const home_dir = env_var_get("HOME") failed (e) {
         const _ = e
-        return ""
+        ""
     }
 
     if home_dir == "" {
@@ -58,11 +55,9 @@ main {
     "{home_dir}/.bash_profile"
     ]
 
-    // Definicje bezpiecznych znaków Unicode, aby uniknąć błędów parsera
+    // Definicje bezpiecznych znaków Unicode
     const dollar = "\u0024"
     const quote = "\u0022"
-
-    // Budujemy target_str bez użycia problematycznych ucieczek \" czy \$
     const target_str = "eval {quote}{dollar}(/opt/homebrew/bin/brew shellenv){quote}"
 
     const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
@@ -74,7 +69,7 @@ main {
 
         const content = file_read(rc) failed (e) {
             const _ = e
-            return ""
+            ""
         }
 
         mut should_update = false
@@ -98,10 +93,9 @@ main {
         }
 
         if should_update {
-            // Używamy \$r zamiast "$r", aby nie zamykać przedwcześnie stringa Ambera
             const ans_raw = $ read -r r < /dev/tty && echo \$r $ failed (e) {
                 const _ = e
-                return "n"
+                "n"
             }
             const ans = trim(ans_raw)
 
@@ -112,13 +106,11 @@ main {
 
                 for line in content_lines {
                     if text_contains(line, marker_start) { skip = true }
-
                     if not skip {
                         if not text_contains(line, "brew shellenv") {
                             new_content = "{new_content}{line}\n"
                         }
                     }
-
                     if text_contains(line, marker_end) { skip = false }
                 }
 
