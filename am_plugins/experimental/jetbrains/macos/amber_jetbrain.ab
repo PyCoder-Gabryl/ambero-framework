@@ -12,7 +12,7 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.15
+// VERSION:         0.1.17
 // CREATED:         2026-07-19
 // ============================================================================
 
@@ -45,9 +45,8 @@ main {
     "{home_dir}/.bash_profile"
     ]
 
-    // Używamy Unicode dla znaku $, aby parser nie szukał interpolacji komendy
-    const dollar = "\u{0024}"
-    const target_str = "eval \"{dollar}(/opt/homebrew/bin/brew shellenv)\""
+    // Oficjalna ucieczka znaku $ według dokumentacji to \$
+    const target_str = "eval \"\$(/opt/homebrew/bin/brew shellenv)\""
     const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
     const marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
     const full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
