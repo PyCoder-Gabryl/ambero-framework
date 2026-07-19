@@ -37,21 +37,30 @@ fun write_to_disk(config: [Text], level: Text, message: Text) {
     const rb = "\u007d"
 
     if not dir_exists("{log_dir}/plain") {
-        $ mkdir -p "{log_dir}/plain" $ failed (e) { echo("") }
+        $ mkdir -p "{log_dir}/plain" $ failed (e) {
+            const _ = e // [ZMIANA]
+        }
     }
     if not dir_exists("{log_dir}/json") {
-        $ mkdir -p "{log_dir}/json" $ failed (e) { echo("") }
+        $ mkdir -p "{log_dir}/json" $ failed (e) {
+            const _ = e // [ZMIANA]
+        }
     }
 
     const timestamp = $ date +%Y-%m-%dT%H:%M:%S $ failed (e) {
+        const _ = e // [ZMIANA]
         return "0000-00-00"
     }
 
     const plain_line = "[{timestamp}] [{level}] {message}\n"
     const json_line = "{lb}\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"{rb}\n"
 
-    file_append("{log_dir}/plain/ambero.log", plain_line) failed (e) { echo("") }
-    file_append("{log_dir}/json/ambero.jsonl", json_line) failed (e) { echo("") }
+    file_append("{log_dir}/plain/ambero.log", plain_line) failed (e) {
+        const _ = e // [ZMIANA]
+    }
+    file_append("{log_dir}/json/ambero.jsonl", json_line) failed (e) {
+        const _ = e // [ZMIANA]
+    }
 }
 
 fun get_verbosity_weight(level: Text): Int {

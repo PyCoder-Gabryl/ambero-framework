@@ -52,7 +52,8 @@ pub fun get_verbosity(c: [Text]): Text {
 
 // Pomocnik TOML: Stabilne pobieranie wartości przy użyciu powłoki systemowej.
 fun get_toml_value(path: Text, target_key: Text): Text {
-    const value = $ sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n' $ failed (e) {
+    const value = $ sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n' $ failed (e)
+    {
         const _ = e
         return ""
     }
@@ -60,12 +61,11 @@ fun get_toml_value(path: Text, target_key: Text): Text {
 }
 
 pub fun load_config(path: Text): [Text] {
-    mut file_exists_status = true
+    let file_exists_status = true
     const defaults = get_default_config()
 
-    // Sprawdzamy czy plik istnieje poprzez próbę odczytu
     const _ = file_read(path) failed (e) {
-        vonst _ = e
+        const _ = e // [ZMIANA]
         file_exists_status = false
     }
 
@@ -80,7 +80,6 @@ pub fun load_config(path: Text): [Text] {
     const shell_val = get_toml_value(path, "default_shell")
     const verb_val = get_toml_value(path, "verbosity")
 
-    // Fallback do wartości domyślnych (składnia ternary: condition then a else b)
     const f_home = home_val == "" then defaults[0] else home_val
     const f_os = os_val == "" then defaults[1] else os_val
     const f_ui = ui_val == "" then defaults[2] else ui_val

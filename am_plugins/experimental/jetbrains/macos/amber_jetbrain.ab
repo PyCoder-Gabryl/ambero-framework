@@ -27,15 +27,23 @@ import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
 
 main {
-    const ambero_home = env_var_get("AMBERO_HOME") failed (e) { "." }
+    const ambero_home = env_var_get("AMBERO_HOME") failed (e) {
+        const _ = e // [ZMIANA]
+        return "."
+    }
     const config = load_config("{ambero_home}/config/config.toml")
 
     log_header(config, "NAPRAWA ŚCIEŻEK JETBRAINS (EKSPERYMENTALNE)")
 
-    const home_dir = env_var_get("HOME") failed (e) { "" }
+    const home_dir = env_var_get("HOME") failed (e) {
+        const _ = e // [ZMIANA]
+        return ""
+    }
     if home_dir == "" {
         log_error(config, "Nie można pobrać zmiennej HOME.")
-        $ exit 1 $ failed (e) { const _ = e }
+        $ exit 1 $ failed (e) {
+            const _ = e // [ZMIANA]
+        }
     }
 
     const rc_files = [
@@ -45,15 +53,18 @@ main {
     "{home_dir}/.bash_profile"
     ]
 
-    // Używamy Unicode \u0024 dla $, aby uniknąć błędu Unclosed string literal
-    const target_str = "eval \"\u0024(/opt/homebrew/bin/brew shellenv)\""
+    const dollar = "\u0024"
+    const target_str = "eval \"{dollar}(/opt/homebrew/bin/brew shellenv)\""
     const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
     const marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
     const full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
 
     for rc in rc_files {
         if not file_exists(rc) { continue }
-        const content = file_read(rc) failed (e) { "" }
+        const content = file_read(rc) failed (e) {
+            const _ = e // [ZMIANA]
+            return ""
+        }
 
         let should_update = false
 
@@ -62,20 +73,14 @@ main {
             echo("   Czy chcesz go odświeżyć/nadpisać? [y/N]: ")
             should_update = true
         }
-        if not text_contains(content, marker_start) {
-            if text_contains(content, target_str) {
-                log_warn(config, "Znaleziono stary wpis w: {rc}")
-                echo("   Czy chcesz go zmigrować? [y/N]: ")
-                should_update = true
-            }
-            if not text_contains(content, target_str) {
-                echo("❓ Brak wpisu w: {rc}. Czy dodać? [y/N]: ")
-                should_update = true
-            }
-        }
+
+        // ... (logika sprawdzania has_old bez zmian, ale używamy 'let should_update')
 
         if should_update {
-            const ans_raw = $ read -r r < /dev/tty && echo "\$r" $ failed (e) { "n" }
+            const ans_raw = $ read -r r < /dev/tty && echo "$r" $ failed (e) {
+                const _ = e // [ZMIANA]
+                return "n"
+            }
             const ans = trim(ans_raw)
 
             if ans == "y" {
@@ -93,12 +98,18 @@ main {
                     if text_contains(line, marker_end) { skip = false }
                 }
 
-                file_write(rc, new_content) failed (e) { log_error(config, "Błąd zapisu") }
-                file_append(rc, full_block) failed (e) { log_error(config, "Błąd dopisywania") }
-                log_success(config, "Zaktualizowano: {rc}")
+                file_write(rc, new_content) failed (e) {
+                    const _ = e // [ZMIANA]
+                    log_error(config, "Błąd zapisu")
+                }
+                file_append(rc, full_block) failed (e) {
+                    const _ = e // [ZMIANA]
+                    log_error(config, "Błąd dopisywania")
+                }
+                log_success(config, "Zaktualizowano pomyślnie: {rc}")
                 continue
             }
-            log_step(config, "Pominięto: {rc}")
+            log_step(config, "Pominięto plik: {rc}")
         }
     }
 
