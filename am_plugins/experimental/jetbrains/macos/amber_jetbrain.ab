@@ -5,10 +5,11 @@
 // EMAIL:           pycoder.gabryl@gmail.com
 // LICENSE:         Apache License 2.0
 // ----------------------------------------------------------------------------
-// HELP-INFO        Sprawdza i naprawia ścieżki Homebrew dla JetBrains IDEA.
-// DESCRIPTION:     Eksperymentalny plugin weryfikujący i naprawiający wpisy
-//                  Homebrew w plikach RC powłoki. Automatyzuje proces
-//                  dodawania markerów ochronnych i migruje stare wpisy.
+// HELP-INFO        Wstrzykuje ścieżki Homebrew do plików RC dla IDE na macOS.
+// DESCRIPTION:     Eksperymentalny plugin rozwiązujący problem wtyczki Amber
+//                  (brak dostępu do PATH w aplikacjach GUI). Automatyzuje proces
+//                  dodawania markerów ochronnych i migruje stare wpisy. Poza
+//                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
 // VERSION:         0.1.0
@@ -16,14 +17,17 @@
 // ============================================================================
 
 
-import { load_config } from "../../../../am_core/config_parser.ab"
-import { log_header, log_success, log_step, log_warn, log_error, log_edu } from "../../../../am_core/logger.ab"
+import { load_config } from "am_core/config_parser.ab"
+import {
+log_header, log_success, log_step,
+log_warn, log_error, log_edu
+} from "am_core/logger.ab"
 import { file_read, file_append } from "std/fs"
 import { env_var_get } from "std/env"
 import { text_contains, trim } from "std/text"
 
 main {
-// 1. Inicjalizacja konfiguracji (pobiera tablice [Text])
+// 1. Inicjalizacja konfiguracji przy użyciu zintegrowanego symlinka am_core
 let ambero_home = env_var_get("AMBERO_HOME") failed { "." }
 let config = load_config("{ambero_home}/config/config.toml")
 
@@ -35,8 +39,13 @@ log_error(config, "Nie można pobrać zmiennej środowiskowej HOME.")
 trust $exit 1$
 }
 
-// Tablica plików do sprawdzenia
-let rc_files = ["{home_dir}/.zshrc", "{home_dir}/.bashrc", "{home_dir}/.zshenv", "{home_dir}/.bash_profile"]
+// Tablica plików konfiguracyjnych powłoki do sprawdzenia
+let rc_files = [
+"{home_dir}/.zshrc",
+"{home_dir}/.bashrc",
+"{home_dir}/.zshenv",
+"{home_dir}/.bash_profile"
+]
 
 let target_str = "eval \"$(/opt/homebrew/bin/brew shellenv)\""
 let marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
@@ -44,12 +53,11 @@ let marker_end   = "# <<< AMBERO JETBRAINS FIX <<<"
 let full_block   = "\n{marker_start}\n{target_str}\n{marker_end}\n"
 
 for rc in rc_files {
-// Tworzymy plik, jeśli nie istnieje (aby uniknąć błędów odczytu)
+// Tworzymy pusty plik, jeśli nie istnieje, aby uniknąć błędów odczytu
 trust $ touch "{rc}" $
 
 let content = file_read(rc) failed { "" }
 
-// Weryfikacja obecności markerów
 if text_contains(content, marker_start) {
 log_step(config, "Wpis z bezpiecznymi markerami już istnieje w: {rc}")
 } else {
@@ -58,7 +66,7 @@ if text_contains(content, target_str) {
 log_warn(config, "Znaleziono stary wpis (bez markerów) w: {rc}")
 
 echo("  Czy chcesz zaktualizować ten plik? (Zalecane) [y/N]: ")
-// Pobieramy wejście z tty, aby uniknąć przechwytywania przez inne procesy
+// Odczyt z /dev/tty omija problemy z przechwytywaniem strumienia
 let ans_raw = trust $ read -r r < /dev/tty; echo $r $
                 let ans = trim(ans_raw)
 
@@ -79,7 +87,7 @@ log_success(config, "Zaktualizowano plik: {rc}")
 log_step(config, "Pominięto aktualizację dla: {rc}")
 }
 } else {
-// Skoro plik nie ma ani starego, ani nowego wpisu - po prostu dodajemy nowy
+// Całkowity brak wpisu - dodajemy nowy
 file_append(rc, full_block) failed {
 log_error(config, "Nie udało się zapisać zmian do: {rc}")
 }
@@ -89,7 +97,7 @@ log_success(config, "Dodano bezpieczne ścieżki Brew do: {rc}")
 }
 
 log_edu(config,
-"Ścieżki systemowe a aplikacje okienkowe",
-"Dopisanie ewaluacji Homebrew do .zshenv oraz .bash_profile jest konieczne, aby aplikacje uruchamiane z GUI (jak IntelliJ IDEA czy Toolbox) odziedziczyły pełen kontekst Twojego terminala."
+"Kontekst JetBrains i Homebrew",
+"Ten skrypt eksponuje dostęp do Homebrew dla aplikacji graficznych (GUI).\n│ Rozwiązuje to błąd wtyczki Amber, dając też dostęp do m.in. Node czy Go."
 )
 }
