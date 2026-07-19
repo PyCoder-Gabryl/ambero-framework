@@ -12,7 +12,7 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.17
+// VERSION:         0.1.18
 // CREATED:         2026-07-19
 // ============================================================================
 
@@ -27,7 +27,7 @@ import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
 
 main {
-    // 1. Inicjalizacja środowiska (w bloku failed podajemy tylko wartość, bez return)
+    // 1. Inicjalizacja środowiska
     const ambero_home = env_var_get("AMBERO_HOME") failed (e) {
         const _ = e
         "."
@@ -72,7 +72,8 @@ main {
             ""
         }
 
-        mut should_update = false
+        // Używamy 'let' dla zmiennych, które będą modyfikowane [ZMIANA]
+        let should_update = false
 
         if text_contains(content, marker_start) {
             echo("❓ Wpis Ambero już istnieje w: {rc}")
@@ -101,8 +102,9 @@ main {
 
             if ans == "y" {
                 const content_lines = split(content, "\n")
-                mut new_content = ""
-                mut skip = false
+                // Używamy 'let' dla buforów tekstowych i flag [ZMIANA]
+                let new_content = ""
+                let skip = false
 
                 for line in content_lines {
                     if text_contains(line, marker_start) { skip = true }
