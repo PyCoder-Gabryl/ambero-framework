@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/am_core" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/am_install" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/config" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/backups" />
+      <excludeFolder url="file://$MODULE_DIR$/logs" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

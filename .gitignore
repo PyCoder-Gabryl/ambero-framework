@@ -85,6 +85,7 @@ $RECYCLE.BIN/
 .idea
 *.iws
 out/
+*.iml
 
 # --- Visual Studio Code (VS Code) ---
 .vscode/*
@@ -96,7 +97,7 @@ out/
 .history/
 
 # =============================================================================
-# 4. PLIKI TYMCZASOWE, LOGI I CACHE
+# 4. PLIKI TYMCZASOWE, LOGI I CACHE, BACKUP
 # =============================================================================
 
 *.log
@@ -104,3 +105,4 @@ logs/
 tmp/
 temp/
 .cache/
+backups/
