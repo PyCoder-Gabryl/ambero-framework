@@ -17,7 +17,7 @@
 // ============================================================================
 
 
-import { load_config, AmberoConfig, get_home } from "am_core/config_parser.ab"
+import { load_config, get_home } from "am_core/config_parser.ab"
 import {
 log_header,
 log_success,
@@ -31,80 +31,79 @@ import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
 
 main {
-//    // 1. Inicjalizacja środowiska
-//    let ambero_home = env_var_get("AMBERO_HOME") failed { "." }
-//    let config = load_config("{ambero_home}/config/config.toml")
-//
-//    log_header(config, "JETBRAINS HOMEBREW PATH FIX (EXPERIMENTAL)")
-//
-//    let home_dir = env_var_get("HOME") failed { "" }
-//    if home_dir == "" {
-//        log_error(config, "Nie można pobrać zmiennej HOME.")
-//        $ exit 1 $ failed {}
-//    }
-//
-//    let rc_files = [
-//    "{home_dir}/.zshrc",
-//    "{home_dir}/.bashrc",
-//    "{home_dir}/.zshenv",
-//    "{home_dir}/.bash_profile"
-//    ]
-//
-//    let target_str = "eval \"$(/opt/homebrew/bin/brew shellenv)\""
-//    let marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
-//    let marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
-//    let full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
-//
-//    for rc in rc_files {
-//        if not file_exists(rc) {
-//            file_write(rc, "") failed {
-//                log_error(config, "Nie można utworzyć pliku: {rc}")
-//                continue
-//            }
-//        }
-//
-//        let content = file_read(rc) failed { "" }
-//
-//        if text_contains(content, marker_start) {
-//            log_step(config, "Wpis z markerami już istnieje w: {rc}")
-//            continue
-//        }
-//
-//        if text_contains(content, target_str) {
-//            log_warn(config, "Znaleziono stary wpis w: {rc}")
-//            echo("  Czy chcesz zaktualizować ten plik? [y/N]: ")
-//
-//            let ans_raw = $ read -r r < /dev/tty && echo "$r" $ failed { "n" }
-//            let ans = trim(ans_raw)
-//
-//            if ans == "y" {
-//                // Zmiana nazwy zmiennej z 'lines' na 'content_lines' [ZMIANA]
-//                let content_lines = split(content, "\n")
-//                let new_content = ""
-//                for line in content_lines {
-//                    let is_old = text_contains(line, "brew shellenv")
-//                    if not is_old {
-//                        new_content = "{new_content}{line}\n"
-//                    }
-//                }
-//                file_write(rc, new_content) failed { log_error(config, "Błąd zapisu: {rc}") }
-//                file_append(rc, full_block) failed { log_error(config, "Błąd dopisywania: {rc}") }
-//                log_success(config, "Zaktualizowano: {rc}")
-//            }
-//
-//            if ans != "y" {
-//                log_step(config, "Pominięto: {rc}")
-//            }
-//            continue
-//        }
-//
-//        file_append(rc, full_block) failed {
-//            log_error(config, "Nie udało się zapisać do: {rc}")
-//        }
-//        log_success(config, "Dodano ścieżki Brew do: {rc}")
-//    }
-//
-//    let edu_msg = "Skrypt daje aplikacjom GUI dostęp do Homebrew.\n"
-//    let edu_fix = "│ Naprawia to błąd PATH we wtyczce Amber."
-//    log_edu(config, "Kontekst JetBrains", "{edu_msg}{edu_fix}")
+    let ambero_home = env_var_get("AMBERO_HOME") failed { "." }
+    let config = load_config("{ambero_home}/config/config.toml")
+
+    log_header(config, "JETBRAINS HOMEBREW PATH FIX (EXPERIMENTAL)")
+
+    let home_dir = env_var_get("HOME") failed { "" }
+    if home_dir == "" {
+        log_error(config, "Nie można pobrać zmiennej HOME.")
+        $ exit 1 $ failed {}
+    }
+
+    let rc_files = [
+    "{home_dir}/.zshrc",
+    "{home_dir}/.bashrc",
+    "{home_dir}/.zshenv",
+    "{home_dir}/.bash_profile"
+    ]
+
+    // [ZMIANA] Dodano \ przed $ aby Amber nie szukał domknięcia polecenia wewnątrz stringa
+    let target_str = "eval \"\$(/opt/homebrew/bin/brew shellenv)\""
+    let marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
+    let marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
+    let full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
+
+    for rc in rc_files {
+        if not file_exists(rc) {
+            file_write(rc, "") failed {
+                log_error(config, "Nie można utworzyć pliku: {rc}")
+                continue
+            }
+        }
+
+        let content = file_read(rc) failed { "" }
+
+        if text_contains(content, marker_start) {
+            log_step(config, "Wpis z markerami już istnieje w: {rc}")
+            continue
+        }
+
+        if text_contains(content, target_str) {
+            log_warn(config, "Znaleziono stary wpis w: {rc}")
+            echo("  Czy chcesz zaktualizować ten plik? [y/N]: ")
+
+            let ans_raw = $ read -r r < /dev/tty && echo "\$r" $ failed { "n" }
+            let ans = trim(ans_raw)
+
+            if ans == "y" {
+                let content_lines = split(content, "\n")
+                let new_content = ""
+                for line in content_lines {
+                    let is_old = text_contains(line, "brew shellenv")
+                    if not is_old {
+                        new_content = "{new_content}{line}\n"
+                    }
+                }
+                file_write(rc, new_content) failed { log_error(config, "Błąd zapisu: {rc}") }
+                file_append(rc, full_block) failed { log_error(config, "Błąd dopisywania: {rc}") }
+                log_success(config, "Zaktualizowano: {rc}")
+            }
+
+            if ans != "y" {
+                log_step(config, "Pominięto: {rc}")
+            }
+            continue
+        }
+
+        file_append(rc, full_block) failed {
+            log_error(config, "Nie udało się zapisać do: {rc}")
+        }
+        log_success(config, "Dodano ścieżki Brew do: {rc}")
+    }
+
+    let edu_msg = "Skrypt daje aplikacjom GUI dostęp do Homebrew.\n"
+    let edu_fix = "│ Rozwiązuje to błąd PATH we wtyczce Amber."
+    log_edu(config, "Kontekst JetBrains", "{edu_msg}{edu_fix}")
 }

@@ -30,18 +30,18 @@ fun write_to_disk(config: [Text], level: Text, message: Text) {
     const home = get_home(config)
     const log_dir = "{home}/logs"
 
-    // Usunięcie 'failed {}' usuwa ostrzeżenie 'Empty failed block'
-    trust $mkdir -p "{log_dir}/plain" "{log_dir}/json"$
+    $ mkdir -p "{log_dir}/plain" "{log_dir}/json" $ failed {}
 
-    const timestamp = trust $date +%Y-%m-%dT%H:%M:%S$ failed {
+    const timestamp = $ date +%Y-%m-%dT%H:%M:%S $ failed {
         return ""
     }
 
     const plain_line = "[{timestamp}] [{level}] {message}"
-    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}"
+    // [ZMIANA] Usunięto \ przed ostatnią klamrą }
+    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"}"
 
-    trust $echo "{plain_line}" >> "{log_dir}/plain/ambero.log"$
-    trust $echo "{json_line}" >> "{log_dir}/json/ambero.jsonl"$
+    $ echo "{plain_line}" >> "{log_dir}/plain/ambero.log" $ failed {}
+    $ echo "{json_line}" >> "{log_dir}/json/ambero.jsonl" $ failed {}
 }
 
 fun get_verbosity_weight(level: Text): Int {
