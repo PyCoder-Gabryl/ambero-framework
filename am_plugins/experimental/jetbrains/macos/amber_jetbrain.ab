@@ -12,7 +12,7 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.17
+// VERSION:         0.1.18
 // CREATED:         2026-07-19
 // ============================================================================
 
@@ -27,21 +27,15 @@ import { env_var_get } from "std/env"
 import { text_contains, trim, split } from "std/text"
 
 main {
-    const ambero_home = env_var_get("AMBERO_HOME") failed (e) {
-        const _ = e
-        return "."
-    }
+    const ambero_home = env_var_get("AMBERO_HOME") failed (e) { "." }
     const config = load_config("{ambero_home}/config/config.toml")
 
     log_header(config, "NAPRAWA ŚCIEŻEK JETBRAINS (EKSPERYMENTALNE)")
 
-    const home_dir = env_var_get("HOME") failed (e) {
-        const _ = e
-        return ""
-    }
+    const home_dir = env_var_get("HOME") failed (e) { "" }
     if home_dir == "" {
         log_error(config, "Nie można pobrać zmiennej HOME.")
-        $ exit 1 $ failed (err) { const _ = err }
+        $ exit 1 $ failed (e) { let _ = e }
     }
 
     const rc_files = [
@@ -51,18 +45,15 @@ main {
     "{home_dir}/.bash_profile"
     ]
 
-    const dollar = "\u0024"
-    const target_str = "eval \"{dollar}(/opt/homebrew/bin/brew shellenv)\""
+    // Używamy Unicode \u0024 dla $, aby uniknąć błędu Unclosed string literal
+    const target_str = "eval \"\u0024(/opt/homebrew/bin/brew shellenv)\""
     const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
     const marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
     const full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
 
     for rc in rc_files {
         if not file_exists(rc) { continue }
-        const content = file_read(rc) failed (e) {
-            const _ = e
-            return ""
-        }
+        const content = file_read(rc) failed (e) { "" }
 
         let should_update = false
 
@@ -74,7 +65,7 @@ main {
         if not text_contains(content, marker_start) {
             if text_contains(content, target_str) {
                 log_warn(config, "Znaleziono stary wpis w: {rc}")
-                echo("   Czy chcesz go zmigrować do Ambero? [y/N]: ")
+                echo("   Czy chcesz go zmigrować? [y/N]: ")
                 should_update = true
             }
             if not text_contains(content, target_str) {
@@ -84,43 +75,34 @@ main {
         }
 
         if should_update {
-            const ans_raw = $ read -r r < /dev/tty && echo "$r" $ failed (e) {
-            const _ = e
-            return "n"
-        }
-        const ans = trim(ans_raw)
+            const ans_raw = $ read -r r < /dev/tty && echo "\$r" $ failed (e) { "n" }
+            const ans = trim(ans_raw)
 
-        if ans == "y" {
-            const content_lines = split(content, "\n")
-            let new_content = ""
-            let skip = false
+            if ans == "y" {
+                const content_lines = split(content, "\n")
+                let new_content = ""
+                let skip = false
 
-            for line in content_lines {
-                if text_contains(line, marker_start) { skip = true }
-                if not skip {
-                    if not text_contains(line, "brew shellenv") {
-                        new_content = "{new_content}{line}\n"
+                for line in content_lines {
+                    if text_contains(line, marker_start) { skip = true }
+                    if not skip {
+                        if not text_contains(line, "brew shellenv") {
+                            new_content = "{new_content}{line}\n"
+                        }
                     }
+                    if text_contains(line, marker_end) { skip = false }
                 }
-                if text_contains(line, marker_end) { skip = false }
-            }
 
-            file_write(rc, new_content) failed (e) {
-                const _ = e
-                log_error(config, "Błąd zapisu")
+                file_write(rc, new_content) failed (e) { log_error(config, "Błąd zapisu") }
+                file_append(rc, full_block) failed (e) { log_error(config, "Błąd dopisywania") }
+                log_success(config, "Zaktualizowano: {rc}")
+                continue
             }
-            file_append(rc, full_block) failed (e) {
-                const _ = e
-                log_error(config, "Błąd dopisywania")
-            }
-            log_success(config, "Zaktualizowano pomyślnie: {rc}")
-            continue
+            log_step(config, "Pominięto: {rc}")
         }
-        log_step(config, "Pominięto plik: {rc}")
     }
-}
 
-const edu_msg = "Skrypt daje aplikacjom GUI dostęp do Homebrew.\n"
-const edu_fix = "│ Rozwiązuje to błąd PATH we wtyczce Amber."
-log_edu(config, "Kontekst JetBrains", "{edu_msg}{edu_fix}")
+    const edu_msg = "Skrypt daje aplikacjom GUI dostęp do Homebrew.\n"
+    const edu_fix = "│ Rozwiązuje to błąd PATH we wtyczce Amber."
+    log_edu(config, "Kontekst JetBrains", "{edu_msg}{edu_fix}")
 }

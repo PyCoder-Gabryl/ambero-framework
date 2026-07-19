@@ -14,51 +14,44 @@
 //                   zgodnie z ustawieniami w config.toml.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/logger.ab
-// VERSION:         0.1.12
+// VERSION:         0.1.14
 // CREATED:         2026-07-17
 // ============================================================================
 
 
-import { get_home, get_verbosity } from "config_parser.ab" // [ZMIANA] Krótki import
+// DESCRIPTION:      Zaawansowany moduł logowania obsługujący poziomy
+//                   gadatliwości (verbosity). Zapisuje logi do plików
+//                   plain i json oraz wyświetla komunikaty w terminalu.
+
+import { get_home, get_verbosity } from "config_parser.ab"
 import {
 clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
 ico_ok, ico_info, ico_warn, ico_error
-} from "ui.ab" // [ZMIANA] Krótki import
+} from "ui.ab"
 import { file_append, dir_exists } from "std/fs"
 
-// Pomocnik zapisu: const _ = e ucisza ostrzeżenia o nieużywanym błędzie
 fun write_to_disk(config: [Text], level: Text, message: Text) {
     const home = get_home(config)
     const log_dir = "{home}/logs"
-
     const lb = "\u007b"
     const rb = "\u007d"
 
     if not dir_exists("{log_dir}/plain") {
-        $ mkdir -p "{log_dir}/plain" $ failed (e) {
-            const _ = e
-        }
+        $ mkdir -p "{log_dir}/plain" $ failed (e) { echo("") }
     }
     if not dir_exists("{log_dir}/json") {
-        $ mkdir -p "{log_dir}/json" $ failed (e) {
-            const _ = e
-        }
+        $ mkdir -p "{log_dir}/json" $ failed (e) { echo("") }
     }
 
     const timestamp = $ date +%Y-%m-%dT%H:%M:%S $ failed (e) {
-        const _ = e
-        return ""
+        return "0000-00-00"
     }
 
     const plain_line = "[{timestamp}] [{level}] {message}\n"
     const json_line = "{lb}\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"{rb}\n"
 
-    file_append("{log_dir}/plain/ambero.log", plain_line) failed (e) {
-        const _ = e
-    }
-    file_append("{log_dir}/json/ambero.jsonl", json_line) failed (e) {
-        const _ = e
-    }
+    file_append("{log_dir}/plain/ambero.log", plain_line) failed (e) { echo("") }
+    file_append("{log_dir}/json/ambero.jsonl", json_line) failed (e) { echo("") }
 }
 
 fun get_verbosity_weight(level: Text): Int {

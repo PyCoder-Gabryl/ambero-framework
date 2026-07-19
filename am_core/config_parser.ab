@@ -12,101 +12,79 @@
 //                   tablicy indeksowanej. Współpracuje z am_core/defaults.ab.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/config_parser.ab
-// VERSION:         0.1.27
+// VERSION:         0.1.28
 // CREATED:         2026-07-16
 // ============================================================================
 
 
-import { file_read } from "std/fs"
-import { get_default_config } from "./defaults.ab"
+// DESCRIPTION:      Rozbudowany moduł parsujący konfigurację TOML.
+//                   Implementuje strukturę AmberoConfig na bazie bezpiecznej
+//                   tablicy indeksowanej. Współpracuje z am_core/defaults.ab.
 
-// Konfiguracja jako tablica tekstowa [Text]. Ustalona kolejność elementów:
+import { file_read } from "std/fs"
+import { get_default_config } from "defaults.ab"
+
 // Indeksy: 0=home, 1=os, 2=ui_mode, 3=language, 4=shell, 5=verbosity
 
 pub fun get_home(c: [Text]): Text {
-    const i = 0
-    return c[i]
+    return c[0]
 }
 
 pub fun get_os(c: [Text]): Text {
-    const i = 1
-    return c[i]
+    return c[1]
 }
 
 pub fun get_ui_mode(c: [Text]): Text {
-    const i = 2
-    return c[i]
+    return c[2]
 }
 
 pub fun get_language(c: [Text]): Text {
-    const i = 3
-    return c[i]
+    return c[3]
 }
 
 pub fun get_shell(c: [Text]): Text {
-    const i = 4
-    return c[i]
+    return c[4]
 }
 
 pub fun get_verbosity(c: [Text]): Text {
-    const i = 5
-    return c[i]
+    return c[5]
 }
 
-// Pomocnik TOML: Stabilne pobieranie wartości z pliku przy użyciu powłoki systemowej.
+// Pomocnik TOML: Stabilne pobieranie wartości przy użyciu powłoki systemowej.
 fun get_toml_value(path: Text, target_key: Text): Text {
-    const value = trust $sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n'$ failed {
+    let value = $ sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n' $ failed (e) {
         return ""
     }
     return value
 }
 
-// Główna funkcja ładująca konfigurację frameworku z obsługą trybu przedinstalacyjnego
 pub fun load_config(path: Text): [Text] {
-    let file_exists = true
-
-    // Pobieramy paczkę z domyślnymi wartościami z pliku am_core/defaults.ab
+    let file_exists_status = true
     const defaults = get_default_config()
 
-    // Zamiana 'raw_content' na '_' wymazuje ostatnie ostrzeżenie o nieużywanej zmiennej
-    const _ = file_read(path) failed {
-        file_exists = false
+    // Sprawdzamy czy plik istnieje poprzez próbę odczytu
+    let _ = file_read(path) failed (e) {
+        file_exists_status = false
     }
 
-    // Jeśli pliku nie ma, natychmiast zwracamy centralną konfigurację domyślną
-    if not file_exists {
+    if not file_exists_status {
         return defaults
     }
 
-    // Jeśli plik istnieje, parsujemy jego klucze
-    let home_val = get_toml_value(path, "home")
-    let os_val = get_toml_value(path, "os")
+    let home_val = get_toml_value(path, "ambero_home")
+    let os_val = get_toml_value(path, "os_type")
     let ui_val = get_toml_value(path, "ui_mode")
     let lang_val = get_toml_value(path, "language")
-    let shell_val = get_toml_value(path, "shell")
+    let shell_val = get_toml_value(path, "default_shell")
     let verb_val = get_toml_value(path, "verbosity")
 
-    // Dynamiczny fallback linia po linii - jeśli dany klucz w TOML jest pusty,
-    // wyciągamy odpowiadający mu bezpieczny indeks z tablicy defaults
-    if home_val == "" {
-        home_val = defaults[0]
-    }
-    if os_val == "" {
-        os_val = defaults[1]
-    }
-    if ui_val == "" {
-        ui_val = defaults[2]
-    }
-    if lang_val == "" {
-        lang_val = defaults[3]
-    }
-    if shell_val == "" {
-        shell_val = defaults[4]
-    }
-    if verb_val == "" {
-        verb_val = defaults[5]
-    }
+    // Fallback do wartości domyślnych (składnia ternary: condition then a else b)
+    let f_home = home_val == "" then defaults[0] else home_val
+    let f_os = os_val == "" then defaults[1] else os_val
+    let f_ui = ui_val == "" then defaults[2] else ui_val
+    let f_lang = lang_val == "" then defaults[3] else lang_val
+    let f_shell = shell_val == "" then defaults[4] else shell_val
+    let f_verb = verb_val == "" then defaults[5] else verb_val
 
-    // Zwracamy uzupełnioną strukturę
-    return [home_val, os_val, ui_val, lang_val, shell_val, verb_val]
+    return [f_home, f_os, f_ui, f_lang, f_shell, f_verb]
 }
