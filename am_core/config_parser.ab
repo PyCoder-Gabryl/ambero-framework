@@ -52,18 +52,20 @@ pub fun get_verbosity(c: [Text]): Text {
 
 // Pomocnik TOML: Stabilne pobieranie wartości przy użyciu powłoki systemowej.
 fun get_toml_value(path: Text, target_key: Text): Text {
-    let value = $ sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n' $ failed (e) {
+    const value = $ sed -n "s/^{target_key}[[:space:]]*=[[:space:]]*\"\(.*\)\"/\1/p" "{path}" | tr -d '\n' $ failed (e) {
+        const _ = e
         return ""
     }
     return value
 }
 
 pub fun load_config(path: Text): [Text] {
-    let file_exists_status = true
+    mut file_exists_status = true
     const defaults = get_default_config()
 
     // Sprawdzamy czy plik istnieje poprzez próbę odczytu
-    let _ = file_read(path) failed (e) {
+    const _ = file_read(path) failed (e) {
+        vonst _ = e
         file_exists_status = false
     }
 
@@ -71,20 +73,20 @@ pub fun load_config(path: Text): [Text] {
         return defaults
     }
 
-    let home_val = get_toml_value(path, "ambero_home")
-    let os_val = get_toml_value(path, "os_type")
-    let ui_val = get_toml_value(path, "ui_mode")
-    let lang_val = get_toml_value(path, "language")
-    let shell_val = get_toml_value(path, "default_shell")
-    let verb_val = get_toml_value(path, "verbosity")
+    const home_val = get_toml_value(path, "ambero_home")
+    const os_val = get_toml_value(path, "os_type")
+    const ui_val = get_toml_value(path, "ui_mode")
+    const lang_val = get_toml_value(path, "language")
+    const shell_val = get_toml_value(path, "default_shell")
+    const verb_val = get_toml_value(path, "verbosity")
 
     // Fallback do wartości domyślnych (składnia ternary: condition then a else b)
-    let f_home = home_val == "" then defaults[0] else home_val
-    let f_os = os_val == "" then defaults[1] else os_val
-    let f_ui = ui_val == "" then defaults[2] else ui_val
-    let f_lang = lang_val == "" then defaults[3] else lang_val
-    let f_shell = shell_val == "" then defaults[4] else shell_val
-    let f_verb = verb_val == "" then defaults[5] else verb_val
+    const f_home = home_val == "" then defaults[0] else home_val
+    const f_os = os_val == "" then defaults[1] else os_val
+    const f_ui = ui_val == "" then defaults[2] else ui_val
+    const f_lang = lang_val == "" then defaults[3] else lang_val
+    const f_shell = shell_val == "" then defaults[4] else shell_val
+    const f_verb = verb_val == "" then defaults[5] else verb_val
 
     return [f_home, f_os, f_ui, f_lang, f_shell, f_verb]
 }

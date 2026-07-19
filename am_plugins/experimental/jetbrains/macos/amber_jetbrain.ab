@@ -12,7 +12,7 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.18
+// VERSION:         0.1.15
 // CREATED:         2026-07-19
 // ============================================================================
 
@@ -35,7 +35,7 @@ main {
     const home_dir = env_var_get("HOME") failed (e) { "" }
     if home_dir == "" {
         log_error(config, "Nie można pobrać zmiennej HOME.")
-        $ exit 1 $ failed (e) { let _ = e }
+        $ exit 1 $ failed (e) { const _ = e }
     }
 
     const rc_files = [
