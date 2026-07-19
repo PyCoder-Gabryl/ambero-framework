@@ -12,15 +12,19 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.15
+// VERSION:         0.1.16
 // CREATED:         2026-07-19
 // ============================================================================
 
 
 import { load_config, get_home } from "am_core/config_parser.ab"
 import {
-log_header, log_success, log_step,
-log_warn, log_error, log_edu
+log_header,
+log_success,
+log_step,
+log_warn,
+log_error,
+log_edu
 } from "am_core/logger.ab"
 import { file_read, file_write, file_append, file_exists } from "std/fs"
 import { env_var_get } from "std/env"
@@ -28,7 +32,7 @@ import { text_contains, trim, split } from "std/text"
 
 main {
     const ambero_home = env_var_get("AMBERO_HOME") failed (e) {
-        const _ = e // [ZMIANA]
+        const _ = e
         return "."
     }
     const config = load_config("{ambero_home}/config/config.toml")
@@ -36,13 +40,14 @@ main {
     log_header(config, "NAPRAWA ŚCIEŻEK JETBRAINS (EKSPERYMENTALNE)")
 
     const home_dir = env_var_get("HOME") failed (e) {
-        const _ = e // [ZMIANA]
+        const _ = e
         return ""
     }
+
     if home_dir == "" {
         log_error(config, "Nie można pobrać zmiennej HOME.")
-        $ exit 1 $ failed (e) {
-            const _ = e // [ZMIANA]
+        $ exit 1 $ failed (err) {
+            const _ = err
         }
     }
 
@@ -53,20 +58,26 @@ main {
     "{home_dir}/.bash_profile"
     ]
 
+    // Definicje bezpiecznych znaków Unicode, aby uniknąć błędów parsera
     const dollar = "\u0024"
-    const target_str = "eval \"{dollar}(/opt/homebrew/bin/brew shellenv)\""
+    const quote = "\u0022"
+
+    // Budujemy target_str bez użycia problematycznych ucieczek \" czy \$
+    const target_str = "eval {quote}{dollar}(/opt/homebrew/bin/brew shellenv){quote}"
+
     const marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
-    const marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
-    const full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
+    const marker_end   = "# <<< AMBERO JETBRAINS FIX <<<"
+    const full_block   = "\n{marker_start}\n{target_str}\n{marker_end}\n"
 
     for rc in rc_files {
         if not file_exists(rc) { continue }
+
         const content = file_read(rc) failed (e) {
-            const _ = e // [ZMIANA]
+            const _ = e
             return ""
         }
 
-        let should_update = false
+        mut should_update = false
 
         if text_contains(content, marker_start) {
             echo("❓ Wpis Ambero już istnieje w: {rc}")
@@ -74,36 +85,49 @@ main {
             should_update = true
         }
 
-        // ... (logika sprawdzania has_old bez zmian, ale używamy 'let should_update')
+        if not text_contains(content, marker_start) {
+            if text_contains(content, target_str) {
+                log_warn(config, "Znaleziono stary wpis w: {rc}")
+                echo("   Czy chcesz go zmigrować do Ambero? [y/N]: ")
+                should_update = true
+            }
+            if not text_contains(content, target_str) {
+                echo("❓ Brak wpisu w: {rc}. Czy dodać? [y/N]: ")
+                should_update = true
+            }
+        }
 
         if should_update {
-            const ans_raw = $ read -r r < /dev/tty && echo "$r" $ failed (e) {
-                const _ = e // [ZMIANA]
+            // Używamy \$r zamiast "$r", aby nie zamykać przedwcześnie stringa Ambera
+            const ans_raw = $ read -r r < /dev/tty && echo \$r $ failed (e) {
+                const _ = e
                 return "n"
             }
             const ans = trim(ans_raw)
 
             if ans == "y" {
                 const content_lines = split(content, "\n")
-                let new_content = ""
-                let skip = false
+                mut new_content = ""
+                mut skip = false
 
                 for line in content_lines {
                     if text_contains(line, marker_start) { skip = true }
+
                     if not skip {
                         if not text_contains(line, "brew shellenv") {
                             new_content = "{new_content}{line}\n"
                         }
                     }
+
                     if text_contains(line, marker_end) { skip = false }
                 }
 
                 file_write(rc, new_content) failed (e) {
-                    const _ = e // [ZMIANA]
+                    const _ = e
                     log_error(config, "Błąd zapisu")
                 }
                 file_append(rc, full_block) failed (e) {
-                    const _ = e // [ZMIANA]
+                    const _ = e
                     log_error(config, "Błąd dopisywania")
                 }
                 log_success(config, "Zaktualizowano pomyślnie: {rc}")
