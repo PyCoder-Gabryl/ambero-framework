@@ -12,22 +12,26 @@
 //                  Amberem, daje JetBrains dostęp do wszystkich narzędzi Brew.
 // ----------------------------------------------------------------------------
 // PATH:            am_plugins/experimental/macos/amber_jetbrain.ab
-// VERSION:         0.1.0
+// VERSION:         0.1.4
 // CREATED:         2026-07-19
 // ============================================================================
 
 
-import { load_config } from "am_core/config_parser.ab"
+import { load_config, AmberoConfig, get_home } from "am_core/config_parser.ab"
 import {
-log_header, log_success, log_step,
-log_warn, log_error, log_edu
+log_header,
+log_success,
+log_step,
+log_warn,
+log_error,
+log_edu
 } from "am_core/logger.ab"
-import { file_read, file_append } from "std/fs"
+import { file_read, file_write, file_append, file_exists } from "std/fs"
 import { env_var_get } from "std/env"
-import { text_contains, trim } from "std/text"
+import { text_contains, trim, split } from "std/text"
 
 main {
-// 1. Inicjalizacja konfiguracji przy użyciu zintegrowanego symlinka am_core
+// 1. Inicjalizacja środowiska
 let ambero_home = env_var_get("AMBERO_HOME") failed { "." }
 let config = load_config("{ambero_home}/config/config.toml")
 
@@ -35,11 +39,10 @@ log_header(config, "JETBRAINS HOMEBREW PATH FIX (EXPERIMENTAL)")
 
 let home_dir = env_var_get("HOME") failed { "" }
 if home_dir == "" {
-log_error(config, "Nie można pobrać zmiennej środowiskowej HOME.")
-trust $exit 1$
+log_error(config, "Nie można pobrać zmiennej HOME.")
+$ exit 1 $ failed {}
 }
 
-// Tablica plików konfiguracyjnych powłoki do sprawdzenia
 let rc_files = [
 "{home_dir}/.zshrc",
 "{home_dir}/.bashrc",
@@ -49,55 +52,65 @@ let rc_files = [
 
 let target_str = "eval \"$(/opt/homebrew/bin/brew shellenv)\""
 let marker_start = "# >>> AMBERO JETBRAINS FIX >>>"
-let marker_end   = "# <<< AMBERO JETBRAINS FIX <<<"
-let full_block   = "\n{marker_start}\n{target_str}\n{marker_end}\n"
+let marker_end = "# <<< AMBERO JETBRAINS FIX <<<"
+let full_block = "\n{marker_start}\n{target_str}\n{marker_end}\n"
 
 for rc in rc_files {
-// Tworzymy pusty plik, jeśli nie istnieje, aby uniknąć błędów odczytu
-trust $ touch "{rc}" $
+// Zapewnienie istnienia pliku bez użycia trust
+if not file_exists(rc) {
+file_write(rc, "") failed {
+log_error(config, "Nie można utworzyć pliku: {rc}")
+continue
+}
+}
 
 let content = file_read(rc) failed { "" }
 
-if text_contains(content, marker_start) {
-log_step(config, "Wpis z bezpiecznymi markerami już istnieje w: {rc}")
-} else {
-// Weryfikacja obecności starego wpisu (bez markerów)
-if text_contains(content, target_str) {
-log_warn(config, "Znaleziono stary wpis (bez markerów) w: {rc}")
+// Sprawdzenie czy wpis już istnieje
+let has_marker = text_contains(content, marker_start)
+if has_marker {
+log_step(config, "Wpis już istnieje w: {rc}")
+continue
+}
 
-echo("  Czy chcesz zaktualizować ten plik? (Zalecane) [y/N]: ")
-// Odczyt z /dev/tty omija problemy z przechwytywaniem strumienia
-let ans_raw = trust $ read -r r < /dev/tty; echo $r $
-                let ans = trim(ans_raw)
+// Sprawdzenie starego wpisu
+let has_old = text_contains(content, target_str)
+if has_old {
+log_warn(config, "Znaleziono stary wpis w: {rc}")
+echo("  Czy chcesz zaktualizować ten plik? [y/N]: ")
 
-                if ans == "y" {
-                    // Usuwamy starą linię przez bash
-                    trust $
-tmp=$(mktemp)
-                        grep -v '/opt/homebrew/bin/brew shellenv' "{rc}" > "$tmp"
-mv "$tmp" "{rc}"
-$
+// Bezpieczny odczyt bez trust
+let ans_raw = $ read -r r < /dev/tty && echo "$r" $ failed { "n" }
+let ans = trim(ans_raw)
 
-// Dodajemy nowy, otagowany blok na końcu pliku
+if ans == "y" {
+let lines = split(content, "\n")
+let new_content = ""
+for line in lines {
+let is_old = text_contains(line, "brew shellenv")
+if not is_old {
+new_content = "{new_content}{line}\n"
+}
+}
+file_write(rc, new_content) failed { log_error(config, "Błąd zapisu: {rc}") }
+file_append(rc, full_block) failed { log_error(config, "Błąd dopisywania: {rc}") }
+log_success(config, "Zaktualizowano: {rc}")
+}
+
+if ans != "y" {
+log_step(config, "Pominięto: {rc}")
+}
+continue
+}
+
+// Dodanie nowego wpisu
 file_append(rc, full_block) failed {
-log_error(config, "Nie udało się zapisać zmian do: {rc}")
+log_error(config, "Nie udało się zapisać do: {rc}")
 }
-log_success(config, "Zaktualizowano plik: {rc}")
-} else {
-log_step(config, "Pominięto aktualizację dla: {rc}")
-}
-} else {
-// Całkowity brak wpisu - dodajemy nowy
-file_append(rc, full_block) failed {
-log_error(config, "Nie udało się zapisać zmian do: {rc}")
-}
-log_success(config, "Dodano bezpieczne ścieżki Brew do: {rc}")
-}
-}
+log_success(config, "Dodano ścieżki Brew do: {rc}")
 }
 
-log_edu(config,
-"Kontekst JetBrains i Homebrew",
-"Ten skrypt eksponuje dostęp do Homebrew dla aplikacji graficznych (GUI).\n│ Rozwiązuje to błąd wtyczki Amber, dając też dostęp do m.in. Node czy Go."
-)
+let edu_msg = "Skrypt daje aplikacjom GUI dostęp do Homebrew.\n"
+let edu_fix = "│ Naprawia to błąd PATH we wtyczce Amber."
+log_edu(config, "Kontekst JetBrains", "{edu_msg}{edu_fix}")
 }
