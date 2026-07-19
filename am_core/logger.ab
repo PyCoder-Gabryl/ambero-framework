@@ -14,7 +14,7 @@
 //                   zgodnie z ustawieniami w config.toml.
 // ----------------------------------------------------------------------------
 // PATH:            am_core/logger.ab
-// VERSION:         0.1.9
+// VERSION:         0.1.10
 // CREATED:         2026-07-17
 // ============================================================================
 
@@ -24,53 +24,45 @@ import {
 clr_reset, clr_bold, clr_amber, clr_green, clr_red, clr_blue, clr_cyan,
 ico_ok, ico_info, ico_warn, ico_error
 } from "./ui.ab"
+import { file_append, dir_exists } from "std/fs"
 
-// Pomocnik zapisu: Wypełnione bloki failed uciszają ostrzeżenia kompilatora
+// Pomocnik zapisu: const _ = 0 ucisza ostrzeżenia o nieużywanych i niemutowalnych zmiennych
 fun write_to_disk(config: [Text], level: Text, message: Text) {
     const home = get_home(config)
     const log_dir = "{home}/logs"
 
-    // Używamy zmiennej pomocniczej, aby blok failed nie był pusty
-    $ mkdir -p "{log_dir}/plain" "{log_dir}/json" $ failed {
-        let _ = 0
+    // Tworzenie katalogów - blok failed nie może być pusty
+    if not dir_exists("{log_dir}/plain") {
+        $ mkdir -p "{log_dir}/plain" $ failed { const _ = 0 }
+    }
+    if not dir_exists("{log_dir}/json") {
+        $ mkdir -p "{log_dir}/json" $ failed { const _ = 0 }
     }
 
     const timestamp = $ date +%Y-%m-%dT%H:%M:%S $ failed {
         return ""
     }
 
-    const plain_line = "[{timestamp}] [{level}] {message}"
-    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}"
+    const plain_line = "[{timestamp}] [{level}] {message}\n"
+    const json_line = "\{\"timestamp\": \"{timestamp}\", \"level\": \"{level}\", \"message\": \"{message}\"\}\n"
 
-    $ echo "{plain_line}" >> "{log_dir}/plain/ambero.log" $ failed {
-        let _ = 0
-    }
-    $ echo "{json_line}" >> "{log_dir}/json/ambero.jsonl" $ failed {
-        let _ = 0
-    }
+    // Zapis do plików - używamy file_append z std/fs dla większej stabilności
+    file_append("{log_dir}/plain/ambero.log", plain_line) failed { const _ = 0 }
+    file_append("{log_dir}/json/ambero.jsonl", json_line) failed { const _ = 0 }
 }
 
 fun get_verbosity_weight(level: Text): Int {
-    let weight = 2
-    if level == "quiet" {
-        weight = 0
-    }
-    if level == "minimal" {
-        weight = 1
-    }
-    if level == "normal" {
-        weight = 2
-    }
-    if level == "edu" {
-        weight = 3
-    }
-    return weight
+    if level == "quiet" { return 0 }
+    if level == "minimal" { return 1 }
+    if level == "normal" { return 2 }
+    if level == "edu" { return 3 }
+    return 2
 }
 
 pub fun log_success(config: [Text], message: Text) {
     write_to_disk(config, "SUCCESS", message)
     const v = get_verbosity(config)
-    if get_verbosity_weight(v) >= 1 {
+    if (get_verbosity_weight(v)) >= 1 {
         echo("{clr_green}{ico_ok} {message}{clr_reset}")
     }
 }
@@ -78,7 +70,7 @@ pub fun log_success(config: [Text], message: Text) {
 pub fun log_step(config: [Text], message: Text) {
     write_to_disk(config, "STEP", message)
     const v = get_verbosity(config)
-    if get_verbosity_weight(v) >= 2 {
+    if (get_verbosity_weight(v)) >= 2 {
         echo("{clr_blue}  ➜ {message}{clr_reset}")
     }
 }
@@ -86,7 +78,7 @@ pub fun log_step(config: [Text], message: Text) {
 pub fun log_error(config: [Text], message: Text) {
     write_to_disk(config, "ERROR", message)
     const v = get_verbosity(config)
-    if get_verbosity_weight(v) >= 0 {
+    if (get_verbosity_weight(v)) >= 0 {
         echo("{clr_red}{clr_bold}{ico_error} BŁĄD: {message}{clr_reset}")
     }
 }
@@ -94,7 +86,7 @@ pub fun log_error(config: [Text], message: Text) {
 pub fun log_warn(config: [Text], message: Text) {
     write_to_disk(config, "WARN", message)
     const v = get_verbosity(config)
-    if get_verbosity_weight(v) >= 1 {
+    if (get_verbosity_weight(v)) >= 1 {
         echo("{clr_amber}{ico_warn} OSTRZEŻENIE: {message}{clr_reset}")
     }
 }
@@ -102,7 +94,7 @@ pub fun log_warn(config: [Text], message: Text) {
 pub fun log_edu(config: [Text], title: Text, content: Text) {
     write_to_disk(config, "EDU", "{title}: {content}")
     const v = get_verbosity(config)
-    if get_verbosity_weight(v) >= 3 {
+    if (get_verbosity_weight(v)) >= 3 {
         echo("")
         echo("{clr_cyan}{clr_bold}🎓 EDUKACJA: {title}{clr_reset}")
         echo("{clr_cyan}│ {content}{clr_reset}")
@@ -112,7 +104,6 @@ pub fun log_edu(config: [Text], title: Text, content: Text) {
 
 pub fun log_header(config: [Text], title: Text) {
     const v = get_verbosity(config)
-    if get_verbosity_weight(v) >= 1 {
+    if (get_verbosity_weight(v)) >= 1 {
         echo("{clr_amber}{clr_bold}=== {title} ==={clr_reset}")
     }
-}
