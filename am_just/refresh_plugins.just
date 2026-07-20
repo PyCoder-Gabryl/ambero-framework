@@ -1,103 +1,134 @@
 # ============================================================================
 # PROJECT:         Ambero Framework CLI
 # AUTHOR:          PyCoder Gabryl
-# GITHUB:          https://github.com/PyCoder-Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl/
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Automatyczny skaner i rejestrator wtyczek (plugins).
 #                   Przeszukuje katalog am_plugins, generuje zadania Just
 #                   i zarządza symlinkami rdzenia dla izolacji wtyczek.
-#                   Obsługuje głębokie skanowanie podkatalogów dostawców.
 # ----------------------------------------------------------------------------
-# PATH:            just_lib/refresh_plugins.just
-# VERSION:         0.1.2
+# PATH:            am_just/refresh_plugins.just
+# VERSION:         0.2.0
 # CREATED:         2026-07-19
 # ============================================================================
 
 # Automatycznie skanuje am_plugins i rejestruje dynamicznie wykryte pliki .ab
+[no-cd]
 refresh-plugins:
-    @echo "🔌 Odświeżanie i rejestracja wtyczek w systemie Ambero..."
-    @bash -c ' \
-    shopt -s nullglob; \
-    OUT="{{AMBERO_DIR}}/am_plugins/plugins.just"; \
-    OLD_TARGETS=$(grep -E "^[a-zA-Z0-9_-]+:" "$OUT" 2>/dev/null | cut -d: -f1 | tr "\n" " "); \
-    \
-    echo "# ============================================================================" > "$OUT"; \
-    echo "# PROJECT:         Ambero Framework CLI" >> "$OUT"; \
-    echo "# DESCRIPTION:     Automatycznie wygenerowany rejestr wtyczek." >> "$OUT"; \
-    echo "#                  UWAGA: Ten plik jest generowany automatycznie." >> "$OUT"; \
-    echo "#                  Ręczne zmiany zostaną nadpisane przy odświeżeniu!" >> "$OUT"; \
-    echo "# ----------------------------------------------------------------------------" >> "$OUT"; \
-    echo "# PATH:            am_plugins/plugins.just" >> "$OUT"; \
-    echo "# ============================================================================" >> "$OUT"; \
-    echo "" >> "$OUT"; \
-    \
-    P_CNT=0; T_COUNT=0; \
-    for t in official experimental user; do \
-        DIR="{{AMBERO_DIR}}/am_plugins/$t"; \
-        printf "\n{{clr_b_purple}}📂 [FOLDER TYPU]: am_plugins/%s{{style_reset}}\n" "$t"; \
-        if [ ! -d "$DIR" ]; then \
-            printf "  ⚠️  Katalog nie istnieje: %s\n" "$DIR"; \
-            continue; \
-        fi; \
-        V_LIST=("$DIR"/*); \
-        if [ ${#V_LIST[@]} -eq 0 ]; then \
-            printf "  {{clr_yellow}}📂 (Katalog typów jest pusty){{style_reset}}\n"; \
-        fi; \
-        for v in "${V_LIST[@]}"; do \
-            [ ! -d "$v" ] && continue; \
-            v_nm=$(basename "$v"); \
-            printf "  ├── 🏢 [SPRAWDZAM DOSTAWCĘ]: {{clr_b_blue}}%s{{style_reset}}\n" "$v_nm"; \
-            \
-            F_LIST=($(find "$v" -type f -name "*.ab" | sort)); \
-            if [ ${#F_LIST[@]} -eq 0 ]; then \
-                printf "  │            {{clr_yellow}}📂 (Katalog dostawcy jest pusty){{style_reset}}\n"; \
-            fi; \
-            for f in "${F_LIST[@]}"; do \
-                f_nm=$(basename "$f"); \
-                rel_f=$(echo "$f" | sed "s|{{AMBERO_DIR}}/||"); \
-                rel_dir=$(dirname "$rel_f"); \
-                \
-                if ! grep -q "main[[:space:]]*{" "$f"; then \
-                    printf "  │   ├── {{clr_yellow}}ℹ️  [NIE JEST WTYCZKĄ]: %s{{style_reset}}\n" "$f_nm"; \
-                    continue; \
-                fi; \
-                \
-                INFO=$(awk '\''BEGIN{IGNORECASE=1} /HELP-INFO/{sub(/^.*HELP-INFO[[:space:]]*:?[[:space:]]*/, ""); \
-                    print; exit}'\'' "$f" | sed -E "s/^[[:space:]]*//; s/[[:space:]]*$//"); \
-                \
-                raw_base="${f_nm%.ab}"; \
-                [[ "$f_nm" == *_test.ab ]] && raw_base="${f_nm%_test.ab}"; \
-                base=$(echo "$raw_base" | tr "_" "-"); \
-                [[ "$f_nm" == *_test.ab ]] && base="${base}-test"; \
-                \
-                IS_NEW=""; [[ ! " $OLD_TARGETS " =~ " $base " ]] && IS_NEW=" {{clr_b_green}}[NOWA]{{style_reset}}"; \
-                \
-                if [[ "$f_nm" == *_test.ab ]]; then \
-                    [ -z "$INFO" ] && INFO="Test wtyczki: ${f_nm}"; \
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    echo -e "{{clr_info}}🔌 Odświeżanie i rejestracja wtyczek w systemie Ambero...{{style_reset}}"
+
+    # --- KONFIGURACJA ŚCIEŻEK ---
+    AMBERO_DIR="{{AMBERO_DIR}}"
+    OUT_FILE="$AMBERO_DIR/am_plugins/plugins.just"
+    TMP_REG=$(mktemp)
+
+    # Pobieramy listę starych zadań do wykrywania nowości
+    OLD_TARGETS=""
+    test -f "$OUT_FILE" && OLD_TARGETS=$(grep -E "^[a-zA-Z0-9_-]+:" "$OUT_FILE" | cut -d: -f1 | tr "\n" " ")
+
+    # --- GENEROWANIE NAGŁÓWKA REJESTRU ---
+    # [EDU] Plik plugins.just jest generowany automatycznie. Nagłówek zawiera
+    #       ostrzeżenie, aby użytkownik nie edytował go ręcznie.
+    cat <<EOF > "$TMP_REG"
+# ============================================================================
+# PROJECT:         AMBERO FRAMEWORK CLI
+# GENERATED:       $(date "+%Y-%m-%d %H:%M:%S")
+# DESCRIPTION:     Automatycznie wygenerowany rejestr wtyczek.
+# ----------------------------------------------------------------------------
+# !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE - NIE EDYTUJ RĘCZNIE !!!
+# !!! WARNING: AUTOMATICALLY GENERATED FILE - DO NOT EDIT MANUALLY !!!
+# ============================================================================
+
+EOF
+
+    P_CNT=0
+    T_COUNT=0
+
+    # --- PROCES SKANOWANIA ---
+    for type in official experimental user; do
+        TYPE_DIR="$AMBERO_DIR/am_plugins/$type"
+        printf "\n{{clr_b_purple}}📂 [FOLDER TYPU]: am_plugins/%s{{style_reset}}\n" "$type"
+
+        if test ! -d "$TYPE_DIR"; then
+            printf "  {{clr_warn}}⚠️  Katalog nie istnieje: %s{{style_reset}}\n" "$type"
+            continue
+        fi
+
+        # Skanowanie dostawców (np. ambero, jetbrains)
+        for vendor_path in "$TYPE_DIR"/*; do
+            test ! -d "$vendor_path" && continue
+            vendor_name=$(basename "$vendor_path")
+            printf "  ├── 🏢 [SPRAWDZAM DOSTAWCĘ]: {{clr_b_blue}}%s{{style_reset}}\n" "$vendor_name"
+
+            # Głębokie szukanie plików .ab (dowolna głębokość podkatalogów)
+            mapfile -t AB_FILES < <(find "$vendor_path" -type f -name "*.ab" | sort)
+
+            if [ ${#AB_FILES[@]} -eq 0 ]; then
+                printf "  │            {{clr_yellow}}📂 (Katalog dostawcy jest pusty){{style_reset}}\n"
+            fi
+
+            for f_path in "${AB_FILES[@]}"; do
+                f_name=$(basename "$f_path")
+                # Ścieżka relatywna względem AMBERO_DIR dla Justa
+                rel_f_path=${f_path#$AMBERO_DIR/}
+                rel_f_dir=$(dirname "$rel_f_path")
+
+                # Weryfikacja czy plik jest wtyczką (musi mieć main {})
+                if ! grep -q "main[[:space:]]*{" "$f_path"; then
+                    printf "  │   ├── {{clr_yellow}}ℹ️  [NIE JEST WTYCZKĄ]: %s{{style_reset}}\n" "$f_name"
+                    continue
+                fi
+
+                # Ekstrakcja opisu HELP-INFO
+                INFO=$(awk 'BEGIN{IGNORECASE=1} /HELP-INFO/{sub(/^.*HELP-INFO[[:space:]]*:?[[:space:]]*/, ""); \
+                    print; exit}' "$f_path" | sed -E "s/^[[:space:]]*//; s/[[:space:]]*$//")
+
+                # Budowanie nazwy zadania (slug)
+                raw_base="${f_name%.ab}"
+                [[ "$f_name" == *_test.ab ]] && raw_base="${f_name%_test.ab}"
+                target_name=$(echo "$raw_base" | tr "_" "-")
+                [[ "$f_name" == *_test.ab ]] && target_name="${target_name}-test"
+
+                # Wykrywanie nowości
+                IS_NEW=""
+                [[ ! " $OLD_TARGETS " =~ " $target_name " ]] && IS_NEW=" {{clr_b_green}}[NOWA]{{style_reset}}"
+
+                # Raportowanie do terminala
+                if [[ "$f_name" == *_test.ab ]]; then
                     printf "  │   ├── 🧪 [WYKRYTO TEST]:   {{clr_cyan}}%-20s{{style_reset}} ➡️  {{clr_green}}%s{{style_reset}}%s\n" \
-                        "$f_nm" "$base" "$IS_NEW"; \
-                    T_COUNT=$((T_COUNT + 1)); \
-                else \
-                    [ -z "$INFO" ] && INFO="Wtyczka: ${f_nm}"; \
+                        "$f_name" "$target_name" "$IS_NEW"
+                    T_COUNT=$((T_COUNT + 1))
+                else
                     printf "  │   ├── 🟢 [WYKRYTO PLIK]:   {{clr_cyan}}%-20s{{style_reset}} ➡️  {{clr_green}}%s{{style_reset}}%s\n" \
-                        "$f_nm" "$base" "$IS_NEW"; \
-                    P_CNT=$((P_CNT + 1)); \
-                fi; \
-                \
-                echo "# ${INFO}" >> "$OUT"; \
-                echo "${base}: _check_config" >> "$OUT"; \
-                echo "    @bash -c '\''trap \"rm -rf {{AMBERO_DIR}}/$rel_dir/am_core\" EXIT INT TERM; \\" >> "$OUT"; \
-                echo "        ln -sfn {{AMBERO_DIR}}/am_core {{AMBERO_DIR}}/$rel_dir/am_core; \\" >> "$OUT"; \
-                echo "        amber run {{AMBERO_DIR}}/$rel_f'\''" >> "$OUT"; \
-                echo "" >> "$OUT"; \
-            done; \
-        done; \
-    done; \
-    echo "------------------------------------------------------------"; \
-    echo "📊 PODSUMOWANIE REJESTRACJI:"; \
-    printf "  • {{clr_b_green}}Wykryte wtyczki:{{style_reset}} %d\n" "$P_CNT"; \
-    printf "  • {{clr_b_cyan}}Wykryte testy:{{style_reset}}   %d\n" "$T_COUNT"; \
-    echo "------------------------------------------------------------"; \
-    echo "✅ Gotowe! Rejestr: am_plugins/plugins.just";'
+                        "$f_name" "$target_name" "$IS_NEW"
+                    P_CNT=$((P_CNT + 1))
+                fi
+
+                # --- GENEROWANIE ZADANIA JUST ---
+                # [EDU] Każda wtyczka otrzymuje własny symlink am_core w swoim katalogu.
+                #       Mechanizm 'trap' gwarantuje usunięcie symlinka nawet przy błędzie.
+                [ -z "$INFO" ] && INFO="Wtyczka: $f_name"
+                echo "# $INFO" >> "$TMP_REG"
+                echo "$target_name: _check_config" >> "$TMP_REG"
+                echo "    @bash -c 'trap \"rm -f \$PWD/$rel_f_dir/am_core\" EXIT INT TERM; \\" >> "$TMP_REG"
+                echo "        ln -sfn {{AMBERO_DIR}}/am_core \"\$PWD/$rel_f_dir/am_core\"; \\" >> "$TMP_REG"
+                echo "        amber run \"\$PWD/$rel_f_path\"'" >> "$TMP_REG"
+                echo "" >> "$TMP_REG"
+            done
+        done
+    done
+
+    # --- FINALIZACJA (ZAPIS ATOMOWY) ---
+    mv "$TMP_REG" "$OUT_FILE"
+
+    echo "------------------------------------------------------------"
+    echo -e "📊 PODSUMOWANIE REJESTRACJI:"
+    printf "  • {{clr_b_green}}Wykryte wtyczki:{{style_reset}} %d\n" "$P_CNT"
+    printf "  • {{clr_b_cyan}}Wykryte testy:{{style_reset}}   %d\n" "$T_COUNT"
+    echo "------------------------------------------------------------"
+    echo -e "{{clr_success}}✅ Gotowe! Rejestr: am_plugins/plugins.just{{style_reset}}"
