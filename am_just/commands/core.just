@@ -5,44 +5,48 @@
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
-# DESCRIPTION:      Rdzeń wykonawczy Just dla frameworku Ambero.
-#                   Implementuje bezpieczny wrapper 'run-amber', który
-#                   zarządza izolacją wtyczek poprzez symlinki am_core
-#                   oraz gwarantuje czystość środowiska dzięki mechanizmowi trap.
+# DESCRIPTION:      Główny silnik wykonawczy (Wrappery Middleware).
+#                   Zapewnia spójne UI, logowanie i pomiar czasu dla
+#                   wszystkich typów zadań we frameworku.
 # ----------------------------------------------------------------------------
-# PATH:            am_just/core.just
-# VERSION:         0.1.3
-# CREATED:         2026-07-20
+# PATH:            am_just/commands/core.just
+# VERSION:         0.2.0
+# CREATED:         2026-07-21
 # ============================================================================
 
-
-# [EDU] @_run-amber jako receptura shebang (#!/usr/bin/env bash).
-# To najbardziej profesjonalny sposób łączenia Justa z Bashem.
-# Just tworzy tymczasowy plik wykonywalny, co eliminuje błędy wcięć.
+# Wrapper dla wtyczek Amber (.ab)
 @_run-amber plugin_path: _check_config
     #!/usr/bin/env bash
-    set -euo pipefail
-
-    # --- KROK 1: INICJALIZACJA SESJI ---
-    # [EDU] Przechwytujemy wynik zadania _init-session i wykonujemy go (eval),
-    # aby zmienna AMBERO_SESSION_ID stała się dostępna w tym skrypcie.
+    set -uo pipefail
     eval "$(just _init-session)"
-
-    # --- KROK 2: NAZWA KOMENDY ---
-    # Wycinamy nazwę pliku i zamieniamy podkreślniki na myślniki dla estetyki CLI.
+    eval "$(just _timer-start)"
     CMD_NAME=$(basename "{{plugin_path}}" .ab | tr "_" "-")
-
-    # --- KROK 3: WARSTWA PREZENTACJI (NAGŁÓWEK) ---
     just _ui-header "$CMD_NAME"
 
-    # --- KROK 4: PRZYGOTOWANIE IZOLACJI (SANDBOX) ---
+    # Izolacja i wykonanie
     PLUGIN_DIR=$(dirname "{{plugin_path}}")
     CORE_LINK="{{AMBERO_DIR}}/$PLUGIN_DIR/am_core"
-
-    # [EDU] Trap gwarantuje usunięcie symlinka nawet przy błędzie Ambera lub Ctrl+C.
     trap 'rm -f "$CORE_LINK"' EXIT INT TERM
-
     ln -sfn "{{AMBERO_DIR}}/am_core" "$CORE_LINK"
 
-    # --- KROK 5: URUCHOMIENIE LOGIKI ---
-    amber run "{{AMBERO_DIR}}/{{plugin_path}}"
+    EXIT_CODE=0
+    amber run "{{AMBERO_DIR}}/{{plugin_path}}" || EXIT_CODE=$?
+
+    DURATION=$(just _timer-stop)
+    just _ui-footer "$EXIT_CODE" "$DURATION"
+    exit $EXIT_CODE
+
+# Wrapper dla natywnych zadań Just
+@_run-just internal_recipe display_name: _check_config
+    #!/usr/bin/env bash
+    set -uo pipefail
+    eval "$(just _init-session)"
+    eval "$(just _timer-start)"
+    just _ui-header "{{display_name}}"
+
+    EXIT_CODE=0
+    just {{internal_recipe}} || EXIT_CODE=$?
+
+    DURATION=$(just _timer-stop)
+    just _ui-footer "$EXIT_CODE" "$DURATION"
+    exit $EXIT_CODE
