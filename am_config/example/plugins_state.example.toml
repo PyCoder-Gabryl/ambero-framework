@@ -1,0 +1,14 @@
+# DESCRIPTION: Przykład rejestru stanu wtyczek. Pozwala na dynamiczne
+#              wyłączanie modułów bez edycji głównego configu.
+
+[official.ada]
+enabled = false
+reason = "Brak zainstalowanego kompilatora GNAT w systemie."
+last_check = "2026-07-20"
+
+[experimental.web-tools]
+enabled = true
+reason = "Aktywowane ręcznie przez użytkownika."
+
+[user.my-private-script]
+enabled = true

@@ -1,0 +1,80 @@
+# ============================================================================
+# PROJECT:         Ambero Framework CLI
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     Główny szablon konfiguracji frameworku Ambero.
+#                  Zawiera ustawienia zachowania systemu, preferencje UI
+#                  oraz parametry konserwacji i zarządzania wtyczkami.
+# ----------------------------------------------------------------------------
+# PATH:            am_config/config.example.toml
+# VERSION:         0.2.0
+# CREATED:         2026-07-16
+# ============================================================================
+
+# ============================================================================
+# SEKCJA 1: TOŻSAMOŚĆ I ŚRODOWISKO SYSTEMOWE
+# ============================================================================
+[system]
+# Bezwzględna ścieżka do instalacji frameworku (ustawiana przez instalator)
+ambero_home = ""
+
+# Tryb pracy: "prod" (stabilny) lub "dev" (deweloperski, używa kodu z IDE)
+mode = "prod"
+
+# Wykryty typ systemu (np. macos-arm64, debian-x86_64)
+os_type = ""
+
+# ============================================================================
+# SEKCJA 2: INTERFEJS UŻYTKOWNIKA (UI)
+# ============================================================================
+[ui]
+# Tryb ikon: "emoji" (standard) lub "nerd" (wymaga czcionek Nerd Font)
+ui_mode = "emoji"
+
+# Język komunikatów: "pl" (polski) lub "en" (angielski)
+language = "pl"
+
+# Poziom gadatliwości:
+# "quiet"   - tylko błędy krytyczne
+# "minimal" - start, koniec i status operacji
+# "normal"  - szczegółowy opis kroków (zalecane)
+# "edu"     - dodatkowe informacje edukacyjne i przykłady
+verbosity = "normal"
+
+# ============================================================================
+# SEKCJA 3: INTEGRACJA Z POWŁOKĄ (SHELL)
+# ============================================================================
+[shell]
+# Domyślna powłoka użytkownika (zsh / bash)
+default_shell = "zsh"
+
+# Czy automatycznie odświeżać powłokę (exec $SHELL) po zmianach w env.sh?
+auto_reload = true
+
+# ============================================================================
+# SEKCJA 4: KONSERWACJA I CACHE (MAINTENANCE)
+# ============================================================================
+[maintenance]
+# Co ile dni framework ma sprawdzać dostępność aktualizacji na GitHubie
+update_interval_days = 7
+
+# Co ile dni framework ma wymuszać odświeżenie pliku runtime_cache.toml
+# (re-detekcja wersji Ambera, Justa, ścieżek systemowych itp.)
+cache_rebuild_days = 3
+
+# ============================================================================
+# SEKCJA 5: ZARZĄDZANIE WTYCZKAMI (PLUGINS)
+# ============================================================================
+[plugins]
+# Czy wtyczki z katalogu am_plugins/user mają być ładowane?
+allow_user_plugins = true
+
+# Czy wtyczki z katalogu am_plugins/experimental mają być ładowane?
+allow_experimental_plugins = false
+
+# Lista wtyczek wyłączonych (czarna lista)
+# Przykład: disabled = ["plugin-name", "other-plugin"]
+disabled = []

@@ -18,7 +18,7 @@
 # =============================================================================
 # Ignorujemy lokalną konfigurację, aby nie wysłać prywatnych ścieżek na GitHuba.
 # W repozytorium zostaje tylko szablon: config/config.example.toml
-config/config.toml
+am_config/config.toml
 
 # =============================================================================
 # 2. SYSTEMY OPERACYJNE

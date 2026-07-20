@@ -1,0 +1,20 @@
+# DESCRIPTION: Przykład pliku cache systemowego. Ten plik jest tworzony
+#              automatycznie przez 'am system-rebuild'.
+
+[meta]
+generated_at = "2026-07-20 12:00:00"
+ambero_version = "0.2.0-dev"
+core_integrity_hash = "a1b2c3d4e5f6" # Hash katalogu am_core
+
+[platform]
+os = "macos"
+distro = "macos-tahoe"
+arch = "arm64"
+kernel = "Darwin 25.0.0"
+default_shell = "/bin/zsh"
+
+[binaries]
+# Ścieżki ustalone podczas instalacji/rebuildu
+amber = "/opt/homebrew/bin/amber"
+just = "/usr/local/bin/just"
+brew = "/opt/homebrew/bin/brew"
