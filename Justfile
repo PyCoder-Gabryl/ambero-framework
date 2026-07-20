@@ -8,20 +8,35 @@
 # DESCRIPTION:      Główny router poleceń (CLI) frameworku Ambero.
 #                   Pełni rolę centralnego punktu wejścia, zarządzając
 #                   importami modułów technicznych oraz wtyczek.
-#                   Zapewnia izolację logiki poprzez delegację zadań.
 # -----------------------------------------------------------------------------
 # PATH:             Justfile
-# VERSION:          0.2.0
+# VERSION:          0.2.1
 # CREATED:          2026-07-16
 # =============================================================================
 
 set shell := ["bash", "-c"]
 
-verbosity := "dev" # UWAGA: Zmienić na "normal" przed wydaniem wersji STABLE.
+# =============================================================================
+# SYSTEM GADATLIWOŚCI (VERBOSITY)
+# =============================================================================
+# [EDU] Zmienna 'verbosity' kontroluje ilość informacji wyświetlanych w terminalu.
+# Dostępne poziomy:
+#   - 'quiet'   (q)   : Tylko surowy wynik (payload).
+#   - 'minimal' (min) : Tylko kluczowe statusy, bez ramek UI.
+#   - 'prod'    (p)   : Standardowy tryb produkcyjny (Nagłówek, Stopka, Status).
+#   - 'edu'     (e)   : Tryb produkcyjny + dodatkowe bloki edukacyjne.
+#   - 'dev'     (d)   : Pełny debug (UUID sesji, ścieżki, kody wyjścia).
+#
+# UWAGA: Obecnie wymuszono 'dev' dla celów deweloperskich. W wersji stabilnej
+# wartość ta będzie nadpisywana dynamicznie przez ustawienie z am_config/config.toml.
+verbosity := "dev"
 
 # =============================================================================
 # SEKCJA: ZMIENNE GLOBALNE I KONFIGURACJA ŚRODOWISKA
 # =============================================================================
+
+AMBERO_NAME    := "AMBERO FRAMEWORK CLI"
+AMBERO_VERSION := trim(read("VERSION"))
 
 # Bezwzględna ścieżka do katalogu głównego frameworku
 AMBERO_DIR := justfile_directory()
@@ -30,9 +45,6 @@ BACKUP_DIR := AMBERO_DIR + "/backups"
 
 # Eksport zmiennej dla skryptów Amber (Source of Truth dla lokalizacji)
 export AMBERO_HOME := AMBERO_DIR
-
-AMBERO_NAME    := "AMBERO FRAMEWORK CLI"
-AMBERO_VERSION := trim(read("VERSION"))
 
 # =============================================================================
 # SEKCJA: IMPORTY MODUŁÓW I WTYCZEK
@@ -44,43 +56,32 @@ import 'am_just/ambero_dir.just'
 import 'am_just/backup.just'
 import 'am_just/refresh_plugins.just'
 import 'am_just/plugin_show.just'
+import 'am_just/dev_help.just'
 
-# 2. Moduły specyficzne dla platformy (Auto-detekcja)
+# 2. Funkcje atomowe (am_just/lib)
+import 'am_just/lib/check_config.just'
+import 'am_just/lib/session.just'
+import 'am_just/lib/timer.just'
+
+# 3. Moduły specyficzne dla platformy
 import 'am_just/platform/macos.just'
 import 'am_just/platform/linux.just'
 import 'am_just/platform/windows.just'
 
-# 3. Rejestr dynamicznych wtyczek (am_plugins)
+# 4. Rejestr dynamicznych wtyczek (am_plugins)
 import 'am_plugins/plugins.just'
 
-# 4. Oficjalna logika frameworku (Przeniesione zadanie ambero)
+# 5. Oficjalna logika frameworku
 import 'am_just/core.just'
 import 'am_just/official.just'
 
 # =============================================================================
-# SEKCJA: GŁÓWNA LOGIKA CLI I ZADANIA SYSTEMOWE
+# SEKCJA: GŁÓWNA LOGIKA CLI
 # =============================================================================
 
 # Wyświetla listę wszystkich dostępnych poleceń frameworku
 @_default:
     just --list
 
-# [EDU] Zadanie help jest aliasem do listy, aby zachować intuicyjność CLI.
+# Alias dla intuicyjności
 help: _default
-
-# Klauzula bezpieczeństwa: Weryfikuje obecność pliku konfiguracyjnego.
-# Zapobiega błędom wykonania skryptów Amber przed inicjalizacją systemu.
-@_check_config:
-    if [ ! -f "{{CONFIG_FILE}}" ]; then \
-        echo "❌ Błąd krytyczny: Brak pliku konfiguracji {{CONFIG_FILE}}!"; \
-        echo "👉 Uruchom instalator (am_install/install.sh), aby wygenerować system."; \
-        exit 1; \
-    fi
-
-# =============================================================================
-# KOMENTARZ EDUKACYJNY (JUST)
-# =============================================================================
-# 1. Używamy 'import' zamiast 'include', co jest standardem w nowym Just.
-# 2. Zmienne zdefiniowane w głównym Justfile są widoczne w importowanych plikach.
-# 3. Zadania zaczynające się od '_' są ukryte w widoku 'just --list'.
-# 4. Dyrektywa [no-cd] (jeśli użyta) zapobiega zmianie katalogu roboczego.
