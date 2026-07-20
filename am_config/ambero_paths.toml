@@ -1,6 +1,6 @@
 [system]
 core = "am_core"
-config = "config"
+config = "am_config"
 logs = "logs"
 
 [install]

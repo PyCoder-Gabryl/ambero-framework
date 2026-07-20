@@ -5,67 +5,73 @@
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
-# DESCRIPTION:
+# DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
+#                   tworzenie i aktualizację pliku ambero_paths.toml,
+#                   który służy jako centralny rejestr lokalizacji
+#                   modułów, wtyczek i plików konfiguracyjnych.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/ambero_dir.just
-# VERSION:         0.1.1
+# VERSION:         0.2.0
 # CREATED:         2026-07-20
 # ============================================================================
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w am_config/ambero_paths.toml
 [no-cd]
-create-dir:
-    @echo "🚀 Inicjalizacja skryptu konfiguracyjnego..."
-    @mkdir -p "{{AMBERO_DIR}}/am_config" # [ZMIANA: am_config]
+map-paths:
+    @echo "🚀 Inicjalizacja mapowania ścieżek frameworku..."
+    @mkdir -p "{{AMBERO_DIR}}/am_config"
     @mkdir -p "{{AMBERO_DIR}}/logs"
     @bash -c ' \
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
+    HEADER_TMPL="{{AMBERO_DIR}}/am_config/templates/header_generated.txt"; \
     TMP_FILE=$(mktemp); \
+    GEN_DATE=$(date "+%Y-%m-%d %H:%M:%S"); \
+    DESC="Automatyczny rejestr ścieżek systemowych frameworku Ambero."; \
     \
-    echo "[system]" > "$TMP_FILE"; \
-    echo "core = \"am_core\"" >> "$TMP_FILE"; \
-    echo "config = \"am_config\"" >> "$TMP_FILE"; \
-    echo "logs = \"logs\"" >> "$TMP_FILE"; \
-    echo "" >> "$TMP_FILE"; \
+    # 1. Generowanie nagłówka z szablonu \
+    if [ -f "$HEADER_TMPL" ]; then \
+        sed -e "s/{{PROJECT_NAME}}/AMBERO FRAMEWORK CLI/g" \
+            -e "s/{{GEN_DATE}}/$GEN_DATE/g" \
+            -e "s/{{DESCRIPTION}}/$DESC/g" \
+            -e "s|{{FILE_PATH}}|am_config/ambero_paths.toml|g" \
+            "$HEADER_TMPL" > "$TMP_FILE"; \
+    else \
+        echo "# Generated: $GEN_DATE" > "$TMP_FILE"; \
+    fi; \
     \
-    echo "[install]" >> "$TMP_FILE"; \
-    echo "root = \"am_install\"" >> "$TMP_FILE"; \
-    echo "platforms = \"am_install/lib/platforms\"" >> "$TMP_FILE"; \
-    echo "" >> "$TMP_FILE"; \
-    \
-    echo "[plugins]" >> "$TMP_FILE"; \
-    echo "root = \"am_plugins\"" >> "$TMP_FILE"; \
-    echo "experimental = \"am_plugins/experimental\"" >> "$TMP_FILE"; \
-    echo "official = \"am_plugins/official\"" >> "$TMP_FILE"; \
-    echo "user = \"am_plugins/user\"" >> "$TMP_FILE"; \
-    echo "" >> "$TMP_FILE"; \
-    \
-    echo "[i18n]" >> "$TMP_FILE"; \
-    echo "root = \"i18n\"" >> "$TMP_FILE"; \
-    echo "en_experimental = \"i18n/en/experimental\"" >> "$TMP_FILE"; \
-    echo "en_official = \"i18n/en/official\"" >> "$TMP_FILE"; \
-    echo "en_user = \"i18n/en/user\"" >> "$TMP_FILE"; \
-    echo "pl_experimental = \"i18n/pl/experimental\"" >> "$TMP_FILE"; \
-    echo "pl_official = \"i18n/pl/official\"" >> "$TMP_FILE"; \
-    echo "pl_user = \"i18n/pl/user\"" >> "$TMP_FILE"; \
+    # 2. Generowanie treści TOML \
+    { \
+        echo -e "\n[system]"; \
+        echo "core = \"am_core\""; \
+        echo "config = \"am_config\""; \
+        echo "logs = \"logs\""; \
+        echo -e "\n[install]"; \
+        echo "root = \"am_install\""; \
+        echo "platforms = \"am_install/lib/platforms\""; \
+        echo -e "\n[plugins]"; \
+        echo "root = \"am_plugins\""; \
+        echo "experimental = \"am_plugins/experimental\""; \
+        echo "official = \"am_plugins/official\""; \
+        echo "user = \"am_plugins/user\""; \
+        echo -e "\n[i18n]"; \
+        echo "root = \"i18n\""; \
+        echo "en_experimental = \"i18n/en/experimental\""; \
+        echo "en_official = \"i18n/en/official\""; \
+        echo "en_user = \"i18n/en/user\""; \
+        echo "pl_experimental = \"i18n/pl/experimental\""; \
+        echo "pl_official = \"i18n/pl/official\""; \
+        echo "pl_user = \"i18n/pl/user\""; \
+    } >> "$TMP_FILE"; \
     \
     if [ -f "$TARGET" ]; then \
         echo "⚠️  Plik am_config/ambero_paths.toml już istnieje."; \
-        echo -n "🤔 Czy chcesz go nadpisać i zobaczyć podsumowanie zmian? [y/N]: "; \
+        echo -n "🤔 Czy chcesz go nadpisać i zobaczyć zmiany? [y/N]: "; \
         read -r CONFIRM < /dev/tty; \
-        if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then \
-            echo "❌ Anulowano. Plik pozostał bez zmian."; \
-            rm "$TMP_FILE"; \
-            exit 0; \
-        fi; \
+        [[ ! "$CONFIRM" =~ ^[Yy]$ ]] && { echo "❌ Anulowano."; rm "$TMP_FILE"; exit 0; }; \
         \
-        echo ""; \
-        echo "📊 PODSUMOWANIE ZMIAN W CONFIGU:"; \
+        echo -e "\n📊 PODSUMOWANIE ZMIAN:"; \
         echo "-------------------------------------"; \
-        \
-        FLAT_OLD=$(mktemp); \
-        FLAT_NEW=$(mktemp); \
-        \
+        FLAT_OLD=$(mktemp); FLAT_NEW=$(mktemp); \
         awk '\''/^\[/{sec=$0; next} /=/{print sec " " $0}'\'' "$TARGET" | tr -d "[] " > "$FLAT_OLD"; \
         awk '\''/^\[/{sec=$0; next} /=/{print sec " " $0}'\'' "$TMP_FILE" | tr -d "[] " > "$FLAT_NEW"; \
         \
@@ -74,36 +80,16 @@ create-dir:
             sec_key=$(echo "$line" | cut -d"=" -f1); \
             val=$(echo "$line" | cut -d"=" -f2-); \
             display_key=$(echo "$sec_key" | cut -d"." -f2); \
-            \
             if grep -q "^$sec_key=" "$FLAT_OLD"; then \
                 old_val=$(grep "^$sec_key=" "$FLAT_OLD" | cut -d"=" -f2-); \
-                if [ "$old_val" = "$val" ]; then \
-                    echo "⚪ [BEZ ZMIAN]  $display_key = $val"; \
-                else \
+                if [ "$old_val" != "$val" ]; then \
                     echo "🟡 [ZMIENIONO] $display_key: $old_val ➡️  $val"; \
                 fi; \
             else \
                 echo "🟢 [DODANO]    $display_key = $val"; \
             fi; \
         done < "$FLAT_NEW"; \
-        \
-        while IFS= read -r line || [ -n "$line" ]; do \
-            [[ -z "$line" ]] && continue; \
-            sec_key=$(echo "$line" | cut -d"=" -f1); \
-            display_line=$(echo "$line" | cut -d"." -f2- | sed '\''s/=/ = /'\''); \
-            if ! grep -q "^$sec_key=" "$FLAT_NEW"; then \
-                echo "🔴 [USUNIĘTO]   $display_line"; \
-            fi; \
-        done < "$FLAT_OLD"; \
-        \
         rm "$FLAT_OLD" "$FLAT_NEW"; \
-        echo "-------------------------------------"; \
-    else \
-        echo ""; \
-        echo "✨ Tworzenie nowego pliku konfiguracji..."; \
-        echo "📊 PODSUMOWANIE (Nowy plik):"; \
-        echo "-------------------------------------"; \
-        grep -v "^$" "$TMP_FILE" | grep -v "^\[" | sed "s/^/🟢 [DODANO]    /"; \
         echo "-------------------------------------"; \
     fi; \
     \
@@ -112,7 +98,6 @@ create-dir:
     '
     @just dir-view
 
-
 # Drukuje zmapowane sekcje i ścieżki z pliku ambero_paths.toml w czytelny sposób
 [no-cd]
 dir-view:
@@ -120,7 +105,7 @@ dir-view:
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
     if [ ! -f "$TARGET" ]; then \
         echo "❌ Błąd: Plik konfiguracyjny nie istnieje!"; \
-        echo "👉 Uruchom najpierw: just create-dir"; \
+        echo "👉 Uruchom najpierw: just map-paths"; \
         exit 1; \
     fi; \
     \
