@@ -1,3 +1,14 @@
+# ============================================================================
+# PROJECT:         AMBERO FRAMEWORK CLI
+# GENERATED:       2026-07-20 07:56:58
+# VERSION:         0.2.0-dev
+# ----------------------------------------------------------------------------
+# DESCRIPTION:     Automatyczny rejestr ścieżek systemowych frameworku Ambero.
+# ----------------------------------------------------------------------------
+# !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE – NIE EDYTUJ RĘCZNIE !!!
+# !!! WARNING: AUTOMATICALLY GENERATED FILE – DO NOT EDIT MANUALLY !!!
+# ============================================================================
+
 [system]
 core = "am_core"
 config = "am_config"

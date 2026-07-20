@@ -29,6 +29,9 @@ BACKUP_DIR := AMBERO_DIR + "/backups"
 # Eksport zmiennej dla skryptów Amber (Source of Truth dla lokalizacji)
 export AMBERO_HOME := AMBERO_DIR
 
+AMBERO_NAME    := "AMBERO FRAMEWORK CLI"
+AMBERO_VERSION := trim(read("VERSION"))
+
 # =============================================================================
 # SEKCJA: IMPORTY MODUŁÓW I WTYCZEK
 # =============================================================================
