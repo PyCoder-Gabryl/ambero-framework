@@ -10,6 +10,7 @@ Ambero opiera się na ścisłej separacji logiki, konfiguracji i rozszerzeń.
    ├── experimental/ – Poligon doświadczalny (tu testujemy nowości).
    └── user/         – Twoje prywatne skrypty (ignorowane przez Git).
 📂 i18n/             – Lustrzane odbicie am_plugins dla plików tłumaczeń (.toml).
+
 ============================================================================
 [EDU] Zasada "Lustra": Każdy plik w am_plugins powinien mieć swój odpowiednik
 w katalogu i18n, aby zapewnić wielojęzyczność komunikatów.

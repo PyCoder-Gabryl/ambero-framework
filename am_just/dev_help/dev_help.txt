@@ -16,5 +16,6 @@ i standardy, dzięki którym nasz framework jest bezpieczny i skalowalny.
 • IZOLACJA:  Wtyczki nie "śmiecą" w systemie. Używaj symlinków am_core.
 • CZYSTOŚĆ:  Komentarze techniczne i EDU zawsze po polsku. Kod po angielsku.
 • WYDAJNOŚĆ: Just to recepcja, Amber to silnik. Nie dubluj logiki.
+
 ============================================================================
 [EDU] Wybierz numer sekcji poniżej, aby zgłębić detale techniczne.

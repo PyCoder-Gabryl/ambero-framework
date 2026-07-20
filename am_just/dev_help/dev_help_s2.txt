@@ -12,6 +12,7 @@ Po dodaniu pliku uruchom 'am refresh–plugins'. System automatycznie:
 – Wykryje plik i sprawdzi obecność funkcji 'main'.
 – Wyciągnie HELP–INFO i dopisze zadanie do am_plugins/plugins.just.
 – Przygotuje bezpieczny wrapper z mechanizmem 'trap'.
+
 ============================================================================
 [EDU] Wtyczki nie powinny importować plików przez '../../'. Używaj symlinka
 'am_core', który jest tworzony automatycznie w katalogu wtyczki podczas pracy.

@@ -13,6 +13,7 @@ MODYFIKATORY (mod=):
 – log (l)     : Wyświetla ostatni wpis z JSONL po zakończeniu.
 – mono (m)    : Wyłącza kolory ANSI (tryb czarno–biały).
 – force (f)   : Ignoruje blokady czasowe (np. interwał 7 dni).
+
 ============================================================================
 [EDU] W Amberze 0.6.0–alpha znaki specjalne ($, {, }) wewnątrz stringów
 definiujemy przez kody Unicode (\u0024, \u007b, \u007d), aby nie mylić parsera.
