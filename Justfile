@@ -8,27 +8,17 @@
 # DESCRIPTION:      Główny router poleceń (CLI) frameworku Ambero.
 #                   Pełni rolę centralnego punktu wejścia, zarządzając
 #                   importami modułów technicznych oraz wtyczek.
+#                   Zapewnia izolację logiki poprzez delegację zadań.
 # -----------------------------------------------------------------------------
 # PATH:             Justfile
-# VERSION:          0.2.1
+# VERSION:          0.2.2
 # CREATED:          2026-07-16
 # =============================================================================
 
 set shell := ["bash", "-c"]
 
-# =============================================================================
-# SYSTEM GADATLIWOŚCI (VERBOSITY)
-# =============================================================================
 # [EDU] Zmienna 'verbosity' kontroluje ilość informacji wyświetlanych w terminalu.
-# Dostępne poziomy:
-#   - 'quiet'   (q)   : Tylko surowy wynik (payload).
-#   - 'minimal' (min) : Tylko kluczowe statusy, bez ramek UI.
-#   - 'prod'    (p)   : Standardowy tryb produkcyjny (Nagłówek, Stopka, Status).
-#   - 'edu'     (e)   : Tryb produkcyjny + dodatkowe bloki edukacyjne.
-#   - 'dev'     (d)   : Pełny debug (UUID sesji, ścieżki, kody wyjścia).
-#
-# UWAGA: Obecnie wymuszono 'dev' dla celów deweloperskich. W wersji stabilnej
-# wartość ta będzie nadpisywana dynamicznie przez ustawienie z am_config/config.toml.
+# Dostępne poziomy: quiet (q), minimal (min), prod (p), edu (e), dev (d).
 verbosity := "dev"
 
 # =============================================================================
@@ -50,7 +40,7 @@ export AMBERO_HOME := AMBERO_DIR
 # SEKCJA: IMPORTY MODUŁÓW I WTYCZEK
 # =============================================================================
 
- 1. Biblioteki techniczne Just (am_just/commands) [ZMIANA ŚCIEŻEK]
+# 1. Biblioteki techniczne Just (am_just/commands)
 import 'am_just/commands/colors.just'
 import 'am_just/commands/ambero_dir.just'
 import 'am_just/commands/backup.just'
@@ -71,7 +61,7 @@ import 'am_just/platform/windows.just'
 # 4. Rejestr dynamicznych wtyczek (am_plugins)
 import 'am_plugins/plugins.just'
 
-# 5. Oficjalna logika frameworku [ZMIANA ŚCIEŻEK]
+# 5. Oficjalna logika frameworku
 import 'am_just/commands/core.just'
 import 'am_just/commands/official.just'
 

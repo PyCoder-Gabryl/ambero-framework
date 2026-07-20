@@ -11,7 +11,7 @@
 #                   oraz gwarantuje czystość środowiska dzięki mechanizmowi trap.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/core.just
-# VERSION:         0.1.0
+# VERSION:         0.1.2
 # CREATED:         2026-07-20
 # ============================================================================
 
@@ -21,7 +21,7 @@
 # 2. Ustawia pułapkę (trap), która usunie symlink am_core nawet przy Ctrl+C.
 # 3. Tworzy symlink, aby wtyczka mogła używać 'import ... from "am_core/..."'.
 # 4. Uruchamia skrypt Amber w bezpiecznym kontekście.
-@_run-amber plugin_path:
+@_run-amber plugin_path: _check_config
     @bash -c ' \
         PLUGIN_DIR=$(dirname "{{plugin_path}}"); \
         FULL_PLUGIN_DIR="{{AMBERO_DIR}}/$PLUGIN_DIR"; \

@@ -9,7 +9,7 @@
 #                   Dynamicznie wczytuje sekcje pomocy z katalogu dev_help.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/dev_help.just
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-20
 # ============================================================================
 
@@ -44,7 +44,7 @@ dev-help:
             local title=$(head -n 1 "$f" | sed 's/^# //')
             echo -e "{{clr_info}}$s_num){{style_reset}} $title"
         done
-        echo -e "{{clr_red}q){{style_reset}} Wyjście"
+        echo -e "{{clr_red}}q){{style_reset}} Wyjście"
     }
 
     # --- PĘTLA INTERAKTYWNA ---
