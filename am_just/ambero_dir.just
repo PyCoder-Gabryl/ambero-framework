@@ -7,10 +7,10 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
-#                   Wersja 0.2.3 naprawia błędy parsowania nagłówków.
+#                   Wersja 0.2.4 przywraca pełne raportowanie zmian.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/ambero_dir.just
-# VERSION:         0.2.3
+# VERSION:         0.2.4
 # CREATED:         2026-07-20
 # ============================================================================
 
@@ -67,24 +67,36 @@ map-paths:
         FLAT_OLD=$(mktemp)
         FLAT_NEW=$(mktemp)
 
-        # [ZMIANA] Dodano !/^#/ aby ignorować nagłówek podczas porównywania
-        awk '!/^#/ && /^\[/{sec=$0; next} !/^#/ && /=/{print sec " " $0}' "$TARGET" | tr -d "[] " > "$FLAT_OLD"
-        awk '!/^#/ && /^\[/{sec=$0; next} !/^#/ && /=/{print sec " " $0}' "$TMP_FILE" | tr -d "[] " > "$FLAT_NEW"
+        # Spłaszczanie TOML do formatu klucz=wartość (ignorując nagłówki)
+        awk '!/^#/ && /^\[/{gsub(/[\[\]]/, "", $0); s=$0; next} !/^#/ && /=/{gsub(/[ "]/, "", $0); print s "." $0}' \
+            "$TARGET" > "$FLAT_OLD"
+        awk '!/^#/ && /^\[/{gsub(/[\[\]]/, "", $0); s=$0; next} !/^#/ && /=/{gsub(/[ "]/, "", $0); print s "." $0}' \
+            "$TMP_FILE" > "$FLAT_NEW"
 
-        while IFS= read -r line || [ -n "$line" ]; do
-            [[ -z "$line" ]] && continue
-            sec_key=$(echo "$line" | cut -d"=" -f1)
-            val=$(echo "$line" | cut -d"=" -f2-)
-            display_key=$(echo "$sec_key" | cut -d"." -f2)
-            if grep -q "^$sec_key=" "$FLAT_OLD"; then
-                old_val=$(grep "^$sec_key=" "$FLAT_OLD" | cut -d"=" -f2-)
-                if [ "$old_val" != "$val" ]; then
-                    echo "🟡 [ZMIENIONO] $display_key: $old_val ➡️  $val"
+        # Porównywanie kluczy
+        while IFS= read -r line; do
+            key=$(echo "$line" | cut -d= -f1)
+            val=$(echo "$line" | cut -d= -f2)
+            if grep -q "^$key=" "$FLAT_OLD"; then
+                old_val=$(grep "^$key=" "$FLAT_OLD" | cut -d= -f2)
+                if [ "$old_val" = "$val" ]; then
+                    echo "⚪ [BEZ ZMIAN]  $key"
+                else
+                    echo "🟡 [ZMIENIONO] $key: $old_val ➡️  $val"
                 fi
             else
-                echo "🟢 [DODANO]    $display_key = $val"
+                echo "🟢 [NOWY]      $key"
             fi
         done < "$FLAT_NEW"
+
+        # Wykrywanie usuniętych
+        while IFS= read -r line; do
+            key=$(echo "$line" | cut -d= -f1)
+            if ! grep -q "^$key=" "$FLAT_NEW"; then
+                echo "🔴 [USUNIĘTO]   $key"
+            fi
+        done < "$FLAT_OLD"
+
         rm "$FLAT_OLD" "$FLAT_NEW"
         echo "-------------------------------------"
     fi
@@ -106,7 +118,6 @@ dir-view:
     echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:"
     echo "=================================================="
     while IFS= read -r line || [ -n "$line" ]; do
-        # [ZMIANA] Ignorowanie komentarzy i linii nagłówka
         [[ "$line" =~ ^# ]] && continue
         [[ -z "$(echo "$line" | tr -d '[:space:]')" ]] && continue
 
