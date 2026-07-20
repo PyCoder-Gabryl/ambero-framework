@@ -50,13 +50,13 @@ export AMBERO_HOME := AMBERO_DIR
 # SEKCJA: IMPORTY MODUŁÓW I WTYCZEK
 # =============================================================================
 
-# 1. Biblioteki techniczne Just (am_just)
-import 'am_just/colors.just'
-import 'am_just/ambero_dir.just'
-import 'am_just/backup.just'
-import 'am_just/refresh_plugins.just'
-import 'am_just/plugin_show.just'
-import 'am_just/dev_help.just'
+ 1. Biblioteki techniczne Just (am_just/commands) [ZMIANA ŚCIEŻEK]
+import 'am_just/commands/colors.just'
+import 'am_just/commands/ambero_dir.just'
+import 'am_just/commands/backup.just'
+import 'am_just/commands/refresh_plugins.just'
+import 'am_just/commands/plugin_show.just'
+import 'am_just/commands/dev_help.just'
 
 # 2. Funkcje atomowe (am_just/lib)
 import 'am_just/lib/check_config.just'
@@ -71,9 +71,9 @@ import 'am_just/platform/windows.just'
 # 4. Rejestr dynamicznych wtyczek (am_plugins)
 import 'am_plugins/plugins.just'
 
-# 5. Oficjalna logika frameworku
-import 'am_just/core.just'
-import 'am_just/official.just'
+# 5. Oficjalna logika frameworku [ZMIANA ŚCIEŻEK]
+import 'am_just/commands/core.just'
+import 'am_just/commands/official.just'
 
 # =============================================================================
 # SEKCJA: GŁÓWNA LOGIKA CLI
