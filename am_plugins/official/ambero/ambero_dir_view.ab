@@ -21,7 +21,7 @@ import { file_read } from "std/fs"
 import { trim, split, text_contains } from "std/text"
 import { validate_paths_integrity } from "am_core/path.ab"
 
-// Samodzielna funkcja parsujaca klucz i wartosc bez zadnych zagniezdzen if/else
+// Samodzielna funkcja parsująca klucz i wartość bez żadnych zagnieżdżeń if/else
 fun format_toml_key_value(line: Text) {
     const parts = split(line, "=")
     let key = ""
@@ -49,7 +49,7 @@ main {
     // -------------------------------------------------------------------------
     echo_colored("--- SEKCJA SUROWEGO ODCZYTU PLIKU TOML ---", "cyan")
 
-    const TOML_PATH = "{ROOT}/config/ambero_paths.toml"
+    const TOML_PATH = "{ROOT}/am_config/ambero_paths.toml"
     const toml_content = file_read(TOML_PATH) failed {
         echo_error("❌ Błąd krytyczny: Nie można odczytać pliku: {TOML_PATH}", 1)
     }
@@ -63,7 +63,7 @@ main {
     for line in toml_lines {
         const clean_line = trim(line)
 
-        // Kazda akcja lezy w osobnym bloku warunkowym bez slowa 'else'
+        // Każda akcja lezy w osobnym bloku warunkowym bez słowa 'else'
         if clean_line == "" {
             printf("\n", [])
         }

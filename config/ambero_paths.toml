@@ -1,0 +1,23 @@
+[system]
+core = "am_core"
+config = "config"
+logs = "logs"
+
+[install]
+root = "am_install"
+platforms = "am_install/lib/platforms"
+
+[plugins]
+root = "am_plugins"
+experimental = "am_plugins/experimental"
+official = "am_plugins/official"
+user = "am_plugins/user"
+
+[i18n]
+root = "i18n"
+en_experimental = "i18n/en/experimental"
+en_official = "i18n/en/official"
+en_user = "i18n/en/user"
+pl_experimental = "i18n/pl/experimental"
+pl_official = "i18n/pl/official"
+pl_user = "i18n/pl/user"

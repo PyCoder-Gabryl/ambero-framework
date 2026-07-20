@@ -53,7 +53,7 @@ pub fun print_ambero_baner() {
 
 main {
     const ambero_home = env_var_load("AMBERO_HOME")
-    const config = load_config("{ambero_home}/config/config.toml")
+    const config = load_config("{ambero_home}/am_config/config.toml")
     const verbosity = get_verbosity(config)
 
     if verbosity != "quiet" {

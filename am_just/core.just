@@ -21,7 +21,7 @@
 # 2. Ustawia pułapkę (trap), która usunie symlink am_core nawet przy Ctrl+C.
 # 3. Tworzy symlink, aby wtyczka mogła używać 'import ... from "am_core/..."'.
 # 4. Uruchamia skrypt Amber w bezpiecznym kontekście.
-@run-amber plugin_path:
+@_run-amber plugin_path:
     @bash -c ' \
         PLUGIN_DIR=$(dirname "{{plugin_path}}"); \
         FULL_PLUGIN_DIR="{{AMBERO_DIR}}/$PLUGIN_DIR"; \

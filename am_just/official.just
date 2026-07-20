@@ -17,6 +17,6 @@
 
 # Główne powitanie, diagnostyka i podgląd konfiguracji Ambero Framework CLI
 ambero:
-    @just run-amber "am_plugins/official/ambero/ambero_welcome.ab"
-    @just run-amber "am_plugins/official/ambero/ambero_info_dev.ab"
-    @just run-amber "am_plugins/official/ambero/ambero_dir_view.ab"
+    @just _run-amber "am_plugins/official/ambero/ambero_welcome.ab"
+    @just _run-amber "am_plugins/official/ambero/ambero_info_dev.ab"
+    @just _run-amber "am_plugins/official/ambero/ambero_dir_view.ab"
