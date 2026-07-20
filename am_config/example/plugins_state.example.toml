@@ -1,5 +1,15 @@
-# DESCRIPTION: Przykład rejestru stanu wtyczek. Pozwala na dynamiczne
-#              wyłączanie modułów bez edycji głównego configu.
+# ============================================================================
+# PROJECT:         AMBERO FRAMEWORK CLI
+# GENERATED:       2026-07-20 12:00:00
+# DESCRIPTION:     Przykład rejestru stanu wtyczek. Definiuje, które moduły
+#                  są aktywne oraz przechowuje powody ich ewentualnego
+#                  automatycznego wyłączenia przez system.
+# ----------------------------------------------------------------------------
+# PATH:            am_config/example/plugins_state.example.toml
+# !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE – NIE EDYTUJ RĘCZNIE !!!
+# !!! WARNING: AUTOMATICALLY GENERATED FILE – DO NOT EDIT MANUALLY !!!
+# ============================================================================
+
 
 [official.ada]
 enabled = false

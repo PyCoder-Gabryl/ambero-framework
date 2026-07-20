@@ -5,6 +5,6 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:     {{DESCRIPTION}}
 # ----------------------------------------------------------------------------
-# !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE - NIE EDYTUJ RĘCZNIE !!!
-# !!! WARNING: AUTOMATICALLY GENERATED FILE - DO NOT EDIT MANUALLY !!!
+# !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE – NIE EDYTUJ RĘCZNIE !!!
+# !!! WARNING: AUTOMATICALLY GENERATED FILE – DO NOT EDIT MANUALLY !!!
 # ============================================================================

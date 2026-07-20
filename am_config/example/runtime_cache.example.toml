@@ -1,5 +1,13 @@
-# DESCRIPTION: Przykład pliku cache systemowego. Ten plik jest tworzony
-#              automatycznie przez 'am system-rebuild'.
+# ============================================================================
+# PROJECT:         AMBERO FRAMEWORK CLI
+# GENERATED:       2026-07-20 12:00:00
+# DESCRIPTION:     Przykład pliku cache systemowego. Zawiera dane o wykrytym
+#                  środowisku, ścieżki do binarek oraz hashe spójności.
+# ----------------------------------------------------------------------------
+# PATH:            am_config/example/runtime_cache.example.toml
+# !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE – NIE EDYTUJ RĘCZNIE !!!
+# !!! WARNING: AUTOMATICALLY GENERATED FILE – DO NOT EDIT MANUALLY !!!
+# ============================================================================
 
 [meta]
 generated_at = "2026-07-20 12:00:00"
