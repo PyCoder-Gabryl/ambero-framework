@@ -1,16 +1,30 @@
-# Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w config/ambero_paths.toml
+# ============================================================================
+# PROJECT:         Ambero Framework CLI
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl/
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:
+# ----------------------------------------------------------------------------
+# PATH:            am_just/ambero_dir.just
+# VERSION:         0.1.1
+# CREATED:         2026-07-20
+# ============================================================================
+
+# Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w am_config/ambero_paths.toml
 [no-cd]
 create-dir:
     @echo "🚀 Inicjalizacja skryptu konfiguracyjnego..."
-    @mkdir -p "{{AMBERO_DIR}}/config"
+    @mkdir -p "{{AMBERO_DIR}}/am_config" # [ZMIANA: am_config]
     @mkdir -p "{{AMBERO_DIR}}/logs"
     @bash -c ' \
-    TARGET="{{AMBERO_DIR}}/config/ambero_paths.toml"; \
+    TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
     TMP_FILE=$(mktemp); \
     \
     echo "[system]" > "$TMP_FILE"; \
     echo "core = \"am_core\"" >> "$TMP_FILE"; \
-    echo "config = \"config\"" >> "$TMP_FILE"; \
+    echo "config = \"am_config\"" >> "$TMP_FILE"; \
     echo "logs = \"logs\"" >> "$TMP_FILE"; \
     echo "" >> "$TMP_FILE"; \
     \
@@ -36,7 +50,7 @@ create-dir:
     echo "pl_user = \"i18n/pl/user\"" >> "$TMP_FILE"; \
     \
     if [ -f "$TARGET" ]; then \
-        echo "⚠️  Plik config/ambero_paths.toml już istnieje."; \
+        echo "⚠️  Plik am_config/ambero_paths.toml już istnieje."; \
         echo -n "🤔 Czy chcesz go nadpisać i zobaczyć podsumowanie zmian? [y/N]: "; \
         read -r CONFIRM < /dev/tty; \
         if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then \
@@ -94,7 +108,7 @@ create-dir:
     fi; \
     \
     mv "$TMP_FILE" "$TARGET"; \
-    echo "✅ Gotowe! Zapisano w: config/ambero_paths.toml"; \
+    echo "✅ Gotowe! Zapisano w: am_config/ambero_paths.toml"; \
     '
     @just dir-view
 
@@ -103,10 +117,10 @@ create-dir:
 [no-cd]
 dir-view:
     @bash -c ' \
-    TARGET="{{AMBERO_DIR}}/config/ambero_paths.toml"; \
+    TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
     if [ ! -f "$TARGET" ]; then \
         echo "❌ Błąd: Plik konfiguracyjny nie istnieje!"; \
-        echo "👉 Uruchom najpierw: just create_dir"; \
+        echo "👉 Uruchom najpierw: just create-dir"; \
         exit 1; \
     fi; \
     \
