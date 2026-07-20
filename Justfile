@@ -1,73 +1,80 @@
-# ============================================================================
-# PROJECT:         Ambero Framework CLI
-# AUTHOR:          PyCoder Gabryl
-# GITHUB:          https://github.com
-# EMAIL:           pycoder.gabryl@gmail.com
-# LICENSE:         Apache 2.0
-# ----------------------------------------------------------------------------
+# =============================================================================
+# PROJECT:          Ambero Framework CLI
+# AUTHOR:           PyCoder Gabryl
+# GITHUB:           https://github.com/PyCoder-Gabryl
+# EMAIL:            pycoder.gabryl@gmail.com
+# LICENSE:          Apache 2.0
+# -----------------------------------------------------------------------------
 # DESCRIPTION:      Główny router poleceń (CLI) frameworku Ambero.
-#                   Odpowiada za przyjmowanie argumentów od użytkownika,
-#                   weryfikację stanu konfiguracji (sanity check) oraz
-#                   przekazywanie wykonania do skryptów Amber.
-# ----------------------------------------------------------------------------
-# PATH:            Justfile
-# VERSION:         0.1.10
-# CREATED:         2026-07-16
-# ============================================================================
+#                   Pełni rolę centralnego punktu wejścia, zarządzając
+#                   importami modułów technicznych oraz wtyczek.
+#                   Zapewnia izolację logiki poprzez delegację zadań.
+# -----------------------------------------------------------------------------
+# PATH:             Justfile
+# VERSION:          0.2.0
+# CREATED:          2026-07-16
+# =============================================================================
 
 set shell := ["bash", "-c"]
 
 # =============================================================================
-# ZMIENNE GLOBALNE I ŚCIEŻKI
+# SEKCJA: ZMIENNE GLOBALNE I KONFIGURACJA ŚRODOWISKA
 # =============================================================================
+
+# Bezwzględna ścieżka do katalogu głównego frameworku
 AMBERO_DIR := justfile_directory()
-CONFIG_FILE := AMBERO_DIR + "/config/config.toml"
+CONFIG_FILE := AMBERO_DIR + "/am_config/config.toml"
 BACKUP_DIR := AMBERO_DIR + "/backups"
 
-# Eksportujemy ścieżkę domową, aby skrypty Amber mogły ją łatwo odczytać z otoczenia
+# Eksport zmiennej dla skryptów Amber (Source of Truth dla lokalizacji)
 export AMBERO_HOME := AMBERO_DIR
 
-# 1. CENTRALNE KOLORY - Ładowane jako pierwsze, aby zasilić pozostałe moduły
-import 'justfiles/colors.just'
+# =============================================================================
+# SEKCJA: IMPORTY MODUŁÓW I WTYCZEK
+# =============================================================================
 
-# 2. POZOSTAŁE MODUŁY POMOCNICZE I AUTOMATYCZNE WTYCZKI
+# 1. Biblioteki techniczne Just (am_just)
+import 'am_just/colors.just'
+import 'am_just/ambero_dir.just'
+import 'am_just/backup.just'
+import 'am_just/refresh_plugins.just'
+import 'am_just/plugin_show.just'
+
+# 2. Moduły specyficzne dla platformy (Auto-detekcja)
+import 'am_just/platform/macos.just'
+import 'am_just/platform/linux.just'
+import 'am_just/platform/windows.just'
+
+# 3. Rejestr dynamicznych wtyczek (am_plugins)
 import 'am_plugins/plugins.just'
-import 'justfiles/ambero_dir.just'
-import 'justfiles/backup.just'
-import 'justfiles/refresh_plugins.just'
-import 'justfiles/plugin_show.just'
+
+# 4. Oficjalna logika frameworku (Przeniesione zadanie ambero)
+import 'am_just/official.just'
 
 # =============================================================================
-# GŁÓWNA LOGIKA CLI
+# SEKCJA: GŁÓWNA LOGIKA CLI I ZADANIA SYSTEMOWE
 # =============================================================================
 
+# Wyświetla listę wszystkich dostępnych poleceń frameworku
 @_default:
     just --list
 
-# =============================================================================
-# UKRYTE ZADANIA SYSTEMOWE
-# =============================================================================
+# [EDU] Zadanie help jest aliasem do listy, aby zachować intuicyjność CLI.
+help: _default
 
+# Klauzula bezpieczeństwa: Weryfikuje obecność pliku konfiguracyjnego.
+# Zapobiega błędom wykonania skryptów Amber przed inicjalizacją systemu.
 @_check_config:
     if [ ! -f "{{CONFIG_FILE}}" ]; then \
-        echo "❌ Błąd krytyczny: Brak pliku konfiguracyjnego {{CONFIG_FILE}}!"; \
-        echo "👉 Uruchom instalator (am_install/install.sh), aby wygenerować konfigurację."; \
+        echo "❌ Błąd krytyczny: Brak pliku konfiguracji {{CONFIG_FILE}}!"; \
+        echo "👉 Uruchom instalator (am_install/install.sh), aby wygenerować system."; \
         exit 1; \
     fi
 
 # =============================================================================
-# MODUŁ: OFFICIAL (AMBERO)
+# KOMENTARZ EDUKACYJNY (JUST)
 # =============================================================================
-
-# Główne powitanie, diagnostyka i podgląd konfiguracji Ambero Framework CLI
-ambero: _check_config
-	@rm -rf {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
-	@ln -sfn {{AMBERO_DIR}}/am_core {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
-	@amber run am_plugins/official/ambero/ambero_welcome.ab
-	@rm -rf {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
-	@ln -sfn {{AMBERO_DIR}}/am_core {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
-	@amber run am_plugins/official/ambero/ambero_info_dev.ab
-	@rm -rf {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
-	@ln -sfn {{AMBERO_DIR}}/am_core {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
-	@amber run am_plugins/official/ambero/ambero_dir_view.ab
-	@rm -rf {{AMBERO_DIR}}/am_plugins/official/ambero/am_core
+# 1. Używamy 'import' zamiast 'include', co jest standardem w nowym Just.
+# 2. Zmienne zdefiniowane w głównym Justfile są widoczne w importowanych plikach.
+# 3. Zadania zaczynające się od '_' są ukryte w widoku 'just --list'.
+# 4. Dyrektywa [no-cd] (jeśli użyta) zapobiega zmianie katalogu roboczego.
