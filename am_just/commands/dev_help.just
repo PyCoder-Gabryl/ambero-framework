@@ -6,10 +6,11 @@
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Interaktywny przewodnik dewelopera Ambero.
-#                   Dynamicznie wczytuje sekcje pomocy z katalogu dev_help.
+#                   Zawiera sztywno zdefiniowane menu nawigacyjne dla
+#                   zapewnienia maksymalnej stabilności interfejsu.
 # ----------------------------------------------------------------------------
-# PATH:            am_just/dev_help.just
-# VERSION:         0.1.2
+# PATH:            am_just/commands/dev_help.just
+# VERSION:         0.1.3
 # CREATED:         2026-07-20
 # ============================================================================
 
@@ -18,61 +19,69 @@ dev-help:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    # --- KONFIGURACJA ---
     HELP_DIR="{{AMBERO_DIR}}/am_just/dev_help"
 
-    # --- FUNKCJA: WYŚWIETLANIE MENU ---
-    show_menu() {
+    # [EDU] Wyświetlamy ekran powitalny (Splash Screen) przed wejściem w pętlę.
+    if test -f "$HELP_DIR/dev_help.txt"; then
+        clear
+        cat "$HELP_DIR/dev_help.txt"
+    fi
+
+    # --- GŁÓWNA PĘTLA INTERFEJSU ---
+    while true; do
         echo -e "\n{{clr_amber}}{{style_bold}}🛠️  AMBERO DEVELOPER GUIDE - MENU GŁÓWNE{{style_reset}}"
         echo -e "------------------------------------------------------------"
-
-        if test ! -d "$HELP_DIR"; then
-            echo -e "{{clr_error}}❌ Błąd: Katalog $HELP_DIR nie istnieje.{{style_reset}}"
-            return 1
-        fi
-
-        # Dynamiczne wykrywanie plików sekcji s1, s2...
-        local files=("$HELP_DIR"/dev_help_s*.txt)
-        if test ${#files[@]} -eq 0 || test ! -e "${files[0]}"; then
-            echo -e "{{clr_warn}}⚠️  Brak dostępnych sekcji pomocy w $HELP_DIR.{{style_reset}}"
-            return 0
-        fi
-
-        for f in "${files[@]}"; do
-            local fname=$(basename "$f")
-            local s_num=$(echo "$fname" | grep -oE "[0-9]+")
-            # Wyciąganie tytułu z pierwszej linii pliku
-            local title=$(head -n 1 "$f" | sed 's/^# //')
-            echo -e "{{clr_info}}$s_num){{style_reset}} $title"
-        done
+        echo -e "{{clr_info}}1){{style_reset}} ARCHITEKTURA I STRUKTURA KATALOGÓW"
+        echo -e "{{clr_info}}2){{style_reset}} TWORZENIE WTYCZEK (PLUGINS)"
+        echo -e "{{clr_info}}3){{style_reset}} JUST I INTEGRACJA SYSTEMOWA"
+        echo -e "{{clr_info}}4){{style_reset}} INTERFEJS, VERBOSITY I i18n"
         echo -e "{{clr_red}}q){{style_reset}} Wyjście"
-    }
 
-    # --- PĘTLA INTERAKTYWNA ---
-    # Wyświetlamy ekran powitalny przed wejściem w pętlę menu
-    test -f "$HELP_DIR/dev_help.txt" && clear && cat "$HELP_DIR/dev_help.txt"
-    while true; do
-        show_menu
-        echo -ne "\n{{clr_amber}}👉 Wybierz sekcję [1-9] lub q: {{style_reset}}"
+        echo -ne "\n{{clr_amber}}👉 Wybierz sekcję [1-4] lub q: {{style_reset}}"
         read -r choice < /dev/tty
 
+        # Obsługa wyjścia
         if [[ "$choice" == "q" ]]; then
-            echo -e "{{clr_info}}👋 Powodzenia w kodowaniu!{{style_reset}}"
+            echo -e "{{clr_info}}👋 Powodzenia w rozbudowie Ambero!{{style_reset}}"
             break
         fi
 
-        FILE="$HELP_DIR/dev_help_s${choice}.txt"
-        if test -f "$FILE"; then
-            if test -s "$FILE"; then
+        # Mapowanie wyboru na konkretny plik
+        case "$choice" in
+            1) FILE="dev_help_s1.txt" ;;
+            2) FILE="dev_help_s2.txt" ;;
+            3) FILE="dev_help_s3.txt" ;;
+            4) FILE="dev_help_s4.txt" ;;
+            *)
+                echo -e "{{clr_error}}❌ Nieprawidłowy wybór: $choice{{style_reset}}"
+                continue
+                ;;
+        esac
+
+        # --- WYŚWIETLANIE ZAWARTOŚCI ---
+        FULL_PATH="$HELP_DIR/$FILE"
+
+        if test -f "$FULL_PATH"; then
+            if test -s "$FULL_PATH"; then
                 clear
-                echo -e "{{clr_b_blue}}--- SEKCJA $choice ---{{style_reset}}\n"
-                cat "$FILE"
-                echo -e "\n{{clr_b_blue}}-------------------{{style_reset}}"
+                # Nagłówek sekcji pobrany z pierwszej linii pliku
+                SECTION_TITLE=$(head -n 1 "$FULL_PATH" | sed 's/^# //')
+                echo -e "{{clr_b_blue}}📘 SEKCJA $choice: $SECTION_TITLE{{style_reset}}"
+                echo -e "{{clr_blue}}------------------------------------------------------------{{style_reset}}\n"
+
+                cat "$FULL_PATH"
+
+                echo -e "\n{{clr_blue}}------------------------------------------------------------{{style_reset}}"
                 echo -ne "{{clr_warn}}Naciśnij ENTER, aby wrócić do menu...{{style_reset}}"
                 read -r _ < /dev/tty
+                clear
+                # Po powrocie z sekcji ponownie pokazujemy ekran powitalny dla kontekstu
+                test -f "$HELP_DIR/dev_help.txt" && cat "$HELP_DIR/dev_help.txt"
             else
-                echo -e "{{clr_warn}}⚠️  Sekcja $choice jest pusta.{{style_reset}}"
+                echo -e "{{clr_warn}}⚠️  Plik sekcji $choice istnieje, ale jest pusty.{{style_reset}}"
             fi
         else
-            echo -e "{{clr_error}}❌ Nieprawidłowy wybór.{{style_reset}}"
+            echo -e "{{clr_error}}❌ Błąd: Nie znaleziono pliku $FILE w $HELP_DIR{{style_reset}}"
         fi
     done
