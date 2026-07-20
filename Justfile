@@ -49,6 +49,7 @@ import 'am_just/platform/windows.just'
 import 'am_plugins/plugins.just'
 
 # 4. Oficjalna logika frameworku (Przeniesione zadanie ambero)
+import 'am_just/core.just'
 import 'am_just/official.just'
 
 # =============================================================================
