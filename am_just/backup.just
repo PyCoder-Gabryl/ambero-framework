@@ -5,59 +5,72 @@
 # EMAIL:           pycoder.gabryl@gmail.com
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
-# DESCRIPTION:      Moduł archiwizacji projektu. Pakuje strukturę frameworku
-#                   do formatu ZIP w celu udostępniania kodu (np. dla AI).
-#                   Pomija historię Git, logi oraz lokalną konfigurację.
+# DESCRIPTION:      Moduł archiwizacji projektu do komunikacji z ekspertem.
+#                   Tworzy paczkę ZIP zawierającą pełny kod i konfigurację,
+#                   czyszcząc wcześniej stare archiwa i pomijając śmieci.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/backup.just
-# VERSION:         0.2.0
+# VERSION:         0.2.1
 # CREATED:         2026-07-20
 # ============================================================================
 
 # ============================================================================
-# SEKCJA: GŁÓWNE ZADANIA ARCHIWIZACJI
+# SEKCJA: ZADANIA ARCHIWIZACJI (TRANSFER DO AI)
 # ============================================================================
 
-# Tworzy kopię zapasową projektu w formacie .zip (do wysłania mentorowi AI)
+# Pakuje projekt do ZIP (włącza config.toml, usuwa stare kopie, pomija śmieci)
 [no-cd]
 backup-project:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # --- KONFIGURACJA LOKALNA ---
+    # --- KONFIGURACJA ---
     B_DIR="{{BACKUP_DIR}}"
     A_DIR="{{AMBERO_DIR}}"
-    TS=$(date +"%Y%m%d_%H%M%S")
-    B_NAME="ambero_v{{AMBERO_VERSION}}_${TS}.zip"
+    # Nazwa pliku oparta na nazwie projektu (małe litery, bez spacji)
+    PROJ_SLUG="ambero"
+    B_NAME="${PROJ_SLUG}_v{{AMBERO_VERSION}}.zip"
 
-    echo -e "{{clr_info}}📦 Przygotowywanie archiwum projektu...{{style_reset}}"
+    echo -e "{{clr_info}}🧹 Czyszczenie starych kopii zapasowych...{{style_reset}}"
     mkdir -p "$B_DIR"
+    # Usuwamy wszystkie stare pliki .zip w katalogu backupów
+    rm -f "$B_DIR"/*.zip
 
-    # --- PROCES PAKOWANIA ---
-    # [EDU] Flaga -x pozwala wykluczyć wzorce plików. Używamy jej, aby archiwum
-    # było lekkie i nie zawierało prywatnych danych IDE ani ciężkiej historii Git.
-    # Wykluczamy też config.toml, aby nie przesyłać lokalnych ścieżek.
+    echo -e "{{clr_info}}📦 Pakowanie projektu dla mentora AI...{{style_reset}}"
+
+    # --- PROCES PAKOWANIA (STYL ADA - PRECYZYJNE WYKLUCZENIA) ---
+    # [EDU] Wykluczamy śmieci z 3 systemów (macOS, Linux, Win) oraz 2 IDE.
+    # Zostawiamy config.toml, aby ekspert widział pełny kontekst środowiska.
     cd "$A_DIR" && zip -r "$B_DIR/$B_NAME" . \
-        -x "backups/*" \
         -x ".git/*" \
         -x ".idea/*" \
-        -x "logs/*" \
+        -x ".vscode/*" \
         -x "*.iml" \
-        -x "am_config/config.toml" \
+        -x "logs/*" \
+        -x "backups/*" \
+        -x ".DS_Store" \
+        -x "__MACOSX" \
+        -x "Thumbs.db" \
+        -x "desktop.ini" \
+        -x "*~" \
+        -x "*.swp" \
+        -x ".fuse_hidden*" \
         > /dev/null
 
-    # --- RAPORTOWANIE ---
-    echo -e "{{clr_success}}✅ Kopia zapasowa została utworzona pomyślnie!{{style_reset}}"
-    echo -e "{{clr_amber}}📂 Lokalizacja:{{style_reset}} $B_DIR/$B_NAME"
+    # --- RAPORT KOŃCOWY ---
+    echo -e "{{clr_success}}✅ Archiwum gotowe do wysłania!{{style_reset}}"
+    echo -e "{{clr_amber}}📍 Ścieżka:{{style_reset}} $B_DIR/$B_NAME"
 
-    # Wyświetlenie rozmiaru archiwum dla pewności
-    ls -lh "$B_DIR/$B_NAME" | awk '{printf "📊 Rozmiar pliku: %s\n", $5}'
+    # Wyświetlenie rozmiaru paczki
+    SIZE=$(ls -lh "$B_DIR/$B_NAME" | awk '{print $5}')
+    echo -e "{{clr_info}}📊 Rozmiar paczki: $SIZE{{style_reset}}"
 
 # ============================================================================
-# KOMENTARZ EDUKACYJNY (JUST & BASH)
+# KOMENTARZ EDUKACYJNY (INŻYNIERIA WSTECZNA I TRANSFER)
 # ============================================================================
-# [EDU] 1. Atrybut [no-cd] gwarantuje, że Just nie zmieni katalogu przed
-#          uruchomieniem skryptu, co pozwala nam na ręczne sterowanie przez 'cd'.
-# [EDU] 2. Użycie 'set -euo pipefail' wewnątrz shebangu to standard Ada-style.
-#          Skrypt przerwie pracę, jeśli np. brakuje narzędzia 'zip'.
-# [EDU] 3. Zmienne Justa {{...}} są wstrzykiwane do skryptu przed jego startem.
+# [EDU] 1. 'rm -f "$B_DIR"/*.zip' przed pakowaniem zapewnia, że w folderze
+#          zawsze znajduje się tylko jedna, najświeższa wersja projektu.
+# [EDU] 2. Wykluczenie '.git/*' drastycznie zmniejsza rozmiar paczki, usuwając
+#          tysiące małych plików historii, które nie są potrzebne do analizy.
+# [EDU] 3. Włączenie 'config.toml' (poprzez brak wykluczenia) pozwala AI na
+#          zrozumienie Twoich lokalnych ścieżek i ustawień verbosity.
