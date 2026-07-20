@@ -20,5 +20,6 @@
 @_init-session:
     #!/usr/bin/env bash
     # Wykorzystujemy sumę kontrolną z czasu, aby uzyskać znaki alfanumeryczne
-    SESSION_ID=$(date +%s%N | md5sum | head -c 5 | tr '[:lower:]' '[:upper:]')
+    # Generujemy ID na podstawie nanosekund i unikalnego numeru procesu
+    SESSION_ID=$(echo "$$ $(date +%s%N)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
     echo "export AMBERO_SESSION_ID=$SESSION_ID"

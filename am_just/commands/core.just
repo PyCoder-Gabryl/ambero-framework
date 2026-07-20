@@ -11,18 +11,25 @@
 #                   oraz gwarantuje czystość środowiska dzięki mechanizmowi trap.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/core.just
-# VERSION:         0.1.2
+# VERSION:         0.1.3
 # CREATED:         2026-07-20
 # ============================================================================
 
 
-# [EDU] run-amber to serce integracji Just + Amber.
-# 1. Oblicza relatywną ścieżkę do wtyczki.
-# 2. Ustawia pułapkę (trap), która usunie symlink am_core nawet przy Ctrl+C.
-# 3. Tworzy symlink, aby wtyczka mogła używać 'import ... from "am_core/..."'.
-# 4. Uruchamia skrypt Amber w bezpiecznym kontekście.
+# [EDU] @_run-amber to teraz kontener typu Middleware.
+# 1. Inicjalizuje sesję (ID).
+# 2. Wyświetla profesjonalny nagłówek.
+# 3. Zarządza izolacją i sprzątaniem (Trap).
 @_run-amber plugin_path: _check_config
     @bash -c ' \
+        # --- KROK 1: INICJALIZACJA METADANYCH --- \
+        eval $(just _init-session); \ # [NOWA]
+        CMD_NAME=$(basename "{{plugin_path}}" .ab | tr "_" "-"); \ # [NOWA]
+        \
+        # --- KROK 2: WARSTWA PREZENTACJI (NAGŁÓWEK) --- \
+        just _ui-header "$CMD_NAME"; \ # [NOWA]
+        \
+        # --- KROK 3: IZOLACJA I URUCHOMIENIE --- \
         PLUGIN_DIR=$(dirname "{{plugin_path}}"); \
         FULL_PLUGIN_DIR="{{AMBERO_DIR}}/$PLUGIN_DIR"; \
         CORE_LINK="$FULL_PLUGIN_DIR/am_core"; \
