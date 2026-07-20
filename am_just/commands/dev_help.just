@@ -9,7 +9,7 @@
 #                   Dynamicznie wczytuje sekcje pomocy z katalogu dev_help.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/dev_help.just
-# VERSION:         0.1.1
+# VERSION:         0.1.2
 # CREATED:         2026-07-20
 # ============================================================================
 
@@ -48,6 +48,8 @@ dev-help:
     }
 
     # --- PĘTLA INTERAKTYWNA ---
+    # Wyświetlamy ekran powitalny przed wejściem w pętlę menu
+    test -f "$HELP_DIR/dev_help.txt" && clear && cat "$HELP_DIR/dev_help.txt"
     while true; do
         show_menu
         echo -ne "\n{{clr_amber}}👉 Wybierz sekcję [1-9] lub q: {{style_reset}}"

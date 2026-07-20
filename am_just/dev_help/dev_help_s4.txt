@@ -1,18 +1,18 @@
-# INTERFEJS, VERBOSITY I i18n
-# ============================================================================
-# Ambero komunikuje się z użytkownikiem w sposób kontrolowany.
-#
-# POZIOMY GADATLIWOŚCI (v=):
-# - quiet (q)   : Tylko surowy wynik. Brak pytań (auto-confirm).
-# - minimal (min): Tylko kluczowe statusy operacji.
-# - prod (p)    : Standardowe ramki, nagłówki i stopki.
-# - edu (e)     : Pełna informacja + bloki edukacyjne (EDU_CONTENT).
-# - dev (d)     : Debug: UUID sesji, ścieżki, kody wyjścia, zrzut zmiennych.
-#
-# MODYFIKATORY (mod=):
-# - log (l)     : Wyświetla ostatni wpis z JSONL po zakończeniu.
-# - mono (m)    : Wyłącza kolory ANSI (tryb czarno-biały).
-# - force (f)   : Ignoruje blokady czasowe (np. interwał 7 dni).
-# ============================================================================
-# [EDU] W Amberze 0.6.0-alpha znaki specjalne ($, {, }) wewnątrz stringów
-# definiujemy przez kody Unicode (\u0024, \u007b, \u007d), aby nie mylić parsera.
+INTERFEJS, VERBOSITY I i18n
+============================================================================
+Ambero komunikuje się z użytkownikiem w sposób kontrolowany.
+
+POZIOMY GADATLIWOŚCI (v=):
+– quiet (q)   : Tylko surowy wynik. Brak pytań (auto–confirm).
+– minimal (min): Tylko kluczowe statusy operacji.
+– prod (p)    : Standardowe ramki, nagłówki i stopki.
+– edu (e)     : Pełna informacja + bloki edukacyjne (EDU_CONTENT).
+– dev (d)     : Debug: UUID sesji, ścieżki, kody wyjścia, zrzut zmiennych.
+
+MODYFIKATORY (mod=):
+– log (l)     : Wyświetla ostatni wpis z JSONL po zakończeniu.
+– mono (m)    : Wyłącza kolory ANSI (tryb czarno–biały).
+– force (f)   : Ignoruje blokady czasowe (np. interwał 7 dni).
+============================================================================
+[EDU] W Amberze 0.6.0–alpha znaki specjalne ($, {, }) wewnątrz stringów
+definiujemy przez kody Unicode (\u0024, \u007b, \u007d), aby nie mylić parsera.
