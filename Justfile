@@ -17,6 +17,8 @@
 
 set shell := ["bash", "-c"]
 
+verbosity := "dev" # UWAGA: Zmienić na "normal" przed wydaniem wersji STABLE.
+
 # =============================================================================
 # SEKCJA: ZMIENNE GLOBALNE I KONFIGURACJA ŚRODOWISKA
 # =============================================================================
