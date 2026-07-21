@@ -11,7 +11,7 @@
 #                   Zapewnia izolację logiki poprzez delegację zadań.
 # -----------------------------------------------------------------------------
 # PATH:             Justfile
-# VERSION:          0.2.2
+# VERSION:          0.2.3
 # CREATED:          2026-07-16
 # =============================================================================
 
@@ -48,22 +48,23 @@ import 'am_just/commands/refresh_plugins.just'
 import 'am_just/commands/plugin_show.just'
 import 'am_just/commands/dev_help.just'
 
-# 2. Funkcje atomowe (am_just/lib)
+# 2. Funkcje atomowe i UI (am_just/lib) [ODBLOKOWANE I UPORZĄDKOWANE]
 import 'am_just/lib/check_config.just'
 import 'am_just/lib/session.just'
 import 'am_just/lib/timer.just'
+import 'am_just/lib/ui_frames.just'
+import 'am_just/lib/logger_peek.just'
+import 'am_just/lib/i18n_helper.just'
 
 # 3. Moduły specyficzne dla platformy
 import 'am_just/platform/macos.just'
 import 'am_just/platform/linux.just'
 import 'am_just/platform/windows.just'
-import 'am_just/lib/ui_frames.just'
-import 'am_just/lib/logger_peek.just'
 
 # 4. Rejestr dynamicznych wtyczek (am_plugins)
 import 'am_plugins/plugins.just'
 
-# 5. Oficjalna logika frameworku
+# 5. Oficjalna logika frameworku i wrappery
 import 'am_just/commands/core.just'
 import 'am_just/commands/official.just'
 
