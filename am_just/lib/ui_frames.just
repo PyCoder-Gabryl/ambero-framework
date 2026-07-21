@@ -15,7 +15,7 @@
 # ============================================================================
 
 
-@_ui-header command_name: # [ZMIANA] Dodano @
+@_ui-header command_name:
     #!/usr/bin/env bash
     if [[ "{{verbosity}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then
         echo -e "{{clr_amber}}┌──{{style_reset}} {{style_bold}}{{AMBERO_NAME}} v{{AMBERO_VERSION}}{{style_reset}} {{style_dim}}[ ID: $AMBERO_SESSION_ID ]{{style_reset}}"
@@ -23,7 +23,7 @@
         echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"
     fi
 
-@_ui-footer status duration: # [ZMIANA] Dodano @
+@_ui-footer status duration:
     #!/usr/bin/env bash
     SHOW_FOOTER=0
     if [[ "{{verbosity}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then SHOW_FOOTER=1; fi

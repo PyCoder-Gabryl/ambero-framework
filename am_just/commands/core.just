@@ -15,8 +15,7 @@
 # ============================================================================
 
 
-# Wrapper dla wtyczek Amber (.ab)
-@_run-amber plugin_path: _check_config # [ZMIANA] Dodano @
+@_run-amber plugin_path: _check_config
     #!/usr/bin/env bash
     set -uo pipefail
     eval "$(just _init-session)"
@@ -37,8 +36,7 @@
     just _log-peek
     exit $EXIT_CODE
 
-# Wrapper dla natywnych zadań Just
-@_run-just internal_recipe display_name: _check_config # [ZMIANA] Dodano @
+@_run-just internal_recipe display_name: _check_config
     #!/usr/bin/env bash
     set -uo pipefail
     eval "$(just _init-session)"

@@ -13,7 +13,7 @@
 # ============================================================================
 
 
-@_init-session: # [ZMIANA] Dodano @
+@_init-session:
     #!/usr/bin/env bash
     RAW_ID=$(echo "$$ $(date +%s)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
     SESSION_ID=${RAW_ID:-00000}
