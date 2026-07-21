@@ -14,6 +14,7 @@
 # CREATED:         2026-07-21
 # ============================================================================
 
+
 # Wrapper dla wtyczek Amber (.ab)
 @_run-amber plugin_path: _check_config
     #!/usr/bin/env bash
@@ -29,10 +30,8 @@
 
     # --- 3. IZOLACJA (SANDBOX) ---
     PLUGIN_DIR=$(dirname "{{plugin_path}}")
-    # [ZMIANA] Dodano cudzysłowy dla bezpieczeństwa ścieżek ze spacjami
     CORE_LINK="{{AMBERO_DIR}}/$PLUGIN_DIR/am_core"
 
-    # Trap gwarantuje czystość nawet przy błędzie lub Ctrl+C
     trap 'rm -f "$CORE_LINK"' EXIT INT TERM
     ln -sfn "{{AMBERO_DIR}}/am_core" "$CORE_LINK"
 
@@ -44,7 +43,6 @@
     DURATION=$(just _timer-stop)
     just _ui-footer "$EXIT_CODE" "$DURATION"
 
-    # [NOWA LINIA] Automatyczny podgląd logów (jeśli aktywny modyfikator 'log')
     just _log-peek
 
     exit $EXIT_CODE
@@ -69,7 +67,6 @@
     DURATION=$(just _timer-stop)
     just _ui-footer "$EXIT_CODE" "$DURATION"
 
-    # [NOWA LINIA] Automatyczny podgląd logów
     just _log-peek
 
     exit $EXIT_CODE
