@@ -10,9 +10,10 @@
 #                   Wersja 0.2.5: Pełna integracja z wrapperem UI.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/ambero_dir.just
-# VERSION:         0.2.5
+# VERSION:         0.2.6
 # CREATED:         2026-07-20
 # ============================================================================
+
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami
 map-paths:
@@ -49,6 +50,7 @@ _map-paths-logic:
 
     printf "\n[system]\ncore = \"am_core\"\nconfig = \"am_config\"\nlogs = \"logs\"\n" >> "$TMP_FILE"
     printf "\n[install]\nroot = \"am_install\"\nplatforms = \"am_install/lib/platforms\"\n" >> "$TMP_FILE"
+    printf "\n[just]\nroot = \"am_just\"\ncommands = \"am_just/commands\"\nlib = \"am_just/lib\"\n" >> "$TMP_FILE"
     printf "\n[plugins]\nroot = \"am_plugins\"\nexperimental = \"am_plugins/experimental\"\n" >> "$TMP_FILE"
     printf "official = \"am_plugins/official\"\nuser = \"am_plugins/user\"\n" >> "$TMP_FILE"
     printf "\n[i18n]\nroot = \"i18n\"\nen_experimental = \"i18n/en/experimental\"\n" >> "$TMP_FILE"

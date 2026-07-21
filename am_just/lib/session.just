@@ -15,11 +15,10 @@
 # !!! WARNING: SYSTEM FILE - DO NOT EDIT MANUALLY !!!
 # ============================================================================
 
-# [EDU] Generuje 5-znakowy ID sesji na podstawie nanosekund.
-#       Używamy 'export', aby ID było dostępne dla wszystkich skryptów Amber.
+# [EDU] Generuje 5-znakowy ID sesji.
+#       Używamy domyślnej wartości '00000' w razie błędu cksum.
 @_init-session:
     #!/usr/bin/env bash
-    # Wykorzystujemy sumę kontrolną z czasu, aby uzyskać znaki alfanumeryczne
-    # Generujemy ID na podstawie nanosekund i unikalnego numeru procesu
-    SESSION_ID=$(echo "$$ $(date +%s%N)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
+    RAW_ID=$(echo "$$ $(date +%s)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
+    SESSION_ID=${RAW_ID:-00000}
     echo "export AMBERO_SESSION_ID=$SESSION_ID"
