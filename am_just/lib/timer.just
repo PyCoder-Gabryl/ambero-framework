@@ -15,12 +15,19 @@
 
 @_timer-start:
     #!/usr/bin/env bash
-    MS=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    if command -v python3 >/dev/null 2>&1; then
+        MS=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    else
+        MS=$(date +%s)000
+    fi
     echo "export AMBERO_START_TIME=$MS"
 
 @_timer-stop:
     #!/usr/bin/env bash
-    END_TIME=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    START=${AMBERO_START_TIME:-$END_TIME}
-    DIFF=$((END_TIME - START))
+    if command -v python3 >/dev/null 2>&1; then
+        END=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    else
+        END=$(date +%s)000
+    fi
+    DIFF=$((END - ${AMBERO_START_TIME:-$END}))
     echo "$DIFF" | LC_NUMERIC=C awk '{printf "%.2f", $1/1000}'

@@ -15,6 +15,7 @@
 # ============================================================================
 
 
+# [ZMIANA] Dodano @ przed nazwami zadań, aby uciszyć wypisywanie kodu
 @_ui-header command_name:
     #!/usr/bin/env bash
     if [[ "{{verbosity}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then

@@ -19,5 +19,4 @@
     if [ ! -f "{{CONFIG_FILE}}" ]; then
         echo -e "{{clr_error}}❌ Błąd krytyczny: Brak pliku konfiguracji {{CONFIG_FILE}}!{{style_reset}}"
         echo -e "{{clr_warn}}👉 Uruchom instalator (am_install/install.sh), aby wygenerować system.{{style_reset}}"
-        exit 1
     fi
