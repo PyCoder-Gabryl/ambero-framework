@@ -30,4 +30,5 @@
         END=$(date +%s)000
     fi
     DIFF=$((END - ${AMBERO_START_TIME:-$END}))
-    echo "$DIFF" | LC_NUMERIC=C awk '{printf "%.2f", $1/1000}'
+    # [ZMIANA] Użycie LC_ALL=C gwarantuje kropkę dziesiętną na każdym systemie
+    echo "$DIFF" | LC_ALL=C awk '{printf "%.2f", $1/1000}'
