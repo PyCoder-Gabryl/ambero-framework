@@ -14,9 +14,8 @@
 
 
 
-@_check_config:
+@_check_config: # [ZMIANA] Dodano @
     #!/usr/bin/env bash
     if [ ! -f "{{CONFIG_FILE}}" ]; then
-        echo -e "{{clr_error}}❌ Błąd krytyczny: Brak pliku konfiguracji {{CONFIG_FILE}}!{{style_reset}}"
-        echo -e "{{clr_warn}}👉 Uruchom instalator (am_install/install.sh), aby wygenerować system.{{style_reset}}"
+        echo -e "{{clr_warn}}⚠️  Informacja: Brak pliku konfiguracji. Ambero użyje wartości domyślnych.{{style_reset}}"
     fi

@@ -13,21 +13,8 @@
 # ============================================================================
 
 
-@_timer-start:
+@_init-session: # [ZMIANA] Dodano @
     #!/usr/bin/env bash
-    if command -v python3 >/dev/null 2>&1; then
-        MS=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    else
-        MS=$(date +%s)000
-    fi
-    echo "export AMBERO_START_TIME=$MS"
-
-@_timer-stop:
-    #!/usr/bin/env bash
-    if command -v python3 >/dev/null 2>&1; then
-        END=$(python3 -c 'import time; print(int(time.time() * 1000))')
-    else
-        END=$(date +%s)000
-    fi
-    DIFF=$((END - ${AMBERO_START_TIME:-$END}))
-    echo "$DIFF" | LC_NUMERIC=C awk '{printf "%.2f", $1/1000}'
+    RAW_ID=$(echo "$$ $(date +%s)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
+    SESSION_ID=${RAW_ID:-00000}
+    echo "export AMBERO_SESSION_ID=$SESSION_ID"

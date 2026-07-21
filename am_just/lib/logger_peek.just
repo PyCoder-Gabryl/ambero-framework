@@ -13,8 +13,7 @@
 # ============================================================================
 
 
-
-@_log-peek:
+@_log-peek: # [ZMIANA] Dodano @
     #!/usr/bin/env bash
     if [[ "${AMBERO_MODIFIERS:-}" =~ (^|,)(log|l)(,|$) ]]; then
         LOG_FILE="{{AMBERO_DIR}}/logs/json/ambero.jsonl"
