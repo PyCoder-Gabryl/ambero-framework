@@ -11,12 +11,9 @@
 # VERSION:         0.1.0
 # CREATED:         2026-07-20
 # ============================================================================
-# !!! UWAGA: PLIK SYSTEMOWY - NIE EDYTUJ RĘCZNIE !!!
-# !!! WARNING: SYSTEM FILE - DO NOT EDIT MANUALLY !!!
-# ============================================================================
 
-# [EDU] Generuje 5-znakowy ID sesji.
-#       Używamy domyślnej wartości '00000' w razie błędu cksum.
+
+
 @_init-session:
     #!/usr/bin/env bash
     RAW_ID=$(echo "$$ $(date +%s)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
