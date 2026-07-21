@@ -57,6 +57,8 @@ import 'am_just/lib/timer.just'
 import 'am_just/platform/macos.just'
 import 'am_just/platform/linux.just'
 import 'am_just/platform/windows.just'
+import 'am_just/lib/ui_frames.just'
+import 'am_just/lib/logger_peek.just'
 
 # 4. Rejestr dynamicznych wtyczek (am_plugins)
 import 'am_plugins/plugins.just'

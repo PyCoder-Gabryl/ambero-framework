@@ -15,15 +15,17 @@
 # !!! WARNING: SYSTEM FILE - DO NOT EDIT MANUALLY !!!
 # ============================================================================
 
-# [EDU] Pobiera aktualny czas w milisekundach (Unix Epoch).
+# Pobiera aktualny czas w milisekundach (Cross-platform: macOS/Linux)
 @_timer-start:
     #!/usr/bin/env bash
-    echo "export AMBERO_START_TIME=$(date +%s%3N)"
+    # Używamy python3 dla milisekund, bo 'date' na macOS nie obsługuje %N
+    MS=$(python3 -c 'import time; print(int(time.time() * 1000))')
+    echo "export AMBERO_START_TIME=$MS"
 
-# [EDU] Oblicza różnicę między czasem startu a obecnym.
+# Oblicza różnicę czasu
 @_timer-stop:
     #!/usr/bin/env bash
-    END_TIME=$(date +%s%3N)
+    END_TIME=$(python3 -c 'import time; print(int(time.time() * 1000))')
     DIFF=$((END_TIME - AMBERO_START_TIME))
-    # Konwersja ms na sekundy z zachowaniem 2 miejsc po przecinku
-    printf "%.2f" $(echo "scale=3; $DIFF/1000" | bc)
+    # Obliczanie sekund przez awk dla pełnej przenośności
+    echo "$DIFF" | awk '{printf "%.2f", $1/1000}'
