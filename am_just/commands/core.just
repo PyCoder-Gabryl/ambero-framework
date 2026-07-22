@@ -10,16 +10,17 @@
 #                   wszystkich typów zadań we frameworku.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/core.just
-# VERSION:         0.3.0
+# VERSION:         0.3.1
 # CREATED:         2026-07-21
 # ============================================================================
 
 
 # Wrapper dla wtyczek Amber (.ab)
-@_run-amber plugin_path v=verbosity mod="": _check_config
+@_run-amber plugin_path v="" mod="": _check_config
     @set -uo pipefail; \
     eval "$(just _select-verbosity)"; \
     V_MODE="{{v}}"; \
+    [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
     [[ -n "${AMBERO_SESSION_V:-}" ]] && V_MODE="$AMBERO_SESSION_V"; \
     V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
     export AMBERO_VERBOSITY="$V_MODE"; \
@@ -41,10 +42,11 @@
     exit $EXIT_CODE
 
 # Wrapper dla natywnych zadań Just
-@_run-just internal_recipe display_name v=verbosity mod="": _check_config
+@_run-just internal_recipe display_name v="" mod="": _check_config
     @set -uo pipefail; \
     eval "$(just _select-verbosity)"; \
     V_MODE="{{v}}"; \
+    [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
     [[ -n "${AMBERO_SESSION_V:-}" ]] && V_MODE="$AMBERO_SESSION_V"; \
     V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
     export AMBERO_VERBOSITY="$V_MODE"; \
