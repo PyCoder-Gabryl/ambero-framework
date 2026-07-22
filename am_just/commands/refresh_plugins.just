@@ -11,9 +11,10 @@
 #                   Wersja 0.2.4: Integracja z wrapperem UI i fix błędu grep.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/refresh_plugins.just
-# VERSION:         0.2.4
+# VERSION:         0.2.6
 # CREATED:         2026-07-19
 # ============================================================================
+
 
 # Automatycznie skanuje am_plugins i rejestruje dynamicznie wykryte pliki .ab
 refresh-plugins:
@@ -25,15 +26,19 @@ _refresh-plugins-logic:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # [NOWE] Gwarancja istnienia katalogu przed rozpoczęciem generowania
-    mkdir -p "{{AMBERO_DIR}}/am_plugins"
-
-    echo -e "{{clr_info}}🔌 Odświeżanie i rejestracja wtyczek w systemie Ambero...{{style_reset}}"
-
+    # --- INICJALIZACJA ZMIENNYCH (Fix: nounset) ---
     AMBERO_DIR="{{AMBERO_DIR}}"
     OUT_FILE="$AMBERO_DIR/am_plugins/plugins.just"
     TMP_REG=$(mktemp)
+    P_CNT=0
+    T_COUNT=0
 
+    # Gwarancja istnienia katalogu przed rozpoczęciem generowania
+    mkdir -p "$AMBERO_DIR/am_plugins"
+
+    echo -e "{{clr_info}}🔌 Odświeżanie i rejestracja wtyczek w systemie Ambero...{{style_reset}}"
+
+    # Pobieramy listę starych zadań do wykrywania nowości
     OLD_TARGETS=$(grep -E "^[a-zA-Z0-9_-]+:" "$OUT_FILE" 2>/dev/null | cut -d: -f1 | tr "\n" " ") || true
 
     # --- GENEROWANIE NAGŁÓWKA REJESTRU ---
@@ -46,8 +51,80 @@ _refresh-plugins-logic:
     printf "# !!! WARNING: AUTOMATICALLY GENERATED FILE - DO NOT EDIT MANUALLY !!!\n" >> "$TMP_REG"
     printf "# ============================================================================\n\n" >> "$TMP_REG"
 
-    # ... (reszta logiki skanowania pozostaje bez zmian) ...
+    # --- PROCES SKANOWANIA ---
+    for type in official experimental user; do
+        TYPE_DIR="$AMBERO_DIR/am_plugins/$type"
+        printf "\n{{clr_b_purple}}📂 [FOLDER TYPU]: am_plugins/%s{{style_reset}}\n" "$type"
 
+        if test ! -d "$TYPE_DIR"; then
+            printf "  {{clr_yellow}}📂 (Katalog typów nie istnieje){{style_reset}}\n"
+            continue
+        fi
+
+        for vendor_path in "$TYPE_DIR"/*; do
+            if test -d "$vendor_path"; then
+                vendor_name=$(basename "$vendor_path")
+                printf "  ├── 🏢 [SPRAWDZAM DOSTAWCĘ]: {{clr_b_blue}}%s{{style_reset}}\n" "$vendor_name"
+
+                # Głębokie szukanie plików .ab
+                FOUND_FILES=$(find "$vendor_path" -type f -name "*.ab" | sort)
+
+                if test -z "$FOUND_FILES"; then
+                    printf "  │            {{clr_yellow}}📂 (Katalog dostawcy jest pusty){{style_reset}}\n"
+                fi
+
+                echo "$FOUND_FILES" | while read -r f_path; do
+                    test -z "$f_path" && continue
+                    f_name=$(basename "$f_path")
+                    rel_f_path=$(echo "$f_path" | sed "s|$AMBERO_DIR/||")
+                    rel_f_dir=$(dirname "$rel_f_path")
+
+                    # Weryfikacja czy plik jest wtyczką
+                    if ! grep -q "main[[:space:]]*{" "$f_path"; then
+                        printf "  │   ├── {{clr_yellow}}ℹ️  [NIE JEST WTYCZKĄ]: %s{{style_reset}}\n" "$f_name"
+                        continue
+                    fi
+
+                    # Ekstrakcja HELP-INFO
+                    INFO=$(awk 'BEGIN{IGNORECASE=1} /HELP-INFO/{sub(/^.*HELP-INFO[[:space:]]*:?[[:space:]]*/, ""); \
+                        print; exit}' "$f_path" | sed -E "s/^[[:space:]]*//; s/[[:space:]]*$//")
+
+                    raw_base="${f_name%.ab}"
+                    test "$f_name" != "${f_name%_test.ab}" && raw_base="${f_name%_test.ab}"
+                    target_name=$(echo "$raw_base" | tr "_" "-")
+                    test "$f_name" != "${f_name%_test.ab}" && target_name="${target_name}-test"
+
+                    # Wykrywanie nowości
+                    IS_NEW=""
+                    if [[ " $OLD_TARGETS " != *" $target_name "* ]]; then
+                        IS_NEW=" {{clr_b_green}}[NOWA]{{style_reset}}"
+                    fi
+
+                    # Raportowanie i inkrementacja liczników
+                    if test "$f_name" != "${f_name%_test.ab}"; then
+                        printf "  │   ├── 🧪 [WYKRYTO TEST]:   {{clr_cyan}}%-20s{{style_reset}} ➡️  {{clr_green}}%s{{style_reset}}%s\n" \
+                            "$f_name" "$target_name" "$IS_NEW"
+                        T_COUNT=$((T_COUNT + 1))
+                    else
+                        printf "  │   ├── 🟢 [WYKRYTO PLIK]:   {{clr_cyan}}%-20s{{style_reset}} ➡️  {{clr_green}}%s{{style_reset}}%s\n" \
+                            "$f_name" "$target_name" "$IS_NEW"
+                        P_CNT=$((P_CNT + 1))
+                    fi
+
+                    # --- GENEROWANIE ZADANIA JUST ---
+                    test -z "$INFO" && INFO="Wtyczka: $f_name"
+                    printf "# %s\n" "$INFO" >> "$TMP_REG"
+                    printf "%s: _check_config\n" "$target_name" >> "$TMP_REG"
+                    printf "    @bash -c 'trap \"rm -f \\\$PWD/%s/am_core\" EXIT INT TERM; \\\\\n" "$rel_f_dir" >> "$TMP_REG"
+                    printf "        ln -sfn {{AMBERO_DIR}}/am_core \\\\\n" >> "$TMP_REG"
+                    printf "        \"\\\$PWD/%s/am_core\"; \\\\\n" "$rel_f_dir" >> "$TMP_REG"
+                    printf "        amber run \"\\\$PWD/%s\"'\n\n" "$rel_f_path" >> "$TMP_REG"
+                done
+            fi
+        done
+    done
+
+    # --- FINALIZACJA ---
     mv "$TMP_REG" "$OUT_FILE"
 
     echo "------------------------------------------------------------"
