@@ -10,7 +10,7 @@
 #                   kompatybilności z różnymi szerokościami terminala.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_frames.just
-# VERSION:         0.3.0
+# VERSION:         0.3.2
 # CREATED:         2026-07-21
 # ============================================================================
 
@@ -26,9 +26,10 @@ msg_ui_error   := "BŁĄD"
 # SEKCJA: RENDEROWANIE RAMEK
 # ============================================================================
 
-# Wyświetla nagłówek zadania (widoczny w trybach: prod, edu, dev)
-@_ui-header command_name:
-    @if [[ "{{verbosity}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then \
+# Wyświetla nagłówek zadania (v pozwala na nadpisanie trybu globalnego)
+@_ui-header command_name v=verbosity:
+    @#!/usr/bin/env bash \
+    if [[ "{{v}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then \
         echo -n -e "{{clr_amber}}┌──{{style_reset}} {{style_bold}}{{AMBERO_NAME}} v{{AMBERO_VERSION}}{{style_reset}} "; \
         echo -e "{{style_dim}}[ ID: $AMBERO_SESSION_ID ]{{style_reset}}"; \
         echo -e "{{clr_amber}}│{{style_reset}} {{clr_info}}{{msg_ui_cmd}}{{style_reset}} {{command_name}}"; \
@@ -36,9 +37,10 @@ msg_ui_error   := "BŁĄD"
     fi
 
 # Wyświetla stopkę z czasem i statusem
-@_ui-footer status duration:
-    @SHOW_FOOTER=0; \
-    if [[ "{{verbosity}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then SHOW_FOOTER=1; fi; \
+@_ui-footer status duration v=verbosity:
+    @#!/usr/bin/env bash \
+    SHOW_FOOTER=0; \
+    if [[ "{{v}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then SHOW_FOOTER=1; fi; \
     if [[ "${AMBERO_MODIFIERS:-}" =~ (^|,)(time|t)(,|$) ]]; then SHOW_FOOTER=1; fi; \
     if [ "$SHOW_FOOTER" -eq 1 ]; then \
         FRAME_CLR="{{clr_amber}}"; \

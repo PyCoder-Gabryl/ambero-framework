@@ -10,18 +10,26 @@
 #                   wszystkich typów zadań we frameworku.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/core.just
-# VERSION:         0.2.5
+# VERSION:         0.3.0
 # CREATED:         2026-07-21
 # ============================================================================
 
 
 # Wrapper dla wtyczek Amber (.ab)
-@_run-amber plugin_path: _check_config
+# [EDU] v i mod mają domyślne wartości, co pozwala na wywołania: am task v=q
+@_run-amber plugin_path v=verbosity mod="": _check_config
     @set -uo pipefail; \
+    eval "$(just _select-verbosity)"; \
+    V_MODE="{{v}}"; \
+    [[ -n "${AMBERO_SESSION_V:-}" ]] && V_MODE="$AMBERO_SESSION_V"; \
+    V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
+    export AMBERO_VERBOSITY="$V_MODE"; \
+    export AMBERO_VERBOSITY_WEIGHT="$V_WEIGHT"; \
+    export AMBERO_MODIFIERS="{{mod}}"; \
     eval "$(just _init-session)"; \
     eval "$(just _timer-start)"; \
     CMD_NAME=$(basename "{{plugin_path}}" .ab | tr "_" "-"); \
-    just _ui-header "$CMD_NAME"; \
+    just _ui-header "$CMD_NAME" "$V_MODE"; \
     PLUGIN_DIR=$(dirname "{{plugin_path}}"); \
     CORE_LINK="{{AMBERO_DIR}}/$PLUGIN_DIR/am_core"; \
     trap 'rm -f "$CORE_LINK"' EXIT INT TERM; \
@@ -29,19 +37,26 @@
     EXIT_CODE=0; \
     amber run "{{AMBERO_DIR}}/{{plugin_path}}" || EXIT_CODE=$?; \
     DURATION=$(just _timer-stop); \
-    just _ui-footer "$EXIT_CODE" "$DURATION"; \
+    just _ui-footer "$EXIT_CODE" "$DURATION" "$V_MODE"; \
     just _log-peek; \
     exit $EXIT_CODE
 
 # Wrapper dla natywnych zadań Just
-@_run-just internal_recipe display_name: _check_config
+@_run-just internal_recipe display_name v=verbosity mod="": _check_config
     @set -uo pipefail; \
+    eval "$(just _select-verbosity)"; \
+    V_MODE="{{v}}"; \
+    [[ -n "${AMBERO_SESSION_V:-}" ]] && V_MODE="$AMBERO_SESSION_V"; \
+    V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
+    export AMBERO_VERBOSITY="$V_MODE"; \
+    export AMBERO_VERBOSITY_WEIGHT="$V_WEIGHT"; \
+    export AMBERO_MODIFIERS="{{mod}}"; \
     eval "$(just _init-session)"; \
     eval "$(just _timer-start)"; \
-    just _ui-header "{{display_name}}"; \
+    just _ui-header "{{display_name}}" "$V_MODE"; \
     EXIT_CODE=0; \
     just {{internal_recipe}} || EXIT_CODE=$?; \
     DURATION=$(just _timer-stop); \
-    just _ui-footer "$EXIT_CODE" "$DURATION"; \
+    just _ui-footer "$EXIT_CODE" "$DURATION" "$V_MODE"; \
     just _log-peek; \
     exit $EXIT_CODE
