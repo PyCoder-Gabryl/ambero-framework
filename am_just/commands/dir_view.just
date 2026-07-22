@@ -9,7 +9,7 @@
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
 #                   Wersja 0.2.9: Naprawa widoczności zadań dla wrappera.
 # ----------------------------------------------------------------------------
-# PATH:            am_just/commands/ambero_dir.just
+# PATH:            am_just/commands/dir_view.just
 # VERSION:         0.2.9
 # CREATED:         2026-07-20
 # ============================================================================

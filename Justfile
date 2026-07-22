@@ -63,7 +63,7 @@ import 'am_just/lib/logger_peek.just'
 import 'am_just/lib/i18n_helper.just'
 
 # 3. Polecenia techniczne (commands)
-import 'am_just/commands/ambero_dir.just'
+import 'am_just/commands/dir_view.just'
 import 'am_just/commands/backup.just'
 import 'am_just/commands/refresh_plugins.just'
 import 'am_just/commands/plugin_show.just'

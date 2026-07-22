@@ -9,7 +9,7 @@
 #                   Obsługuje logikę wag oraz interaktywny wybór trybu.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/verbosity.just
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-22
 # ============================================================================
 # !!! UWAGA: PLIK SYSTEMOWY - NIE EDYTUJ RĘCZNIE !!!
@@ -40,8 +40,10 @@
     @#!/usr/bin/env bash \
     if [ "{{IS_DEV_ENV}}" == "true" ]; then \
         if [ -z "${AMBERO_SESSION_V:-}" ]; then \
-            echo -e "{{clr_amber}}{{style_bold}}[ 🛠️  AMBERO DEV-MODE ]{{style_reset}}"; \
-            echo -ne "{{clr_info}}Wybierz tryb pracy [q/min/prod/edu/dev] (Enter=dev): {{style_reset}}"; \
+            echo -e "\n{{clr_amber}}{{style_bold}}┌── 🛠️  AMBERO INTERACTIVE SESSION SETUP{{style_reset}}"; \
+            echo -e "{{clr_amber}}│{{style_reset}} {{clr_info}}Wykryto środowisko projektowe (DEV).{{style_reset}}"; \
+            echo -e "{{clr_amber}}│{{style_reset}} Wybierz głośność [q/min/prod/edu/dev] (Enter=dev): "; \
+            echo -n -e "{{clr_amber}}└──{{style_reset}} 👉 " > /dev/tty; \
             read -r user_v < /dev/tty; \
             FINAL_V=${user_v:-dev}; \
             echo "export AMBERO_SESSION_V=$FINAL_V"; \
