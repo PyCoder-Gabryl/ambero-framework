@@ -9,7 +9,7 @@
 #                   Wersja 0.3.4: Dynamiczne etykiety trybów pracy (Verbosity).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_frames.just
-# VERSION:         0.3.4
+# VERSION:         0.3.5
 # CREATED:         2026-07-21
 # ============================================================================
 
@@ -26,7 +26,7 @@ msg_ui_error   := "BŁĄD"
 # SEKCJA: RENDEROWANIE RAMEK UI
 # ============================================================================
 
-# Wyświetla nagłówek zadania (v pozwala na nadpisanie trybu globalnego)
+# Wyświetla nagłówek zadania (v0.3.5: zamiana kolejności trybu i polecenia)
 @_ui-header command_name v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
@@ -37,13 +37,14 @@ msg_ui_error   := "BŁĄD"
                 "edu"|"e") MODE_LBL="{{clr_b_purple}}EDU{{style_reset}}" ;; \
                 "dev"|"d") MODE_LBL="{{clr_b_yellow}}DEV{{style_reset}}" ;; \
             esac; \
-            MODE_INFO=" [ {{msg_ui_mode}} $MODE_LBL ]"; \
+            MODE_INFO="[ {{msg_ui_mode}} $MODE_LBL ]   "; \
         fi; \
         echo -n -e "{{clr_amber}}┌──{{style_reset}} {{style_bold}}{{AMBERO_NAME}} v{{AMBERO_VERSION}}{{style_reset}} "; \
         echo -e "{{style_dim}}[ ID: $AMBERO_SESSION_ID ]{{style_reset}}"; \
-        echo -e "{{clr_amber}}│{{style_reset}} {{clr_info}}{{msg_ui_cmd}}{{style_reset}} {{command_name}}$MODE_INFO"; \
+        echo -e "{{clr_amber}}│{{style_reset}} ${MODE_INFO}{{clr_info}}{{msg_ui_cmd}}{{style_reset}} {{command_name}}"; \
         echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
+
 
 # Wyświetla stopkę z czasem i statusem
 @_ui-footer status duration v="":
