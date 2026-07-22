@@ -9,18 +9,18 @@
 #                   Wersja 0.3.4: Dynamiczne etykiety trybów pracy (Verbosity).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_frames.just
-# VERSION:         0.3.5
+# VERSION:         0.3.6
 # CREATED:         2026-07-21
 # ============================================================================
 
 
 # --- SEKCJA: ETIKIETY KOMUNIKATÓW (i18n Ready) ---
-msg_ui_cmd     := "POLECENIE:"
-msg_ui_mode    := "TRYB:"
+msg_ui_cmd     := "🚀 POLECENIE:"
+msg_ui_mode    := "⚙️ TRYB:"
 msg_ui_time    := "⏳ CZAS:"
 msg_ui_status  := "STATUS:"
-msg_ui_success := "SUKCES (0)"
-msg_ui_error   := "BŁĄD"
+msg_ui_success := "✅ SUKCES (0)"
+msg_ui_error   := "❌ BŁĄD"
 
 # ============================================================================
 # SEKCJA: RENDEROWANIE RAMEK UI
