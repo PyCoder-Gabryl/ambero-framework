@@ -10,7 +10,7 @@
 #                   wszystkich typów zadań we frameworku.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/core.just
-# VERSION:         0.3.2
+# VERSION:         0.3.3
 # CREATED:         2026-07-21
 # ============================================================================
 
@@ -41,26 +41,22 @@
     just _log-peek; \
     exit $EXIT_CODE
 
-# Wrapper dla natywnych zadań Just (v0.3.2: obsługa auto-edu)
+# Wrapper dla natywnych zadań Just (v0.3.3: usunięto interakcję dla stabilności)
 @_run-just internal_recipe display_name v="" mod="": _check_config
     @set -uo pipefail; \
-    eval "$(just _select-verbosity)"; \
     V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
-    [[ -n "${AMBERO_SESSION_V:-}" ]] && V_MODE="$AMBERO_SESSION_V"; \
     V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
     export AMBERO_VERBOSITY="$V_MODE"; \
     export AMBERO_VERBOSITY_WEIGHT="$V_WEIGHT"; \
-    export AMBERO_MODIFIERS="{{mod}}"; \
+    MODS="{{mod}}"; [[ -z "$MODS" ]] && MODS="{{modifiers}}"; \
+    export AMBERO_MODIFIERS="$MODS"; \
     eval "$(just _init-session)"; \
     eval "$(just _timer-start)"; \
     just _ui-header "{{display_name}}" "$V_MODE"; \
-    \
-    # [NOWE] Wywołanie bloku EDU jeśli tryb na to pozwala \
     if [ "$V_WEIGHT" -ge 3 ]; then \
         just --allow-missing "{{internal_recipe}}-edu" 2>/dev/null || true; \
     fi; \
-    \
     EXIT_CODE=0; \
     just {{internal_recipe}} || EXIT_CODE=$?; \
     DURATION=$(just _timer-stop); \

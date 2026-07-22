@@ -7,15 +7,11 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
-#                   Wersja 0.3.0: Inteligentne wnioskowanie hierarchii drzewa.
+#                   Wersja 0.3.0: Inteligentne wnioskowanie hierarchii.
 # ----------------------------------------------------------------------------
-# PATH:            am_just/commands/ambero_dir.just
+# PATH:            am_just/commands/dir_view.just
 # VERSION:         0.3.0
 # CREATED:         2026-07-20
-# ============================================================================
-
-# ============================================================================
-# SEKCJA: ZADANIA PUBLICZNE (INTERFEJS)
 # ============================================================================
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w am_config/
@@ -26,20 +22,12 @@ map-paths:
 dir-view:
     @just _run-just "_dir-view-logic" "dir-view"
 
-# ============================================================================
-# SEKCJA: EDUKACJA (EDU BLOCKS)
-# ============================================================================
-
 # [EDU] Wyjaśnienie roli mapowania ścieżek w architekturze frameworku.
 @_dir-view-logic-edu:
     @just _ui-msg 3 "Plik ambero_paths.toml to 'mapa drogowa' systemu."
     @just _ui-msg 3 "Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber."
-    @just _ui-msg 3 "Dzięki temu wtyczki mogą być przenoszone między folderami"
-    @just _ui-msg 3 "bez konieczności rekompilacji lub zmiany logiki."
 
-# ============================================================================
-# SEKCJA: LOGIKA WEWNĘTRZNA (UKRYTA)
-# ============================================================================
+# --- LOGIKA WEWNĘTRZNA (UKRYTA) ---
 
 [no-cd]
 _map-paths-logic:
@@ -72,29 +60,6 @@ _map-paths-logic:
     printf "pl_experimental = \"i18n/pl/experimental\"\npl_official = \"i18n/pl/official\"\n" >> "$TMP_FILE"
     printf "pl_user = \"i18n/pl/user\"\n" >> "$TMP_FILE"
 
-    if test -f "$TARGET"; then
-        echo -e "\n{{clr_warn}}⚠️  Plik am_config/ambero_paths.toml już istnieje.{{style_reset}}"
-        echo -n "🤔 Czy chcesz go nadpisać i zobaczyć zmiany? [y/N]: "
-        read -r CONFIRM < /dev/tty
-        if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
-            echo "❌ Anulowano."; rm "$TMP_FILE"; exit 0
-        fi
-        echo -e "\n📊 PODSUMOWANIE ZMIAN W STRUKTURZE:"
-        echo "------------------------------------------------------------"
-        FLAT_OLD=$(mktemp); FLAT_NEW=$(mktemp)
-        awk '!/^#/ && /^\[/{gsub(/[\[\]]/, "", $0); s=$0; next} !/^#/ && /=/{gsub(/[ "]/, "", $0); print s "." $0}' "$TARGET" > "$FLAT_OLD"
-        awk '!/^#/ && /^\[/{gsub(/[\[\]]/, "", $0); s=$0; next} !/^#/ && /=/{gsub(/[ "]/, "", $0); print s "." $0}' "$TMP_FILE" > "$FLAT_NEW"
-        while IFS= read -r line; do
-            key=$(echo "$line" | cut -d= -f1); val=$(echo "$line" | cut -d= -f2)
-            if grep -q "^$key=" "$FLAT_OLD"; then
-                old_val=$(grep "^$key=" "$FLAT_OLD" | cut -d= -f2)
-                if [ "$old_val" = "$val" ]; then echo "⚪ [BEZ ZMIAN]  $key"
-                else echo "🟡 [ZMIENIONO] $key: $old_val ➡️  $val"; fi
-            else echo "🟢 [NOWY]      $key"; fi
-        done < "$FLAT_NEW"
-        rm "$FLAT_OLD" "$FLAT_NEW"
-        echo "------------------------------------------------------------"
-    fi
     mv "$TMP_FILE" "$TARGET"
     echo -e "{{clr_success}}✅ Gotowe! Zapisano w: am_config/ambero_paths.toml{{style_reset}}"
     just _dir-view-logic
@@ -104,10 +69,7 @@ _dir-view-logic:
     #!/usr/bin/env bash
     set -euo pipefail
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"
-    if test ! -f "$TARGET"; then
-        echo -e "{{clr_error}}❌ Błąd: Plik konfiguracyjny nie istnieje!{{style_reset}}"
-        exit 1
-    fi
+    test ! -f "$TARGET" && { echo "❌ Błąd: Brak pliku ścieżek!"; exit 1; }
     echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:"
     echo "=================================================="
     LAST_LANG=""
@@ -117,21 +79,17 @@ _dir-view-logic:
         if [[ "$line" =~ ^\[.*\]$ ]]; then
             section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
             case "$section" in
-                SYSTEM)  ICON="🖥️ " ;; INSTALL) ICON="📦 " ;;
-                JUST)    ICON="⚙️ " ;; PLUGINS) ICON="🔌 " ;;
-                I18N)    ICON="🌐 " ;; *)       ICON="🔷 " ;;
+                SYSTEM) ICON="🖥️ " ;; INSTALL) ICON="📦 " ;; JUST) ICON="⚙️ " ;;
+                PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;; *) ICON="🔷 " ;;
             esac
             echo -e "\n${ICON}SEKCJA: $section"
             echo "--------------------------------------------------"
             LAST_LANG=""
         elif [[ "$line" =~ = ]]; then
             key=$(echo "$line" | cut -d"=" -f1 | tr -d " ")
-            val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")
-
-            # --- LOGIKA WNIOSKOWANIA HIERARCHII (I18N / PLUGINS) ---
+            val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"" | sed 's/^[[:space:]]*//')
             if [[ "$val" =~ ^i18n/([a-z]{2})/(.*) ]]; then
-                CUR_LANG="${BASH_REMATCH[1]}"
-                SUB_PATH="${BASH_REMATCH[2]}"
+                CUR_LANG="${BASH_REMATCH[1]}"; SUB_PATH="${BASH_REMATCH[2]}"
                 if [ "$CUR_LANG" != "$LAST_LANG" ]; then
                     printf "  ├── 🌎 JĘZYK: \x1b[1;35m%s\x1b[0m\n" "$CUR_LANG"
                     LAST_LANG="$CUR_LANG"
