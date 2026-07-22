@@ -13,6 +13,7 @@
 # ============================================================================
 
 
+# [ZMIANA] Dodano pełny fallback na wypadek braku Pythona w systemie
 @_timer-start:
     @if command -v python3 >/dev/null 2>&1; then \
         MS=$(python3 -c 'import time; print(int(time.time() * 1000))'); \

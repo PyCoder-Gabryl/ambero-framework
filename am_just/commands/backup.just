@@ -19,58 +19,35 @@
 # ============================================================================
 
 # Pakuje projekt do ZIP (włącza config.toml, usuwa stare kopie, pomija śmieci)
-[no-cd]
 backup-project:
+    @just _run-just "_backup-project-logic" "backup-project" # [ZMIANA] Podpięcie pod wrapper
+
+[private]
+[no-cd]
+_backup-project-logic: # [ZMIANA] Przeniesienie logiki do zadania prywatnego
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # --- KONFIGURACJA ---
     B_DIR="{{BACKUP_DIR}}"
     A_DIR="{{AMBERO_DIR}}"
-    # Nazwa pliku oparta na nazwie projektu (małe litery, bez spacji)
     PROJ_SLUG="ambero"
     B_NAME="${PROJ_SLUG}_v{{AMBERO_VERSION}}.zip"
 
     echo -e "{{clr_info}}🧹 Czyszczenie starych kopii zapasowych...{{style_reset}}"
     mkdir -p "$B_DIR"
-    # Usuwamy wszystkie stare pliki .zip w katalogu backupów
     rm -f "$B_DIR"/*.zip
 
     echo -e "{{clr_info}}📦 Pakowanie projektu dla mentora AI...{{style_reset}}"
 
-    # --- PROCES PAKOWANIA (STYL ADA - PRECYZYJNE WYKLUCZENIA) ---
-    # [EDU] Wykluczamy śmieci z 3 systemów (macOS, Linux, Win) oraz 2 IDE.
-    # Zostawiamy config.toml, aby ekspert widział pełny kontekst środowiska.
     cd "$A_DIR" && zip -r "$B_DIR/$B_NAME" . \
-        -x ".git/*" \
-        -x ".idea/*" \
-        -x ".vscode/*" \
-        -x "*.iml" \
-        -x "logs/*" \
-        -x "backups/*" \
-        -x ".DS_Store" \
-        -x "__MACOSX" \
-        -x "Thumbs.db" \
-        -x "desktop.ini" \
-        -x "*~" \
-        -x "*.swp" \
+        -x ".git/*" -x ".idea/*" -x ".vscode/*" -x "*.iml" \
+        -x "logs/*" -x "backups/*" -x ".DS_Store" -x "__MACOSX" \
+        -x "Thumbs.db" -x "desktop.ini" -x "*~" -x "*.swp" \
         -x ".fuse_hidden*" \
         > /dev/null
 
-    # --- RAPORT KOŃCOWY ---
     echo -e "{{clr_success}}✅ Archiwum gotowe do wysłania!{{style_reset}}"
     echo -e "{{clr_amber}}📍 Ścieżka:{{style_reset}} $B_DIR/$B_NAME"
 
-    # Wyświetlenie rozmiaru paczki
     SIZE=$(ls -lh "$B_DIR/$B_NAME" | awk '{print $5}')
     echo -e "{{clr_info}}📊 Rozmiar paczki: $SIZE{{style_reset}}"
-
-# ============================================================================
-# KOMENTARZ EDUKACYJNY (INŻYNIERIA WSTECZNA I TRANSFER)
-# ============================================================================
-# [EDU] 1. 'rm -f "$B_DIR"/*.zip' przed pakowaniem zapewnia, że w folderze
-#          zawsze znajduje się tylko jedna, najświeższa wersja projektu.
-# [EDU] 2. Wykluczenie '.git/*' drastycznie zmniejsza rozmiar paczki, usuwając
-#          tysiące małych plików historii, które nie są potrzebne do analizy.
-# [EDU] 3. Włączenie 'config.toml' (poprzez brak wykluczenia) pozwala AI na
-#          zrozumienie Twoich lokalnych ścieżek i ustawień verbosity.
