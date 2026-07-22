@@ -6,30 +6,32 @@
 # LICENSE:         Apache 2.0
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Interaktywny przewodnik dewelopera Ambero.
-#                   Zapewnia dostęp do ustandaryzowanej bazy wiedzy
-#                   dotyczącej architektury, wtyczek i silnika Just.
+#                   Zapewnia dostęp do ustandaryzowanej bazy wiedzy.
+#                   Wersja 0.2.1: Pełna integracja z wrapperem UI.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/dev_help.just
-# VERSION:         0.2.0
+# VERSION:         0.2.1
 # CREATED:         2026-07-20
 # ============================================================================
 
 # Wyświetla interaktywny przewodnik dla deweloperów frameworku Ambero
 dev-help:
+    @just _run-just "_dev-help-logic" "dev-help"
+
+# ============================================================================
+# SEKCJA: LOGIKA WEWNĘTRZNA (UKRYTA)
+# ============================================================================
+
+[private]
+[no-cd]
+_dev-help-logic:
     #!/usr/bin/env bash
-    # [EDU] set -euo pipefail:
-    # -e: kończy skrypt przy błędzie dowolnej komendy.
-    # -u: traktuje niezdefiniowane zmienne jako błąd.
-    # -o pipefail: wyłapuje błędy ukryte wewnątrz potoków (pipes).
     set -euo pipefail
 
-    # ============================================================================
-    # SEKCJA: KONFIGURACJA ŚCIEŻEK I ŚRODOWISKA
-    # ============================================================================
+    # --- KONFIGURACJA ŚRODOWISKA ---
     HELP_DIR="{{AMBERO_DIR}}/am_just/dev_help"
 
-    # --- FUNKCJA: POWITANIE ---
-    # Wyświetla główny ekran powitalny (Splash Screen)
+    # [EDU] Funkcja pomocnicza do odświeżania ekranu powitalnego.
     show_splash() {
         if test -f "$HELP_DIR/dev_help.txt"; then
             clear
@@ -37,11 +39,9 @@ dev-help:
         fi
     }
 
-    # ============================================================================
-    # SEKCJA: GŁÓWNA PĘTLA INTERFEJSU (UI LOOP)
-    # ============================================================================
     show_splash
 
+    # --- GŁÓWNA PĘTLA INTERFEJSU ---
     while true; do
         echo -e "\n{{clr_amber}}{{style_bold}}🛠️  AMBERO DEVELOPER GUIDE - MENU GŁÓWNE{{style_reset}}"
         echo -e "----------------------------------------------------------------------------"
@@ -53,19 +53,15 @@ dev-help:
 
         echo -ne "\n{{clr_amber}}👉 Wybierz sekcję [1-4] lub q: {{style_reset}}"
 
-        # [EDU] Przekierowanie < /dev/tty jest kluczowe. Pozwala na odczyt wejścia
-        # bezpośrednio z klawiatury użytkownika, nawet jeśli Just jest częścią
-        # większego potoku poleceń lub skryptu.
+        # Odczyt bezpośrednio z terminala (standard Ada-style dla interakcji)
         read -r choice < /dev/tty
 
-        # --- OBSŁUGA WYJŚCIA ---
         if [[ "$choice" == "q" ]]; then
             echo -e "{{clr_info}}👋 Powodzenia w rozbudowie Ambero!{{style_reset}}"
             break
         fi
 
-        # --- LOGIKA WYBORU SEKCI (DYNAMICZNA) ---
-        # Sprawdzamy czy wybór jest liczbą i czy odpowiadający plik istnieje
+        # Dynamiczne mapowanie plików sekcji
         if [[ "$choice" =~ ^[0-9]+$ ]]; then
             FILE="dev_help_s${choice}.txt"
             FULL_PATH="$HELP_DIR/$FILE"
@@ -73,7 +69,6 @@ dev-help:
             if test -f "$FULL_PATH"; then
                 if test -s "$FULL_PATH"; then
                     clear
-                    # Pobieramy tytuł z pierwszej linii pliku (format: # Tytuł)
                     SECTION_TITLE=$(head -n 1 "$FULL_PATH" | sed 's/^# //')
                     echo -e "{{clr_b_blue}}📘 SEKCJA $choice: $SECTION_TITLE{{style_reset}}"
                     echo -e "{{clr_blue}}----------------------------------------------------------------------------{{style_reset}}\n"
