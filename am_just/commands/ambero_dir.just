@@ -7,34 +7,43 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
-#                   Wersja 0.2.5: Pełna integracja z wrapperem UI.
+#                   Wersja 0.2.9: Naprawa widoczności zadań dla wrappera.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/ambero_dir.just
-# VERSION:         0.2.6
+# VERSION:         0.2.9
 # CREATED:         2026-07-20
 # ============================================================================
 
+# ============================================================================
+# SEKCJA: ZADANIA PUBLICZNE (INTERFEJS)
+# ============================================================================
 
+# Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w am_config/
 map-paths:
     @just _run-just "_map-paths-logic" "map-paths"
 
+# Drukuje zmapowane sekcje i ścieżki w czytelny sposób (widok drzewa)
 dir-view:
     @just _run-just "_dir-view-logic" "dir-view"
 
-# --- LOGIKA WEWNĘTRZNA (UKRYTA) ---
+# ============================================================================
+# SEKCJA: LOGIKA WEWNĘTRZNA (UKRYTA)
+# ============================================================================
 
-[private]
+# [EDU] Zadania techniczne zaczynają się od '_'. Są ukryte w helpie,
+#       ale dostępne dla wrappera _run-just. Nie używamy [private].
+
 [no-cd]
 _map-paths-logic:
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "🚀 Inicjalizacja mapowania ścieżek frameworku..."
+    # --- INICJALIZACJA ---
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"
     HEADER_TMPL="{{AMBERO_DIR}}/am_config/templates/header_generated.txt"
     TMP_FILE=$(mktemp)
     GEN_DATE=$(date "+%Y-%m-%d %H:%M:%S")
     DESC="Automatyczny rejestr ścieżek systemowych frameworku Ambero."
-
+    # --- GENEROWANIE NAGŁÓWKA ---
     if test -f "$HEADER_TMPL"; then
         sed -e "s/{{ "{{" }}PROJECT_NAME}}/{{AMBERO_NAME}}/g" \
             -e "s/{{ "{{" }}GEN_DATE}}/$GEN_DATE/g" \
@@ -45,7 +54,7 @@ _map-paths-logic:
     else
         echo "# Generated: $GEN_DATE" > "$TMP_FILE"
     fi
-
+    # --- GENEROWANIE TREŚCI TOML ---
     printf "\n[system]\ncore = \"am_core\"\nconfig = \"am_config\"\nlogs = \"logs\"\n" >> "$TMP_FILE"
     printf "\n[install]\nroot = \"am_install\"\nplatforms = \"am_install/lib/platforms\"\n" >> "$TMP_FILE"
     printf "\n[just]\nroot = \"am_just\"\ncommands = \"am_just/commands\"\nlib = \"am_just/lib\"\n" >> "$TMP_FILE"
@@ -55,16 +64,16 @@ _map-paths-logic:
     printf "en_official = \"i18n/en/official\"\nen_user = \"i18n/en/user\"\n" >> "$TMP_FILE"
     printf "pl_experimental = \"i18n/pl/experimental\"\npl_official = \"i18n/pl/official\"\n" >> "$TMP_FILE"
     printf "pl_user = \"i18n/pl/user\"\n" >> "$TMP_FILE"
-
+    # --- PORÓWNANIE I AKTUALIZACJA ---
     if test -f "$TARGET"; then
-        echo "⚠️  Plik am_config/ambero_paths.toml już istnieje."
+        echo -e "\n{{clr_warn}}⚠️  Plik am_config/ambero_paths.toml już istnieje.{{style_reset}}"
         echo -n "🤔 Czy chcesz go nadpisać i zobaczyć zmiany? [y/N]: "
         read -r CONFIRM < /dev/tty
         if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
             echo "❌ Anulowano."; rm "$TMP_FILE"; exit 0
         fi
         echo -e "\n📊 PODSUMOWANIE ZMIAN W STRUKTURZE:"
-        echo "-------------------------------------"
+        echo "------------------------------------------------------------"
         FLAT_OLD=$(mktemp); FLAT_NEW=$(mktemp)
         awk '!/^#/ && /^\[/{gsub(/[\[\]]/, "", $0); s=$0; next} !/^#/ && /=/{gsub(/[ "]/, "", $0); print s "." $0}' "$TARGET" > "$FLAT_OLD"
         awk '!/^#/ && /^\[/{gsub(/[\[\]]/, "", $0); s=$0; next} !/^#/ && /=/{gsub(/[ "]/, "", $0); print s "." $0}' "$TMP_FILE" > "$FLAT_NEW"
@@ -77,20 +86,19 @@ _map-paths-logic:
             else echo "🟢 [NOWY]      $key"; fi
         done < "$FLAT_NEW"
         rm "$FLAT_OLD" "$FLAT_NEW"
-        echo "-------------------------------------"
+        echo "------------------------------------------------------------"
     fi
     mv "$TMP_FILE" "$TARGET"
-    echo "✅ Gotowe! Zapisano w: am_config/ambero_paths.toml"
+    echo -e "{{clr_success}}✅ Gotowe! Zapisano w: am_config/ambero_paths.toml{{style_reset}}"
     just _dir-view-logic
 
-[private]
 [no-cd]
 _dir-view-logic:
     #!/usr/bin/env bash
     set -euo pipefail
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"
     if test ! -f "$TARGET"; then
-        echo "❌ Błąd: Plik konfiguracyjny nie istnieje!"
+        echo -e "{{clr_error}}❌ Błąd: Plik konfiguracyjny nie istnieje!{{style_reset}}"
         exit 1
     fi
     echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:"
@@ -100,12 +108,24 @@ _dir-view-logic:
         [[ -z "$(echo "$line" | tr -d '[:space:]')" ]] && continue
         if [[ "$line" =~ ^\[.*\]$ ]]; then
             section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
-            echo -e "\n🔷 SEKCJA: $section"
+            case "$section" in
+                SYSTEM)  ICON="🖥️ " ;;
+                INSTALL) ICON="📦 " ;;
+                JUST)    ICON="⚙️ " ;;
+                PLUGINS) ICON="🔌 " ;;
+                I18N)    ICON="🌐 " ;;
+                *)       ICON="🔷 " ;;
+            esac
+            echo -e "\n${ICON}SEKCJA: $section"
             echo "--------------------------------------------------"
         elif [[ "$line" =~ = ]]; then
             key=$(echo "$line" | cut -d"=" -f1 | tr -d " ")
             val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")
-            printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+            if [[ "$key" =~ ^(root|core|config|logs)$ ]]; then
+                printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+            else
+                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+            fi
         fi
     done < "$TARGET"
     echo -e "==================================================\n"
