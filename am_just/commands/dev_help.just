@@ -34,8 +34,10 @@ _dev-help-logic:
     # [EDU] Funkcja pomocnicza do odświeżania ekranu powitalnego.
     show_splash() {
         if test -f "$HELP_DIR/dev_help.txt"; then
-            clear
-            cat "$HELP_DIR/dev_help.txt"
+        clear
+        # [NOWE] Przywrócenie nagłówka po wyczyszczeniu ekranu
+        just _ui-header "dev-help"
+        cat "$HELP_DIR/dev_help.txt"
         fi
     }
 
@@ -69,7 +71,11 @@ _dev-help-logic:
             if test -f "$FULL_PATH"; then
                 if test -s "$FULL_PATH"; then
                     clear
+                    # [NOWE] Przywrócenie nagłówka przed wyświetleniem sekcji
+                    just _ui-header "dev-help"
+                    # Nagłówek sekcji pobrany z pierwszej linii pliku (format: # Tytuł)
                     SECTION_TITLE=$(head -n 1 "$FULL_PATH" | sed 's/^# //')
+
                     echo -e "{{clr_b_blue}}📘 SEKCJA $choice: $SECTION_TITLE{{style_reset}}"
                     echo -e "{{clr_blue}}----------------------------------------------------------------------------{{style_reset}}\n"
 
