@@ -27,6 +27,9 @@ _refresh-plugins-logic:
     #!/usr/bin/env bash
     set -euo pipefail
 
+    # [NOWE] Zapewnienie, że katalog docelowy istnieje przed próbą zapisu
+    mkdir -p "$(dirname "{{AMBERO_DIR}}/am_plugins/plugins.just")"
+
     echo -e "{{clr_info}}🔌 Odświeżanie i rejestracja wtyczek w systemie Ambero...{{style_reset}}"
 
     # --- KONFIGURACJA ŚCIEŻEK ---
