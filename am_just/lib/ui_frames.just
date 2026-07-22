@@ -29,7 +29,8 @@ msg_ui_error   := "BŁĄD"
 # Wyświetla nagłówek zadania (widoczny w trybach: prod, edu, dev)
 @_ui-header command_name:
     @if [[ "{{verbosity}}" =~ ^(prod|p|edu|e|dev|d)$ ]]; then \
-        echo -e "{{clr_amber}}┌──{{style_reset}} {{style_bold}}{{AMBERO_NAME}} v{{AMBERO_VERSION}}{{style_reset}} {{style_dim}}[ ID: $AMBERO_SESSION_ID ]{{style_reset}}"; \
+        echo -n -e "{{clr_amber}}┌──{{style_reset}} {{style_bold}}{{AMBERO_NAME}} v{{AMBERO_VERSION}}{{style_reset}} "; \
+        echo -e "{{style_dim}}[ ID: $AMBERO_SESSION_ID ]{{style_reset}}"; \
         echo -e "{{clr_amber}}│{{style_reset}} {{clr_info}}{{msg_ui_cmd}}{{style_reset}} {{command_name}}"; \
         echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
@@ -47,6 +48,7 @@ msg_ui_error   := "BŁĄD"
             STATUS_TXT="{{clr_error}}{{msg_ui_error}} ({{status}}){{style_reset}}"; \
         fi; \
         echo -e "${FRAME_CLR}┌──────────────────────────────────────────────────────────{{style_reset}}"; \
-        echo -e "${FRAME_CLR}│{{style_reset}} {{clr_info}}{{msg_ui_time}}{{style_reset}} {{duration}}s {{style_dim}}|{{style_reset}} {{clr_info}}{{msg_ui_status}}{{style_reset}} ${STATUS_TXT}"; \
+        echo -n -e "${FRAME_CLR}│{{style_reset}} {{clr_info}}{{msg_ui_time}}{{style_reset}} {{duration}}s "; \
+        echo -e "{{style_dim}}|{{style_reset}} {{clr_info}}{{msg_ui_status}}{{style_reset}} ${STATUS_TXT}"; \
         echo -e "${FRAME_CLR}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
