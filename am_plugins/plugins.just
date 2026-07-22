@@ -1,6 +1,6 @@
 # ============================================================================
 # PROJECT:         AMBERO FRAMEWORK CLI
-# GENERATED:       2026-07-22 10:22:29
+# GENERATED:       2026-07-22 10:28:04
 # DESCRIPTION:     Automatycznie wygenerowany rejestr wtyczek.
 # ----------------------------------------------------------------------------
 # !!! UWAGA: PLIK GENEROWANY AUTOMATYCZNIE - NIE EDYTUJ RĘCZNIE !!!
@@ -48,11 +48,3 @@ ambero-welcome: _check_config
         ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
         "\$PWD/am_plugins/official/ambero/am_core"; \
         amber run "\$PWD/am_plugins/official/ambero/ambero_welcome.ab"'
-
-# Wstrzykuje ścieżki Homebrew do plików RC dla IDE na macOS.
-amber-jetbrain: _check_config
-    @bash -c 'trap "rm -f \$PWD/am_plugins/experimental/jetbrains/macos/am_core" EXIT INT TERM; \
-        ln -sfn /Users/pygamiq/Documents/InteliIDEA/ambero/am_core \
-        "\$PWD/am_plugins/experimental/jetbrains/macos/am_core"; \
-        amber run "\$PWD/am_plugins/experimental/jetbrains/macos/amber_jetbrain.ab"'
-
