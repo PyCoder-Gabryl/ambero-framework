@@ -27,6 +27,11 @@ verbosity := "dev"
 AMBERO_NAME    := "AMBERO FRAMEWORK CLI"
 AMBERO_VERSION := trim(read("VERSION"))
 AMBERO_DIR     := justfile_directory()
+
+# [NOWE] BOOTSTRAP: Automatyczne tworzenie brakującego rejestru wtyczek.
+# Ta linia wykonuje się podczas parsowania Justfile, zapobiegając błędom importu.
+_bootstrap := `test -f am_plugins/plugins.just || (mkdir -p am_plugins && touch am_plugins/plugins.just)`
+
 CONFIG_FILE    := AMBERO_DIR + "/am_config/config.toml"
 BACKUP_DIR     := AMBERO_DIR + "/backups"
 
