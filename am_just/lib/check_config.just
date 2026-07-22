@@ -8,7 +8,7 @@
 # DESCRIPTION:      Moduł weryfikacji spójności konfiguracji (Sanity Check).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/check_config.just
-# VERSION:         0.1.1
+# VERSION:         0.1.7
 # CREATED:         2026-07-20
 # ============================================================================
 

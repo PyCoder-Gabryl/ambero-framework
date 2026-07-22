@@ -8,17 +8,16 @@
 # DESCRIPTION:      Narzędzie podglądu ostatniego logu (Peek).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/logger_peek.just
-# VERSION:         0.1.0
+# VERSION:         0.1.4
 # CREATED:         2026-07-20
 # ============================================================================
 
 
-@_log-peek: # [ZMIANA] Dodano @
-    #!/usr/bin/env bash
-    if [[ "${AMBERO_MODIFIERS:-}" =~ (^|,)(log|l)(,|$) ]]; then
-        LOG_FILE="{{AMBERO_DIR}}/logs/json/ambero.jsonl"
-        if test -f "$LOG_FILE"; then
-            echo -e "\n{{clr_info}}📋 OSTATNI LOG (JSONL):{{style_reset}}"
-            tail -n 1 "$LOG_FILE"
-        fi
+@_log-peek:
+    @if [[ "${AMBERO_MODIFIERS:-}" =~ (^|,)(log|l)(,|$) ]]; then \
+        LOG_FILE="{{AMBERO_DIR}}/logs/json/ambero.jsonl"; \
+        if test -f "$LOG_FILE"; then \
+            echo -e "\n{{clr_info}}📋 OSTATNI LOG (JSONL):{{style_reset}}"; \
+            tail -n 1 "$LOG_FILE"; \
+        fi; \
     fi

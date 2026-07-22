@@ -14,7 +14,6 @@
 
 
 @_init-session:
-    #!/usr/bin/env bash
-    RAW_ID=$(echo "$$ $(date +%s)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]')
-    SESSION_ID=${RAW_ID:-00000}
+    @RAW_ID=$(echo "$$ $(date +%s)" | cksum | cut -c1-5 | tr '[:lower:]' '[:upper:]'); \
+    SESSION_ID=${RAW_ID:-00000}; \
     echo "export AMBERO_SESSION_ID=$SESSION_ID"
