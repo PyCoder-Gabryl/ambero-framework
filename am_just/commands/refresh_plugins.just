@@ -8,33 +8,36 @@
 # DESCRIPTION:      Zaawansowany skaner i rejestrator wtyczek (plugins).
 #                   Przeszukuje katalog am_plugins, generuje zadania Just
 #                   i zarządza symlinkami rdzenia dla izolacji wtyczek.
-#                   Wersja 0.2.3: Optymalizacja czytelności generowanego kodu.
+#                   Wersja 0.2.4: Integracja z wrapperem UI i fix błędu grep.
 # ----------------------------------------------------------------------------
-# PATH:            am_just/refresh_plugins.just
-# VERSION:         0.2.3
+# PATH:            am_just/commands/refresh_plugins.just
+# VERSION:         0.2.4
 # CREATED:         2026-07-19
 # ============================================================================
 
-
 # Automatycznie skanuje am_plugins i rejestruje dynamicznie wykryte pliki .ab
-[no-cd]
 refresh-plugins:
+    @just _run-just "_refresh-plugins-logic" "refresh-plugins"
+
+# --- LOGIKA WEWNĘTRZNA (UKRYTA) ---
+
+[private]
+[no-cd]
+_refresh-plugins-logic:
     #!/usr/bin/env bash
     set -euo pipefail
 
     echo -e "{{clr_info}}🔌 Odświeżanie i rejestracja wtyczek w systemie Ambero...{{style_reset}}"
 
+    # --- KONFIGURACJA ŚCIEŻEK ---
     AMBERO_DIR="{{AMBERO_DIR}}"
     OUT_FILE="$AMBERO_DIR/am_plugins/plugins.just"
     TMP_REG=$(mktemp)
 
-    # Pobieramy listę starych zadań do wykrywania nowości
-    OLD_TARGETS=""
-    if test -f "$OUT_FILE"; then
-        OLD_TARGETS=$(grep -E "^[a-zA-Z0-9_-]+:" "$OUT_FILE" | cut -d: -f1 | tr "\n" " ")
-    fi
+    # [ZMIANA] Dodano || true, aby grep nie wywalał skryptu, gdy nie znajdzie zadań
+    OLD_TARGETS=$(grep -E "^[a-zA-Z0-9_-]+:" "$OUT_FILE" 2>/dev/null | cut -d: -f1 | tr "\n" " ") || true
 
-    # --- GENEROWANIE NAGŁÓWKA ---
+    # --- GENEROWANIE NAGŁÓWKA REJESTRU ---
     printf "# ============================================================================\n" > "$TMP_REG"
     printf "# PROJECT:         AMBERO FRAMEWORK CLI\n" >> "$TMP_REG"
     printf "# GENERATED:       $(date "+%Y-%m-%d %H:%M:%S")\n" >> "$TMP_REG"
@@ -62,7 +65,6 @@ refresh-plugins:
                 vendor_name=$(basename "$vendor_path")
                 printf "  ├── 🏢 [SPRAWDZAM DOSTAWCĘ]: {{clr_b_blue}}%s{{style_reset}}\n" "$vendor_name"
 
-                # Szukamy plików .ab (głębokie skanowanie)
                 FOUND_FILES=$(find "$vendor_path" -type f -name "*.ab" | sort)
 
                 if test -z "$FOUND_FILES"; then
@@ -74,29 +76,24 @@ refresh-plugins:
                     f_name=$(basename "$f_path")
                     rel_f_path=$(echo "$f_path" | sed "s|$AMBERO_DIR/||")
 
-                    # Weryfikacja czy plik jest wtyczką (musi mieć main {)
                     if ! grep -q "main[[:space:]]*{" "$f_path"; then
                         printf "  │   ├── {{clr_yellow}}ℹ️  [NIE JEST WTYCZKĄ]: %s{{style_reset}}\n" "$f_name"
                         continue
                     fi
 
-                    # Ekstrakcja HELP-INFO
                     INFO=$(awk 'BEGIN{IGNORECASE=1} /HELP-INFO/{sub(/^.*HELP-INFO[[:space:]]*:?[[:space:]]*/, ""); \
                         print; exit}' "$f_path" | sed -E "s/^[[:space:]]*//; s/[[:space:]]*$//")
 
-                    # Nazwa zadania (slug)
                     raw_base="${f_name%.ab}"
                     test "$f_name" != "${f_name%_test.ab}" && raw_base="${f_name%_test.ab}"
                     target_name=$(echo "$raw_base" | tr "_" "-")
                     test "$f_name" != "${f_name%_test.ab}" && target_name="${target_name}-test"
 
-                    # Wykrywanie nowości
                     IS_NEW=""
                     if [[ " $OLD_TARGETS " != *" $target_name "* ]]; then
                         IS_NEW=" {{clr_b_green}}[NOWA]{{style_reset}}"
                     fi
 
-                    # Raportowanie do terminala
                     if test "$f_name" != "${f_name%_test.ab}"; then
                         printf "  │   ├── 🧪 [WYKRYTO TEST]:   {{clr_cyan}}%-20s{{style_reset}} ➡️  {{clr_green}}%s{{style_reset}}%s\n" \
                             "$f_name" "$target_name" "$IS_NEW"
@@ -107,9 +104,6 @@ refresh-plugins:
                         P_CNT=$((P_CNT + 1))
                     fi
 
-                    # --- GENEROWANIE ZADANIA JUST ---
-                    # [EDU] Zamiast generować skomplikowany Bash, generujemy proste wywołanie wrappera.
-                    #       To zapewnia 100% stabilności pliku plugins.just.
                     test -z "$INFO" && INFO="Wtyczka: $f_name"
                     printf "# %s\n" "$INFO" >> "$TMP_REG"
                     printf "%s:\n" "$target_name" >> "$TMP_REG"
