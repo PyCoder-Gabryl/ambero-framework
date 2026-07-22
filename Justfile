@@ -11,7 +11,7 @@
 #                   Zapewnia izolację logiki poprzez delegację zadań.
 # -----------------------------------------------------------------------------
 # PATH:             Justfile
-# VERSION:          0.2.5
+# VERSION:          0.3.0
 # CREATED:          2026-07-16
 # =============================================================================
 
@@ -19,7 +19,18 @@
 set shell := ["bash", "-c"]
 set quiet
 
-verbosity := "dev"
+# =============================================================================
+# SEKCJA: DETEKCJA ŚRODOWISKA I TRYBU PRACY
+# =============================================================================
+# [EDU] Sprawdzamy, czy pracujemy wewnątrz repozytorium (tryb deweloperski).
+IS_DEV_ENV := `if [ -d .git ]; then echo "true"; else echo "false"; fi`
+
+# Wartości domyślne (używane, gdy brak pliku config.toml)
+DEFAULT_VERBOSITY   := if IS_DEV_ENV == "true" { "dev" } else { "prod" }
+DEFAULT_INTERACTIVE := if IS_DEV_ENV == "true" { "true" } else { "false" }
+
+# [ZMIANA] Zmienna verbosity może być nadpisana z linii komend, np. 'am task v=q'
+verbosity := DEFAULT_VERBOSITY
 
 # =============================================================================
 # SEKCJA: ZMIENNE GLOBALNE
@@ -31,24 +42,27 @@ AMBERO_DIR     := justfile_directory()
 CONFIG_FILE    := AMBERO_DIR + "/am_config/config.toml"
 BACKUP_DIR     := AMBERO_DIR + "/backups"
 
+# Eksport dla Ambera - Source of Truth
 export AMBERO_HOME := AMBERO_DIR
 
 # =============================================================================
 # SEKCJA: IMPORTY (JEDYNE MIEJSCE W SYSTEMIE)
 # =============================================================================
 
-# 1. Fundamenty wizualne
+# 1. Fundamenty wizualne i i18n
 import 'am_just/commands/colors.just'
 
-# 2. Silnik (lib) - TU SĄ TWOJE RECEPTURY _init-session ITP.
+# 2. Silnik (lib) - Funkcje atomowe
 import 'am_just/lib/check_config.just'
 import 'am_just/lib/session.just'
 import 'am_just/lib/timer.just'
 import 'am_just/lib/ui_frames.just'
+import 'am_just/lib/ui_msg.just'
+import 'am_just/lib/verbosity.just'
 import 'am_just/lib/logger_peek.just'
 import 'am_just/lib/i18n_helper.just'
 
-# 3. Polecenia (commands)
+# 3. Polecenia techniczne (commands)
 import 'am_just/commands/ambero_dir.just'
 import 'am_just/commands/backup.just'
 import 'am_just/commands/refresh_plugins.just'
