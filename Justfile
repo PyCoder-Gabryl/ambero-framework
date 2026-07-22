@@ -17,9 +17,9 @@
 
 
 set shell := ["bash", "-c"]
-verbosity := "dev"
+set quiet
 
-set quiet := true
+verbosity := "dev"
 
 # =============================================================================
 # SEKCJA: ZMIENNE GLOBALNE

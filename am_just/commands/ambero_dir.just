@@ -15,11 +15,9 @@
 # ============================================================================
 
 
-# Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami
 map-paths:
     @just _run-just "_map-paths-logic" "map-paths"
 
-# Drukuje zmapowane sekcje i ścieżki w czytelny sposób
 dir-view:
     @just _run-just "_dir-view-logic" "dir-view"
 

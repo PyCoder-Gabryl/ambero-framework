@@ -13,9 +13,8 @@
 # ============================================================================
 
 
-
-@_check_config: # [ZMIANA] Dodano @
-    #!/usr/bin/env bash
-    if [ ! -f "{{CONFIG_FILE}}" ]; then
-        echo -e "{{clr_warn}}⚠️  Informacja: Brak pliku konfiguracji. Ambero użyje wartości domyślnych.{{style_reset}}"
+# Klauzula bezpieczeństwa: Weryfikuje obecność pliku konfiguracyjnego.
+@_check_config:
+    @if [ ! -f "{{CONFIG_FILE}}" ]; then \
+        echo -e "{{clr_warn}}⚠️  Informacja: Brak pliku konfiguracji. Ambero użyje wartości domyślnych.{{style_reset}}"; \
     fi

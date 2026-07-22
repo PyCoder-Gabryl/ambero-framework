@@ -8,7 +8,7 @@
 # DESCRIPTION:      Generator unikalnych identyfikatorów sesji (UUID-lite).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/session.just
-# VERSION:         0.1.0
+# VERSION:         0.1.3
 # CREATED:         2026-07-20
 # ============================================================================
 
