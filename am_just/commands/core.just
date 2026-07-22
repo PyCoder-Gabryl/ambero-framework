@@ -16,7 +16,6 @@
 
 
 # Wrapper dla wtyczek Amber (.ab)
-# [EDU] v i mod mają domyślne wartości, co pozwala na wywołania: am task v=q
 @_run-amber plugin_path v=verbosity mod="": _check_config
     @set -uo pipefail; \
     eval "$(just _select-verbosity)"; \
