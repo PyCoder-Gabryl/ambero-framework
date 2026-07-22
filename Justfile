@@ -27,12 +27,14 @@ set quiet
 # verbosity := "edu"     # (e)   - Tryb produkcyjny + bloki edukacyjne.
 verbosity := "dev"       # (d)   - Pełny debug (ID sesji, ścieżki, logi).
 
+# [NOWE] Modyfikatory globalne (np. "time" aby zawsze mierzyć czas)
+# Ta zmienna musi istnieć, aby wrapper core.just nie zgłaszał błędu.
+modifiers := "time"
 
 # =============================================================================
 # SEKCJA: DETEKCJA ŚRODOWISKA
 # =============================================================================
 IS_DEV_ENV := `if [ -d .git ]; then echo "true"; else echo "false"; fi`
-
 
 # =============================================================================
 # SEKCJA: ZMIENNE GLOBALNE
@@ -44,7 +46,6 @@ CONFIG_FILE    := AMBERO_DIR + "/am_config/config.toml"
 BACKUP_DIR     := AMBERO_DIR + "/backups"
 
 export AMBERO_HOME := AMBERO_DIR
-
 
 # =============================================================================
 # SEKCJA: IMPORTY
@@ -70,7 +71,6 @@ import 'am_just/platform/macos.just'
 import 'am_just/platform/linux.just'
 import 'am_just/platform/windows.just'
 import 'am_plugins/plugins.just'
-
 
 # =============================================================================
 # SEKCJA: GŁÓWNA LOGIKA
