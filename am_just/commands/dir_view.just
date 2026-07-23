@@ -7,13 +7,12 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
-#                   Wersja 0.3.5: Pełna obsługa trybów Q/MIN oraz sekcji EDU/DEV.
+#                   Wersja 0.4.1: Unifikacja widoku (zawsze pełne drzewo).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/dir_view.just
-# VERSION:         0.3.9
+# VERSION:         0.4.1
 # CREATED:         2026-07-20
 # ============================================================================
-
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami
 map-paths:
@@ -61,7 +60,6 @@ _map-paths-logic:
         echo "# Generated: $GEN_DATE" > "$TMP_FILE"
     fi
 
-    # [ZMIANA] Grupowy blok echo zapewnia zgodność z wcięciami Just i zapobiega błędom w IDE
     {
         echo ""
         echo "[system]"
@@ -103,47 +101,47 @@ _dir-view-logic:
     #!/usr/bin/env bash
     set -euo pipefail
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"
-    W=${AMBERO_VERBOSITY_WEIGHT:-2}
 
     if test ! -f "$TARGET"; then echo -e "{{clr_error}}❌ Błąd: Brak pliku!{{style_reset}}"; exit 1; fi
 
-    [ "$W" -ge 2 ] && echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:\n=================================================="
+    # [ZMIANA] Tytuł i ramka są teraz stałym elementem widoku
+    echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:\n=================================================="
 
     LAST_LANG=""
     while IFS= read -r line || [ -n "$line" ]; do
         [[ "$line" =~ ^# ]] && continue
         [[ -z "$(echo "$line" | tr -d '[:space:]')" ]] && continue
+
+        # Sekcje (SYSTEM, INSTALL itd.)
         if [[ "$line" =~ ^\[.*\]$ ]]; then
-            if [ "$W" -ge 2 ]; then
-                section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
-                case "$section" in
-                    SYSTEM) ICON="🖥️ " ;; INSTALL) ICON="📦 " ;; JUST) ICON="⚙️ " ;;
-                    PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;; *) ICON="🔷 " ;;
-                esac
-                echo -e "\n${ICON}SEKCJA: $section\n--------------------------------------------------"
-            fi
+            section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
+            case "$section" in
+                SYSTEM) ICON="🖥️ " ;; INSTALL) ICON="📦 " ;; JUST) ICON="⚙️ " ;;
+                PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;; *) ICON="🔷 " ;;
+            esac
+            echo -e "\n${ICON}SEKCJA: $section\n--------------------------------------------------"
             LAST_LANG=""
+
+        # Klucze i wartości (Zawsze pełne drzewo)
         elif [[ "$line" =~ = ]]; then
             key=$(echo "$line" | cut -d"=" -f1 | tr -d " "); val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"")
+
             if [[ "$val" =~ ^i18n/([a-z]{2})/(.*) ]]; then
                 CUR_LANG="${BASH_REMATCH[1]}"; SUB_PATH="${BASH_REMATCH[2]}"
                 if [ "$CUR_LANG" != "$LAST_LANG" ]; then
-                    L_ICO=$( [ "$W" -ge 1 ] && echo "🌎 " || echo "" )
-                    [ "$W" -ge 2 ] && printf "  ├── %sJĘZYK: \x1b[1;35m%s\x1b[0m\n" "$L_ICO" "$CUR_LANG"
+                    printf "  ├── 🌎 JĘZYK: \x1b[1;35m%s\x1b[0m\n" "$CUR_LANG"
                     LAST_LANG="$CUR_LANG"
                 fi
-                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
-                [ "$W" -lt 2 ] && printf "%s%s.%s ➡️   %s\n" "$( [ "$W" -eq 1 ] && echo "🌎 " )" "$CUR_LANG" "$key" "$SUB_PATH"
+                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
+
             elif [[ "$key" =~ ^(root|core|config|logs)$ ]]; then
-                [ "$W" -ge 2 ] && printf "  ├── \x1b[36m%-20s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$val"
-                [ "$W" -lt 2 ] && printf "%s%s ➡️   %s\n" "$( [ "$W" -eq 1 ] && echo "📦 " )" "$key" "$val"
+                printf "  ├── \x1b[36m%-20s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$val"
+
             else
-                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$val"
-                [ "$W" -lt 2 ] && printf "  └── %s ➡️   %s\n" "$key" "$val"
+                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$val"
             fi
         fi
     done < "$TARGET"
 
-    [ "$W" -ge 2 ] && echo -e "==================================================\n"
-
+    echo -e "==================================================\n"
     exit 0
