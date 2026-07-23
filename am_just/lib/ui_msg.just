@@ -9,7 +9,7 @@
 #                   Odpowiada za warunkowe drukowanie treści i ramek.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_msg.just
-# VERSION:         0.1.2
+# VERSION:         0.1.3
 # CREATED:         2026-07-22
 # ============================================================================
 # !!! UWAGA: PLIK SYSTEMOWY - NIE EDYTUJ RĘCZNIE !!!
@@ -34,13 +34,14 @@
 # SEKCJA: BLOKI SPECJALNE (EDU & LOG)
 # ============================================================================
 
-# Wyświetla sformatowany blok edukacyjny (tylko dla trybu edu+)
+# Wyświetla sformatowany blok edukacyjny (v0.1.4: ustandaryzowane obramowanie)
 @_ui-edu-block content:
     @CURRENT_W=${AMBERO_VERBOSITY_WEIGHT:-2}; \
     if [ "$CURRENT_W" -ge 3 ]; then \
-        echo -e "\n{{clr_cyan}}{{style_bold}}🎓 EDUKACJA:{{style_reset}}"; \
-        echo -e "{{content}}" | sed 's/^/{{clr_cyan}}│{{style_reset}} /'; \
-        echo -e ""; \
+        echo -e "{{clr_amber}}┌──────────────────────────────────────────────────────────{{style_reset}}"; \
+        echo -e "{{clr_amber}}│{{style_reset}} {{clr_cyan}}{{style_bold}}🎓 EDUKACJA:{{style_reset}}"; \
+        echo -e "{{content}}" | sed 's/^/{{clr_amber}}│{{style_reset}} /'; \
+        echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
 
 # ============================================================================
