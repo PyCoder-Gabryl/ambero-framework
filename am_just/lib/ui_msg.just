@@ -9,7 +9,7 @@
 #                   Odpowiada za warunkowe drukowanie treści i ramek.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_msg.just
-# VERSION:         0.1.3
+# VERSION:         0.1.4
 # CREATED:         2026-07-22
 # ============================================================================
 # !!! UWAGA: PLIK SYSTEMOWY - NIE EDYTUJ RĘCZNIE !!!

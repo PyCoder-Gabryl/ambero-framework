@@ -1,3 +1,20 @@
+# ============================================================================
+# PROJECT:         Ambero Framework CLI
+# AUTHOR:          PyCoder Gabryl
+# GITHUB:          https://github.com/PyCoder-Gabryl/
+# EMAIL:           pycoder.gabryl@gmail.com
+# LICENSE:         Apache 2.0
+# ----------------------------------------------------------------------------
+# DESCRIPTION:      Moduł archiwizacji projektu do komunikacji z ekspertem.
+#                   Tworzy paczkę ZIP zawierającą pełny kod i konfigurację,
+#                   czyszcząc wcześniej stare archiwa i pomijając śmieci.
+# ----------------------------------------------------------------------------
+# PATH:            am_just/backup.just
+# VERSION:         0.3.2
+# CREATED:         2026-07-20
+# ============================================================================
+
+
 # --- KOMUNIKATY I18N (Lokalne) ---
 msg_backup_pack   := "📦 Pakowanie projektu do pakietu ZIP..."
 msg_backup_verify := "🔍 Weryfikacja spójności archiwum (unzip -t)..."

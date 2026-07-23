@@ -10,7 +10,7 @@
 #                   Wersja 0.3.5: Pełna obsługa trybów Q/MIN oraz sekcji EDU/DEV.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/dir_view.just
-# VERSION:         0.3.7
+# VERSION:         0.3.9
 # CREATED:         2026-07-20
 # ============================================================================
 
@@ -23,7 +23,7 @@ map-paths:
 dir-view:
     @just _run-just "_dir-view-logic" "dir-view"
 
-# [EDU] Wyjaśnienie roli mapowania ścieżek
+# [EDU] Wyjaśnienie roli mapowania ścieżek (v0.3.9: Nowe obramowanie w ui_msg)
 @_dir-view-logic-edu:
     @just _ui-edu-block "Plik ambero_paths.toml to 'mapa drogowa' systemu.\n\
         │ Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
@@ -31,12 +31,14 @@ dir-view:
         │ bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
         │ importuje 'am_core/path.ab', aby poznać swoje otoczenie."
 
-# [DEV] Diagnostyka ścieżek (v0.3.7: bezpieczne drukowanie TOML)
+# [DEV] Diagnostyka ścieżek (v0.3.9: Nowe ustandaryzowane obramowanie)
 @_dir-view-logic-dev:
-    @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"; \
+    @echo -e "{{clr_amber}}┌──────────────────────────────────────────────────────────{{style_reset}}"; \
+    echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"; \
     echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
     echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just [dir-view]"; \
-    echo -e "{{clr_amber}}│{{style_reset}} 📄 Plik zadania: am_just/commands/dir_view.just"
+    echo -e "{{clr_amber}}│{{style_reset}} 📄 Plik zadania: am_just/commands/dir_view.just"; \
+    echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"
 
 [no-cd]
 _map-paths-logic:
