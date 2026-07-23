@@ -50,9 +50,13 @@ msg_ui_error   := "❌ BŁĄD"
 @_ui-footer status duration v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
+    V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
     SHOW_FOOTER=0; \
-    if [[ "$V_MODE" =~ ^(prod|p|edu|e|dev|d)$ ]]; then SHOW_FOOTER=1; fi; \
-    if [[ "${AMBERO_MODIFIERS:-}" =~ (^|,)(time|t)(,|$) ]]; then SHOW_FOOTER=1; fi; \
+    # Stopka tylko dla PROD+ (waga >= 2)
+    if [ "$V_WEIGHT" -ge 2 ]; then SHOW_FOOTER=1; fi; \
+    # WYJĄTEK: Jawny modyfikator 'time' przekazany w ARGUMENTACH (nie globalny)
+    if [[ "{{AMBERO_MODIFIERS}}" =~ (^|,)(time|t)(,|$) ]]; then SHOW_FOOTER=1; fi; \
+    \
     if [ "$SHOW_FOOTER" -eq 1 ]; then \
         FRAME_CLR="{{clr_amber}}"; \
         STATUS_TXT="{{clr_success}}{{msg_ui_success}}{{style_reset}}"; \

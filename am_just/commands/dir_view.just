@@ -7,15 +7,11 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
-#                   Wersja 0.3.3: Pełna obsługa poziomów komunikacji (v=).
+#                   Wersja 0.3.4: Poprawka trybów Q/MIN oraz sekcji EDU/DEV.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/dir_view.just
-# VERSION:         0.3.3
+# VERSION:         0.3.4
 # CREATED:         2026-07-20
-# ============================================================================
-
-# ============================================================================
-# SEKCJA: ZADANIA PUBLICZNE (INTERFEJS)
 # ============================================================================
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w am_config/
@@ -35,13 +31,14 @@ dir-view:
     @just _ui-edu-block "Plik ambero_paths.toml to 'mapa drogowa' systemu.\n\
         │ Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
         │ Dzięki temu wtyczki mogą być przenoszone między folderami\n\
-        │ bez konieczności zmiany logiki skryptów."
+        │ bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
+        │ importuje 'am_core/path.ab', aby poznać swoje otoczenie."
 
 # [DEV] Diagnostyka ścieżek dla dewelopera.
 @_dir-view-logic-dev:
-    @echo -e "{{clr_amber}}│{{style_reset}} {{style_bold}}DEBUG:{{style_reset}} Lokalizacja pliku ścieżek:"
+    @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"
     @echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"
-    @echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just"
+    @echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just [dir-view]"
 
 # ============================================================================
 # SEKCJA: LOGIKA WEWNĘTRZNA (UKRYTA)
@@ -94,11 +91,9 @@ _dir-view-logic:
         exit 1
     fi
 
-    # --- NAGŁÓWEK RAPORTU (Tylko PROD+) ---
-    if [ "$W" -ge 2 ]; then
-        echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:"
-        echo "=================================================="
-    fi
+    # --- NAGŁÓWEK RAPORTU ---
+    echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:"
+    echo "=================================================="
 
     LAST_LANG=""
     while IFS= read -r line || [ -n "$line" ]; do
@@ -106,43 +101,41 @@ _dir-view-logic:
         [[ -z "$(echo "$line" | tr -d '[:space:]')" ]] && continue
 
         if [[ "$line" =~ ^\[.*\]$ ]]; then
-            # --- SEKCJA (Tylko PROD+) ---
-            if [ "$W" -ge 2 ]; then
-                section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
+            section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
+            ICON="🔷 "
+            if [ "$W" -ge 1 ]; then
                 case "$section" in
                     SYSTEM) ICON="🖥️ " ;; INSTALL) ICON="📦 " ;; JUST) ICON="⚙️ " ;;
-                    PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;; *) ICON="🔷 " ;;
+                    PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;;
                 esac
-                echo -e "\n${ICON}SEKCJA: $section"
-                echo "--------------------------------------------------"
+            else
+                ICON="" # W trybie quiet (0) brak emotek sekcji
             fi
+            echo -e "\n${ICON}SEKCJA: $section"
+            echo "--------------------------------------------------"
             LAST_LANG=""
         elif [[ "$line" =~ = ]]; then
             key=$(echo "$line" | cut -d"=" -f1 | tr -d " ")
             val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")
 
-            # --- LOGIKA WNIOSKOWANIA HIERARCHII (I18N / PLUGINS) ---
+            # --- LOGIKA WNIOSKOWANIA HIERARCHII ---
             if [[ "$val" =~ ^i18n/([a-z]{2})/(.*) ]]; then
                 CUR_LANG="${BASH_REMATCH[1]}"; SUB_PATH="${BASH_REMATCH[2]}"
                 if [ "$CUR_LANG" != "$LAST_LANG" ]; then
-                    [ "$W" -ge 2 ] && printf "  ├── 🌎 JĘZYK: \x1b[1;35m%s\x1b[0m\n" "$CUR_LANG"
+                    L_ICO=$( [ "$W" -ge 1 ] && echo "🌎 " || echo "" )
+                    printf "  ├── %sJĘZYK: \x1b[1;35m%s\x1b[0m\n" "$L_ICO" "$CUR_LANG"
                     LAST_LANG="$CUR_LANG"
                 fi
-                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
-                [ "$W" -lt 2 ] && printf "%s.%s ➡️  %s\n" "$CUR_LANG" "$key" "$SUB_PATH"
+                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
             elif [[ "$key" =~ ^(root|core|config|logs)$ ]]; then
-                [ "$W" -ge 2 ] && printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
-                [ "$W" -lt 2 ] && printf "%s ➡️  %s\n" "$key" "$val"
+                printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
             else
-                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
-                [ "$W" -lt 2 ] && printf "%s ➡️  %s\n" "$key" "$val"
+                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
             fi
         fi
     done < "$TARGET"
+    echo -e "==================================================\n"
 
-    [ "$W" -ge 2 ] && echo -e "==================================================\n"
-
-    # [NOWE] Wywołanie sekcji DEV na samym końcu (tylko dla trybu dev)
-    if [ "$W" -ge 4 ]; then
-        just _dir-view-logic-dev
-    fi
+    # [NOWE] Wywołanie sekcji EDU i DEV wewnątrz logiki (nad stopką)
+    if [ "$W" -ge 3 ]; then just --allow-missing "_dir-view-logic-edu" 2>/dev/null || true; fi
+    if [ "$W" -ge 4 ]; then just --allow-missing "_dir-view-logic-dev" 2>/dev/null || true; fi

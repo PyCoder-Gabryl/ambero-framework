@@ -51,11 +51,10 @@
     eval "$(just _init-session)"; \
     eval "$(just _timer-start)"; \
     just _ui-header "{{display_name}}" "$V_MODE"; \
-    if [ "$V_WEIGHT" -ge 3 ]; then \
-        just --allow-missing "{{internal_recipe}}-edu" 2>/dev/null || true; \
-    fi; \
+    \
     EXIT_CODE=0; \
     just {{internal_recipe}} || EXIT_CODE=$?; \
+    \
     DURATION=$(just _timer-stop); \
     just _ui-footer "$EXIT_CODE" "$DURATION" "$V_MODE"; \
     exit $EXIT_CODE
