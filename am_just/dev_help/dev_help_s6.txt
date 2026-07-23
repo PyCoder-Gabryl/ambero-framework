@@ -1,0 +1,58 @@
+SZABLON WTYCZKI (PLUGIN TEMPLATE)
+--------------------------------------------------------------------------------
+
+#!/usr/local/bin/amber amber
+
+// ============================================================================
+// PROJECT:         Ambero Framework CLI
+// AUTHOR:          AUTOR PLUGINA
+// GITHUB:          https://github.com/PyCoder-Gabryl/
+// EMAIL:           MAIL AUTORA PLUGINA
+// LICENSE:         Apache License 2.0
+// ----------------------------------------------------------------------------
+// --- NAGŁÓWEK WYMAGANY PRZEZ REFRESH-PLUGINS ---
+// HELP-INFO        Krótki opis widoczny w 'am help'
+// ----------------------------------------------------------------------------
+// DESCRIPTION:     Szczegółowy opis techniczny działania wtyczki.
+// ----------------------------------------------------------------------------
+// PATH:            am_plugins/[kategoria]/[dostawca]/[nazwa].ab
+// VERSION:         0.1.0
+// CREATED:         DATA UTWORZENIA
+// ============================================================================
+
+
+import { env_var_get } from "std/env"
+import { load_config } from "am_core/config_parser.ab"
+import {
+    log_header, log_success, log_error, log_edu
+} from "am_core/logger.ab"
+
+main {
+    // 1. Inicjalizacja środowiska (Pobranie AMBERO_HOME)
+    const ambero_home = env_var_get("AMBERO_HOME") failed (e) {
+        const _ = e
+        "." // Fallback do katalogu bieżącego
+    }
+
+    // 2. Wczytanie konfiguracji frameworka
+    const config = load_config("{ambero_home}/am_config/config.toml")
+
+    // 3. Start logiki (Nagłówek UI)
+    log_header(config, "MOJA NOWA WTYCZKA")
+
+    // 4. Przykładowa operacja systemowa
+    const user = $whoami$ failed (e) {
+        log_error(config, "Nie udalo sie pobrac nazwy uzytkownika")
+        const _ = e
+        "unknown"
+    }
+
+    log_success(config, "Witaj {user}! Wtyczka dziala poprawnie.")
+
+    // 5. Opcjonalny blok edukacyjny
+    log_edu(config, "Tworzenie wtyczek", "Uzywaj 'let' dla zmiennych i 'const' dla stalych.")
+}
+
+============================================================================
+[EDU] Pamiętaj, aby po zapisaniu pliku uruchomić 'am refresh-plugins'.
+============================================================================

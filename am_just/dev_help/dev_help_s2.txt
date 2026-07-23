@@ -3,15 +3,15 @@ TWORZENIE WTYCZEK (PLUGINS)
 Aby stworzyć nową wtyczkę, dodaj plik .ab w am_plugins/[kategoria]/[nazwa]/.
 
 WYMAGANE ELEMENTY PLIKU .ab:
-1. Nagłówek DESCRIPTION: Wieloliniowy opis techniczny pliku.
-2. Nagłówek HELP–INFO: Jednoliniowy opis dla Justa (wyświetlany w 'am help').
-3. Blok main { ... }: Punkt wejścia skryptu.
+    1. Nagłówek DESCRIPTION: Wieloliniowy opis techniczny pliku.
+    2. Nagłówek HELP–INFO: Jednoliniowy opis dla Justa (wyświetlany w 'am help').
+    3. Blok main { ... }: Punkt wejścia skryptu.
 
 REJESTRACJA:
 Po dodaniu pliku uruchom 'am refresh–plugins'. System automatycznie:
-– Wykryje plik i sprawdzi obecność funkcji 'main'.
-– Wyciągnie HELP–INFO i dopisze zadanie do am_plugins/plugins.just.
-– Przygotuje bezpieczny wrapper z mechanizmem 'trap'.
+    – Wykryje plik i sprawdzi obecność funkcji 'main'.
+    – Wyciągnie HELP–INFO i dopisze zadanie do am_plugins/plugins.just.
+    – Przygotuje bezpieczny wrapper z mechanizmem 'trap'.
 
 ============================================================================
 [EDU] Wtyczki nie powinny importować plików przez '../../'. Używaj symlinka

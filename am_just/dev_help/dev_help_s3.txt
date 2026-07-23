@@ -3,13 +3,13 @@ JUST I INTEGRACJA SYSTEMOWA
 Just pełni funkcję "Recepcji" i "Wrappera" dla logiki Ambera.
 
 WRAPPER (_run–amber):
-– Każda wtyczka jest uruchamiana przez ukryte zadanie @_run–amber.
-– Zapewnia ono izolację (symlink am_core) i sprzątanie (trap rm –f).
-– Przekazuje zmienną AMBERO_HOME do środowiska Ambera.
+    – Każda wtyczka jest uruchamiana przez ukryte zadanie @_run–amber.
+    – Zapewnia ono izolację (symlink am_core) i sprzątanie (trap rm –f).
+    – Przekazuje zmienną AMBERO_HOME do środowiska Ambera.
 
 BEZPIECZEŃSTWO (Ada–style):
-– Zadanie @_check_config blokuje start, jeśli system nie jest zainicjowany.
-– Używamy 'set –euo pipefail' w recepturach shebang, aby wyłapać każdy błąd.
+    – Zadanie @_check_config blokuje start, jeśli system nie jest zainicjowany.
+    – Używamy 'set –euo pipefail' w recepturach shebang, aby wyłapać każdy błąd.
 
 ============================================================================
 [EDU] Justfile w Ambero ma być minimalny. Skomplikowaną logikę Bash/Amber

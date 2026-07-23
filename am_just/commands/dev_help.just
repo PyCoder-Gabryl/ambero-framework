@@ -47,13 +47,17 @@ _dev-help-logic:
     while true; do
         echo -e "\n{{clr_amber}}{{style_bold}}🛠️  AMBERO DEVELOPER GUIDE - MENU GŁÓWNE{{style_reset}}"
         echo -e "----------------------------------------------------------------------------"
-        echo -e "{{clr_info}}1){{style_reset}} ARCHITEKTURA I STRUKTURA KATALOGÓW"
-        echo -e "{{clr_info}}2){{style_reset}} TWORZENIE WTYCZEK (PLUGINS)"
-        echo -e "{{clr_info}}3){{style_reset}} JUST I INTEGRACJA SYSTEMOWA"
-        echo -e "{{clr_info}}4){{style_reset}} INTERFEJS, VERBOSITY I i18n"
-        echo -e "{{clr_red}}q){{style_reset}} Wyjście"
+        echo ""
+        echo -e "   {{clr_info}}1){{style_reset}} ARCHITEKTURA I STRUKTURA KATALOGÓW"
+        echo -e "   {{clr_info}}2){{style_reset}} TWORZENIE WTYCZEK (PLUGINS)"
+        echo -e "   {{clr_info}}3){{style_reset}} JUST I INTEGRACJA SYSTEMOWA"
+        echo -e "   {{clr_info}}4){{style_reset}} INTERFEJS, VERBOSITY I i18n"
+        echo -e "   {{clr_info}}5){{style_reset}} BIBLIOTEKI RDZENIA (AM_CORE API)"
+        echo -e "   {{clr_info}}6){{style_reset}} SZABLON WTYCZKI (PLUGIN TEMPLATE)"
+        echo -e "   ––––––––––––––  ––––––––––––––––––––––––"
+        echo -e "   {{clr_red}}q){{style_reset}} Wyjście"
 
-        echo -ne "\n{{clr_amber}}👉 Wybierz sekcję [1-4] lub q: {{style_reset}}"
+        echo -ne "\n{{clr_amber}}👉 Wybierz sekcję [1-6] lub q: {{style_reset}}"
 
         # Odczyt bezpośrednio z terminala (standard Ada-style dla interakcji)
         read -r choice < /dev/tty

@@ -3,17 +3,23 @@ INTERFEJS, VERBOSITY I i18n
 Ambero komunikuje się z użytkownikiem w sposób kontrolowany.
 
 POZIOMY GADATLIWOŚCI (v=):
-– quiet (q)   : Tylko surowy wynik. Brak pytań (auto–confirm).
-– minimal (min): Tylko kluczowe statusy operacji.
-– prod (p)    : Standardowe ramki, nagłówki i stopki.
-– edu (e)     : Pełna informacja + bloki edukacyjne (EDU_CONTENT).
-– dev (d)     : Debug: UUID sesji, ścieżki, kody wyjścia, zrzut zmiennych.
+    – quiet (q)     : Tylko surowy wynik. Brak pytań (auto–confirm).
+    – minimal (min) : Tylko kluczowe statusy operacji i nazwa polecenia.
+    – prod (p)      : Standardowe ramki, nagłówki i stopki.
+    – edu (e)       : Pełna informacja + bloki edukacyjne (EDU_CONTENT).
+    – dev (d)       : Debug: UUID sesji, ścieżki, kody wyjścia, zrzut zmiennych.
 
 MODYFIKATORY (mod=):
-– log (l)     : Wyświetla ostatni wpis z JSONL po zakończeniu.
-– mono (m)    : Wyłącza kolory ANSI (tryb czarno–biały).
-– force (f)   : Ignoruje blokady czasowe (np. interwał 7 dni).
+    – log (l)       : Wyświetla ostatni wpis z JSONL po zakończeniu.
+    – mono (m)      : Wyłącza kolory ANSI (tryb czarno–biały).
+    – force (f)     : Ignoruje blokady czasowe (np. interwał 7 dni).
+
+⚠️ AMBER 0.6.0-ALPHA – BEZPIECZEŃSTWO STRINGÓW:
+Aby uniknąć błędów parsera, znaki specjalne w stringach zastępuj:
+    – Dolar ($)         -> \u0024
+    – Klamra lewa ({)   -> \u007b
+    – Klamra prawa (})  -> \u007d
+    – Cudzysłów (")     -> \u0022
 
 ============================================================================
-[EDU] W Amberze 0.6.0–alpha znaki specjalne ($, {, }) wewnątrz stringów
-definiujemy przez kody Unicode (\u0024, \u007b, \u007d), aby nie mylić parsera.
+[EDU] Zawsze używaj silnika i18n dla komunikatów (katalog /i18n).

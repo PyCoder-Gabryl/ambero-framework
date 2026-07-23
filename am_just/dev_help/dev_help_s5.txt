@@ -1,0 +1,22 @@
+BIBLIOTEKI RDZENIA (AM_CORE API)
+============================================================================
+Nie wyważaj otwartych drzwi. Używaj gotowych modułów z am_core.
+
+1.  LOGGER (import { ... } from "am_core/logger.ab"):
+    – log_header(cfg, title)   : Rysuje nagłówek sekcji (kolor bursztynowy).
+    – log_success(cfg, msg)    : Wyświetla zielony status sukcesu.
+    – log_error(cfg, msg)      : Wyświetla czerwony błąd krytyczny.
+    – log_warn(cfg, msg)       : Wyświetla żółte ostrzeżenie.
+    – log_edu(cfg, title, txt) : Rysuje ramkę edukacyjną (tylko w trybie edu).
+
+2.  CONFIG (import { ... } from "am_core/config_parser.ab"):
+    – load_config(path)        : Wczytuje tablicę ustawień z pliku TOML.
+    – get_verbosity(cfg)       : Pobiera aktualny poziom gadatliwości.
+
+3.  UI (import { ... } from "am_core/ui.ab"):
+    – clr_amber, clr_green...  : Stałe kolorów ANSI.
+    – ico_ok, ico_warn...      : Ustandaryzowane ikony (Emoji/Nerd).
+
+============================================================================
+[EDU] Każda funkcja logująca automatycznie sprawdza poziom verbosity
+zapisany w obiekcie 'config'. Nie musisz pisać własnych warunków 'if'.

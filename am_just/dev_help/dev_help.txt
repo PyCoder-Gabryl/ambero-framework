@@ -5,17 +5,17 @@ i standardy, dzięki którym nasz framework jest bezpieczny i skalowalny.
 
 📚 DOSTĘPNE SEKCJE POMOCY:
 ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-1) ARCHITEKTURA    – Struktura katalogów, rola am_core i zasada "Lustra".
-2) WTYCZKI (PLUGS) – Jak pisać pliki .ab, rejestracja i HELP–INFO.
-3) SILNIK JUST     – Rola wrappera, mechanizm trap i bezpieczeństwo.
-4) INTERFEJS (UI)  – Poziomy gadatliwości (v=), modyfikatory i i18n.
+    1) ARCHITEKTURA    – Struktura katalogów, rola am_core i zasada "Lustra".
+    2) WTYCZKI (PLUGS) – Jak pisać pliki .ab, rejestracja i HELP–INFO.
+    3) SILNIK JUST     – Rola wrappera, mechanizm trap i bezpieczeństwo.
+    4) INTERFEJS (UI)  – Poziomy gadatliwości (v=), modyfikatory i i18n.
 
 🛠️  ZŁOTE ZASADY AMBERO (STYLE GUIDE):
 ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-• ADA–STYLE: Przewiduj błędy. Każdy blok 'failed' musi być obsłużony.
-• IZOLACJA:  Wtyczki nie "śmiecą" w systemie. Używaj symlinków am_core.
-• CZYSTOŚĆ:  Komentarze techniczne i EDU zawsze po polsku. Kod po angielsku.
-• WYDAJNOŚĆ: Just to recepcja, Amber to silnik. Nie dubluj logiki.
+    • ADA–STYLE: Przewiduj błędy. Każdy blok 'failed' musi być obsłużony.
+    • IZOLACJA:  Wtyczki nie "śmiecą" w systemie. Używaj symlinków am_core.
+    • CZYSTOŚĆ:  Komentarze techniczne i EDU zawsze po polsku. Kod po angielsku.
+    • WYDAJNOŚĆ: Just to recepcja, Amber to silnik. Nie dubluj logiki.
 
 ============================================================================
 [EDU] Wybierz numer sekcji poniżej, aby zgłębić detale techniczne.

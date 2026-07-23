@@ -2,14 +2,14 @@ ARCHITEKTURA I STRUKTURA KATALOGÓW
 ============================================================================
 Ambero opiera się na ścisłej separacji logiki, konfiguracji i rozszerzeń.
 
-📂 am_core/          – Rdzeń Ambera. Biblioteki współdzielone (UI, Parser, System).
-📂 am_config/        – Szablony i dane dynamiczne (Runtime Cache, Plugins State).
-📂 am_just/          – Silnik Just. Katalog 'commands' (zadania) i 'lib' (funkcje).
-📂 am_plugins/       – Ekosystem wtyczek podzielony na:
-   ├── official/     – Pancerne, certyfikowane narzędzia frameworka.
-   ├── experimental/ – Poligon doświadczalny (tu testujemy nowości).
-   └── user/         – Twoje prywatne skrypty (ignorowane przez Git).
-📂 i18n/             – Lustrzane odbicie am_plugins dla plików tłumaczeń (.toml).
+📂  am_core/          – Rdzeń Ambera. Biblioteki współdzielone (UI, Parser, System).
+📂  am_config/        – Szablony i dane dynamiczne (Runtime Cache, Plugins State).
+📂  am_just/          – Silnik Just. Katalog 'commands' (zadania) i 'lib' (funkcje).
+📂  am_plugins/       – Ekosystem wtyczek podzielony na:
+        ├── official/     – Pancerne, certyfikowane narzędzia frameworka.
+        ├── experimental/ – Poligon doświadczalny (tu testujemy nowości).
+        └── user/         – Twoje prywatne skrypty (ignorowane przez Git).
+📂  i18n/             – Lustrzane odbicie am_plugins dla plików tłumaczeń (.toml).
 
 ============================================================================
 [EDU] Zasada "Lustra": Każdy plik w am_plugins powinien mieć swój odpowiednik
