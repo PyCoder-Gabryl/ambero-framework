@@ -9,7 +9,7 @@
 #                   Wersja 0.3.4: Dynamiczne etykiety trybów pracy (Verbosity).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_frames.just
-# VERSION:         0.3.8
+# VERSION:         0.3.9
 # CREATED:         2026-07-21
 # ============================================================================
 
@@ -26,11 +26,11 @@ msg_ui_error   := "❌ BŁĄD"
 # SEKCJA: RENDEROWANIE RAMEK UI
 # ============================================================================
 
-# Wyświetla nagłówek zadania
+# Wyświetla nagłówek zadania (v0.3.9: dodano tryb minimal do nagłówka)
 @_ui-header command_name v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
-    if [[ "$V_MODE" =~ ^(prod|p|edu|e|dev|d)$ ]]; then \
+    if [[ "$V_MODE" =~ ^(minimal|min|prod|p|edu|e|dev|d)$ ]]; then \
         MODE_INFO=""; \
         if [[ "$V_MODE" =~ ^(edu|e|dev|d)$ ]]; then \
             case "$V_MODE" in \
@@ -45,14 +45,13 @@ msg_ui_error   := "❌ BŁĄD"
         echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
 
-# Wyświetla stopkę (v0.3.8: naprawa odwołania do AMBERO_MODIFIERS)
+# Wyświetla stopkę (v0.3.9: stopka pojawia się wyłącznie w trybie prod i wyższych)
 @_ui-footer status duration v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
     V_WEIGHT=$(just _get-verbosity-weight "$V_MODE"); \
     SHOW_FOOTER=0; \
     if [ "$V_WEIGHT" -ge 2 ]; then SHOW_FOOTER=1; fi; \
-    if [[ "$AMBERO_MODIFIERS" =~ (^|,)(time|t)(,|$) ]]; then SHOW_FOOTER=1; fi; \
     if [ "$SHOW_FOOTER" -eq 1 ]; then \
         FRAME_CLR="{{clr_amber}}"; \
         STATUS_TXT="{{clr_success}}{{msg_ui_success}}{{style_reset}}"; \

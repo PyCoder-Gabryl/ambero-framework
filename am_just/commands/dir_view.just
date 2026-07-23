@@ -25,12 +25,12 @@ dir-view:
 # [EDU] Wyjaśnienie roli mapowania ścieżek
 @_dir-view-logic-edu:
     @just _ui-edu-block "Plik ambero_paths.toml to 'mapa drogowa' systemu.\n\
-        │   Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
-        │   Dzięki temu wtyczki mogą być przenoszone między folderami\n\
-        │   bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
-        │   importuje 'am_core/path.ab', aby poznać swoje otoczenie."
+        │ Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
+        │ Dzięki temu wtyczki mogą być przenoszone między folderami\n\
+        │ bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
+        │ importuje 'am_core/path.ab', aby poznać swoje otoczenie."
 
-# [DEV] Diagnostyka ścieżek (v0.3.5: kolory i ścieżka pliku)
+# [DEV] Diagnostyka ścieżek (v0.3.6: kolory i ścieżka pliku)
 @_dir-view-logic-dev:
     @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"; \
     echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
@@ -56,15 +56,40 @@ _map-paths-logic:
     else
         echo "# Generated: $GEN_DATE" > "$TMP_FILE"
     fi
-    printf "\n[system]\ncore = \"am_core\"\nconfig = \"am_config\"\nlogs = \"logs\"\n" >> "$TMP_FILE"
-    printf "\n[install]\nroot = \"am_install\"\nplatforms = \"am_install/lib/platforms\"\n" >> "$TMP_FILE"
-    printf "\n[just]\nroot = \"am_just\"\ncommands = \"am_just/commands\"\nlib = \"am_just/lib\"\n" >> "$TMP_FILE"
-    printf "\n[plugins]\nroot = \"am_plugins\"\nexperimental = \"am_plugins/experimental\"\n" >> "$TMP_FILE"
-    printf "official = \"am_plugins/official\"\nuser = \"am_plugins/user\"\n" >> "$TMP_FILE"
-    printf "\n[i18n]\nroot = \"i18n\"\nen_experimental = \"i18n/en/experimental\"\n" >> "$TMP_FILE"
-    printf "en_official = \"i18n/en/official\"\nen_user = \"i18n/en/user\"\n" >> "$TMP_FILE"
-    printf "pl_experimental = \"i18n/pl/experimental\"\npl_official = \"i18n/pl/official\"\n" >> "$TMP_FILE"
-    printf "pl_user = \"i18n/pl/user\"\n" >> "$TMP_FILE"
+
+    # [ZMIANA] Użyto czystego bloku Heredoc, aby ułatwić edycję i uniknąć literówek
+    cat << 'EOF' >> "$TMP_FILE"
+
+[system]
+core = "am_core"
+config = "am_config"
+logs = "logs"
+
+[install]
+root = "am_install"
+platforms = "am_install/lib/platforms"
+
+[just]
+root = "am_just"
+commands = "am_just/commands"
+lib = "am_just/lib"
+
+[plugins]
+root = "am_plugins"
+experimental = "am_plugins/experimental"
+official = "am_plugins/official"
+user = "am_plugins/user"
+
+[i18n]
+root = "i18n"
+en_experimental = "i18n/en/experimental"
+en_official = "i18n/en/official"
+en_user = "i18n/en/user"
+pl_experimental = "i18n/pl/experimental"
+pl_official = "i18n/pl/official"
+pl_user = "i18n/pl/user"
+EOF
+
     mv "$TMP_FILE" "$TARGET"
     echo -e "{{clr_success}}✅ Gotowe! Zapisano w: am_config/ambero_paths.toml{{style_reset}}"
     just _dir-view-logic
@@ -75,8 +100,11 @@ _dir-view-logic:
     set -euo pipefail
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"
     W=${AMBERO_VERBOSITY_WEIGHT:-2}
+
     if test ! -f "$TARGET"; then echo -e "{{clr_error}}❌ Błąd: Brak pliku!{{style_reset}}"; exit 1; fi
+
     [ "$W" -ge 2 ] && echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:\n=================================================="
+
     LAST_LANG=""
     while IFS= read -r line || [ -n "$line" ]; do
         [[ "$line" =~ ^# ]] && continue
@@ -111,4 +139,8 @@ _dir-view-logic:
             fi
         fi
     done < "$TARGET"
+
     [ "$W" -ge 2 ] && echo -e "==================================================\n"
+
+    # [NOWE] Zabezpieczenie na wypadek nieprawdziwego warunku końcowego
+    exit 0
