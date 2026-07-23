@@ -10,9 +10,10 @@
 #                   Wersja 0.3.5: Pełna obsługa trybów Q/MIN oraz sekcji EDU/DEV.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/dir_view.just
-# VERSION:         0.3.5
+# VERSION:         0.3.7
 # CREATED:         2026-07-20
 # ============================================================================
+
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami
 map-paths:
@@ -30,7 +31,7 @@ dir-view:
         │ bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
         │ importuje 'am_core/path.ab', aby poznać swoje otoczenie."
 
-# [DEV] Diagnostyka ścieżek (v0.3.6: kolory i ścieżka pliku)
+# [DEV] Diagnostyka ścieżek (v0.3.7: bezpieczne drukowanie TOML)
 @_dir-view-logic-dev:
     @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"; \
     echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
@@ -46,6 +47,7 @@ _map-paths-logic:
     TMP_FILE=$(mktemp)
     GEN_DATE=$(date "+%Y-%m-%d %H:%M:%S")
     DESC="Automatyczny rejestr ścieżek systemowych frameworku Ambero."
+
     if test -f "$HEADER_TMPL"; then
         sed -e "s/{{ "{{" }}PROJECT_NAME}}/{{AMBERO_NAME}}/g" \
             -e "s/{{ "{{" }}GEN_DATE}}/$GEN_DATE/g" \
@@ -57,38 +59,38 @@ _map-paths-logic:
         echo "# Generated: $GEN_DATE" > "$TMP_FILE"
     fi
 
-    # [ZMIANA] Użyto czystego bloku Heredoc, aby ułatwić edycję i uniknąć literówek
-    cat << 'EOF' >> "$TMP_FILE"
-
-[system]
-core = "am_core"
-config = "am_config"
-logs = "logs"
-
-[install]
-root = "am_install"
-platforms = "am_install/lib/platforms"
-
-[just]
-root = "am_just"
-commands = "am_just/commands"
-lib = "am_just/lib"
-
-[plugins]
-root = "am_plugins"
-experimental = "am_plugins/experimental"
-official = "am_plugins/official"
-user = "am_plugins/user"
-
-[i18n]
-root = "i18n"
-en_experimental = "i18n/en/experimental"
-en_official = "i18n/en/official"
-en_user = "i18n/en/user"
-pl_experimental = "i18n/pl/experimental"
-pl_official = "i18n/pl/official"
-pl_user = "i18n/pl/user"
-EOF
+    # [ZMIANA] Grupowy blok echo zapewnia zgodność z wcięciami Just i zapobiega błędom w IDE
+    {
+        echo ""
+        echo "[system]"
+        echo "core = \"am_core\""
+        echo "config = \"am_config\""
+        echo "logs = \"logs\""
+        echo ""
+        echo "[install]"
+        echo "root = \"am_install\""
+        echo "platforms = \"am_install/lib/platforms\""
+        echo ""
+        echo "[just]"
+        echo "root = \"am_just\""
+        echo "commands = \"am_just/commands\""
+        echo "lib = \"am_just/lib\""
+        echo ""
+        echo "[plugins]"
+        echo "root = \"am_plugins\""
+        echo "experimental = \"am_plugins/experimental\""
+        echo "official = \"am_plugins/official\""
+        echo "user = \"am_plugins/user\""
+        echo ""
+        echo "[i18n]"
+        echo "root = \"i18n\""
+        echo "en_experimental = \"i18n/en/experimental\""
+        echo "en_official = \"i18n/en/official\""
+        echo "en_user = \"i18n/en/user\""
+        echo "pl_experimental = \"i18n/pl/experimental\""
+        echo "pl_official = \"i18n/pl/official\""
+        echo "pl_user = \"i18n/pl/user\""
+    } >> "$TMP_FILE"
 
     mv "$TMP_FILE" "$TARGET"
     echo -e "{{clr_success}}✅ Gotowe! Zapisano w: am_config/ambero_paths.toml{{style_reset}}"
@@ -142,5 +144,4 @@ _dir-view-logic:
 
     [ "$W" -ge 2 ] && echo -e "==================================================\n"
 
-    # [NOWE] Zabezpieczenie na wypadek nieprawdziwego warunku końcowego
     exit 0
