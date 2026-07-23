@@ -1,20 +1,3 @@
-# ============================================================================
-# PROJECT:         Ambero Framework CLI
-# AUTHOR:          PyCoder Gabryl
-# GITHUB:          https://github.com/PyCoder-Gabryl/
-# EMAIL:           pycoder.gabryl@gmail.com
-# LICENSE:         Apache 2.0
-# ----------------------------------------------------------------------------
-# DESCRIPTION:      Moduł archiwizacji projektu do komunikacji z ekspertem.
-#                   Tworzy paczkę ZIP zawierającą pełny kod i konfigurację,
-#                   czyszcząc wcześniej stare archiwa i pomijając śmieci.
-# ----------------------------------------------------------------------------
-# PATH:            am_just/backup.just
-# VERSION:         0.3.1
-# CREATED:         2026-07-20
-# ============================================================================
-
-
 # --- KOMUNIKATY I18N (Lokalne) ---
 msg_backup_pack   := "📦 Pakowanie projektu do pakietu ZIP..."
 msg_backup_verify := "🔍 Weryfikacja spójności archiwum (unzip -t)..."
@@ -39,6 +22,16 @@ backup-project:
         │ Operacja celowo omija katalogi, takie jak '.git', 'logs/', 'backups/'\n\
         │ oraz pliki konfiguracyjne środowisk IDE (.idea, .vscode, .DS_Store).\n\
         │ Jeśli weryfikacja się powiedzie, stare paczki są kasowane."
+
+# [DEV] Diagnostyka parametrów backupu (v0.3.2: Nowe obramowanie)
+@_backup-project-logic-dev:
+    @echo -e "{{clr_amber}}┌──────────────────────────────────────────────────────────{{style_reset}}"; \
+    echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Parametry archiwizacji:{{style_reset}}"; \
+    echo -e "{{clr_amber}}│{{style_reset}} 📂 Katalog:    {{BACKUP_DIR}}"; \
+    echo -e "{{clr_amber}}│{{style_reset}} 📦 Plik:       ambero_v{{AMBERO_VERSION}}.zip"; \
+    echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Metoda:     Atomic (zip -> unzip -t -> mv)"; \
+    echo -e "{{clr_amber}}│{{style_reset}} 📄 Zadanie:    am_just/commands/backup.just"; \
+    echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"
 
 [private]
 [no-cd]
@@ -74,7 +67,6 @@ _backup-project-logic:
     fi
 
     # --- 2. ETAP WERYFIKACJI (Integrity check) ---
-    # Polecenie zip testuje pliki. Jeśli zwróci błąd, 'set -e' ubije skrypt, chroniąc starą paczkę.
     [ "$W" -ge 1 ] && echo -e "{{clr_info}}{{msg_backup_verify}}{{style_reset}}"
 
     if [ "$W" -ge 4 ]; then
