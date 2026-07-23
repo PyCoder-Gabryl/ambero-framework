@@ -9,7 +9,7 @@
 #                   Odpowiada za warunkowe drukowanie treści i ramek.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_msg.just
-# VERSION:         0.1.0
+# VERSION:         0.1.1
 # CREATED:         2026-07-22
 # ============================================================================
 # !!! UWAGA: PLIK SYSTEMOWY - NIE EDYTUJ RĘCZNIE !!!
@@ -40,7 +40,7 @@
     @#!/usr/bin/env bash \
     CURRENT_W=${AMBERO_VERBOSITY_WEIGHT:-2}; \
     if [ "$CURRENT_W" -ge 3 ]; then \
-        echo -e "\n{{clr_cyan}}{{style_bold}}🎓 EDU:{{style_reset}}"; \
+        echo -e "\n{{clr_cyan}}{{style_bold}}🎓 EDUKACJA:{{style_reset}}"; \
         echo -e "{{content}}" | sed 's/^/{{clr_cyan}}│{{style_reset}} /'; \
         echo -e ""; \
     fi

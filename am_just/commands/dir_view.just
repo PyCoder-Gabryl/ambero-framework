@@ -7,13 +7,12 @@
 # ----------------------------------------------------------------------------
 # DESCRIPTION:      Generator mapy ścieżek frameworku. Odpowiada za
 #                   tworzenie i aktualizację pliku ambero_paths.toml.
-#                   Wersja 0.3.4: Poprawka trybów Q/MIN oraz sekcji EDU/DEV.
+#                   Wersja 0.3.5: Pełna obsługa trybów Q/MIN oraz sekcji EDU/DEV.
 # ----------------------------------------------------------------------------
 # PATH:            am_just/commands/dir_view.just
-# VERSION:         0.3.4
+# VERSION:         0.3.5
 # CREATED:         2026-07-20
 # ============================================================================
-
 
 # Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami
 map-paths:
@@ -34,9 +33,9 @@ dir-view:
 # [DEV] Diagnostyka ścieżek (v0.3.5: kolory i ścieżka pliku)
 @_dir-view-logic-dev:
     @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"; \
-    @echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
-    @echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just [dir-view]"; \
-    @echo -e "{{clr_amber}}│{{style_reset}} 📄 Plik zadania: am_just/commands/dir_view.just"
+    echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
+    echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just [dir-view]"; \
+    echo -e "{{clr_amber}}│{{style_reset}} 📄 Plik zadania: am_just/commands/dir_view.just"
 
 [no-cd]
 _map-paths-logic:
@@ -101,17 +100,15 @@ _dir-view-logic:
                     [ "$W" -ge 2 ] && printf "  ├── %sJĘZYK: \x1b[1;35m%s\x1b[0m\n" "$L_ICO" "$CUR_LANG"
                     LAST_LANG="$CUR_LANG"
                 fi
-                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
-                [ "$W" -lt 2 ] && printf "%s%s.%s ➡️  %s\n" "$( [ "$W" -eq 1 ] && echo "🌎 " )" "$CUR_LANG" "$key" "$SUB_PATH"
+                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
+                [ "$W" -lt 2 ] && printf "%s%s.%s ➡️   %s\n" "$( [ "$W" -eq 1 ] && echo "🌎 " )" "$CUR_LANG" "$key" "$SUB_PATH"
             elif [[ "$key" =~ ^(root|core|config|logs)$ ]]; then
-                [ "$W" -ge 2 ] && printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
-                [ "$W" -lt 2 ] && printf "%s%s ➡️  %s\n" "$( [ "$W" -eq 1 ] && echo "📦 " )" "$key" "$val"
+                [ "$W" -ge 2 ] && printf "  ├── \x1b[36m%-20s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$val"
+                [ "$W" -lt 2 ] && printf "%s%s ➡️   %s\n" "$( [ "$W" -eq 1 ] && echo "📦 " )" "$key" "$val"
             else
-                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
-                [ "$W" -lt 2 ] && printf "  └── %s ➡️  %s\n" "$key" "$val"
+                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️   \x1b[32m%s\x1b[0m\n" "$key" "$val"
+                [ "$W" -lt 2 ] && printf "  └── %s ➡️   %s\n" "$key" "$val"
             fi
         fi
     done < "$TARGET"
     [ "$W" -ge 2 ] && echo -e "==================================================\n"
-    if [ "$W" -ge 3 ]; then just --allow-missing "_dir-view-logic-edu" 2>/dev/null || true; fi
-    if [ "$W" -ge 4 ]; then just --allow-missing "_dir-view-logic-dev" 2>/dev/null || true; fi
