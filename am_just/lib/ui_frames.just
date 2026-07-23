@@ -9,7 +9,7 @@
 #                   Wersja 0.3.4: Dynamiczne etykiety trybów pracy (Verbosity).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_frames.just
-# VERSION:         0.3.9
+# VERSION:         0.3.10
 # CREATED:         2026-07-21
 # ============================================================================
 
@@ -26,11 +26,13 @@ msg_ui_error   := "❌ BŁĄD"
 # SEKCJA: RENDEROWANIE RAMEK UI
 # ============================================================================
 
-# Wyświetla nagłówek zadania (v0.3.9: dodano tryb minimal do nagłówka)
+# Wyświetla nagłówek zadania (v0.3.10: rozdzielenie minimal od prod)
 @_ui-header command_name v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
-    if [[ "$V_MODE" =~ ^(minimal|min|prod|p|edu|e|dev|d)$ ]]; then \
+    if [[ "$V_MODE" =~ ^(minimal|min)$ ]]; then \
+        echo -e "{{clr_info}}{{msg_ui_cmd}}{{style_reset}} {{command_name}}"; \
+    elif [[ "$V_MODE" =~ ^(prod|p|edu|e|dev|d)$ ]]; then \
         MODE_INFO=""; \
         if [[ "$V_MODE" =~ ^(edu|e|dev|d)$ ]]; then \
             case "$V_MODE" in \
@@ -45,7 +47,7 @@ msg_ui_error   := "❌ BŁĄD"
         echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
 
-# Wyświetla stopkę (v0.3.9: stopka pojawia się wyłącznie w trybie prod i wyższych)
+# Wyświetla stopkę
 @_ui-footer status duration v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
