@@ -9,7 +9,7 @@
 #                   Wersja 0.3.4: Dynamiczne etykiety trybów pracy (Verbosity).
 # ----------------------------------------------------------------------------
 # PATH:            am_just/lib/ui_frames.just
-# VERSION:         0.3.10
+# VERSION:         0.3.11
 # CREATED:         2026-07-21
 # ============================================================================
 
@@ -26,7 +26,7 @@ msg_ui_error   := "❌ BŁĄD"
 # SEKCJA: RENDEROWANIE RAMEK UI
 # ============================================================================
 
-# Wyświetla nagłówek zadania (v0.3.10: rozdzielenie minimal od prod)
+# Wyświetla nagłówek zadania (v0.3.11: minimal to tylko tekst, quiet to cisza)
 @_ui-header command_name v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
@@ -47,7 +47,7 @@ msg_ui_error   := "❌ BŁĄD"
         echo -e "{{clr_amber}}└──────────────────────────────────────────────────────────{{style_reset}}"; \
     fi
 
-# Wyświetla stopkę
+# Wyświetla stopkę (v0.3.11: stopka tylko dla prod+)
 @_ui-footer status duration v="":
     @V_MODE="{{v}}"; \
     [[ -z "$V_MODE" ]] && V_MODE="{{verbosity}}"; \
