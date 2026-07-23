@@ -22,10 +22,10 @@ set quiet
 # =============================================================================
 # [EDU] Odkomentuj tylko JEDEN z poniższych trybów, aby zmienić zachowanie CLI.
 #verbosity := "quiet"   # (q)   - Absolutna cisza, tylko surowy wynik.
-verbosity := "minimal" # (min) - Tylko kluczowe statusy sukcesu/błędu.
+#verbosity := "minimal" # (min) - Tylko kluczowe statusy sukcesu/błędu.
 #verbosity := "prod"    # (p)   - Standardowe ramki i kroki operacji.
 #verbosity := "edu"     # (e)   - Tryb produkcyjny + bloki edukacyjne.
-#verbosity := "dev"       # (d)   - Pełny debug (ID sesji, ścieżki, logi).
+verbosity := "dev"       # (d)   - Pełny debug (ID sesji, ścieżki, logi).
 
 # [NOWE] Modyfikatory globalne (np. "time" aby zawsze mierzyć czas)
 # Ta zmienna musi istnieć, aby wrapper core.just nie zgłaszał błędu.
@@ -48,28 +48,41 @@ BACKUP_DIR     := AMBERO_DIR + "/backups"
 export AMBERO_HOME := AMBERO_DIR
 
 # =============================================================================
-# SEKCJA: IMPORTY
+# SEKCJA: IMPORTY (HIERARCHII ZALEŻNOŚCI)
 # =============================================================================
 
-import 'am_just/commands/colors.just'
+# 1. FUNDAMENTY WIZUALNE I KONFIGURACYJNE
+import 'am_just/lib/colors.just'
+import 'am_just/lib/verbosity.just'
 import 'am_just/lib/check_config.just'
+
+# 2. BIBLIOTEKI POMOCNICZE (LOGIKA SYSTEMOWA)
 import 'am_just/lib/session.just'
 import 'am_just/lib/timer.just'
-import 'am_just/lib/ui_frames.just'
-import 'am_just/lib/ui_msg.just'
-import 'am_just/lib/verbosity.just'
 import 'am_just/lib/logger_peek.just'
 import 'am_just/lib/i18n_helper.just'
+
+# 3. SILNIK KOMUNIKACJI UI (ZALEŻNY OD KOLORÓW I WAG)
+import 'am_just/lib/ui_msg.just'
+import 'am_just/lib/ui_frames.just'
+
+# 4. SILNIK WYKONAWCZY (MIDDLEWARE - ZALEŻNY OD WSZYSTKIEGO POWYŻEJ)
+import 'am_just/lib/core.just'
+
+# 5. MODUŁY FUNKCJONALNE (KOMENDY CLI)
 import 'am_just/commands/dir_view.just'
 import 'am_just/commands/backup.just'
 import 'am_just/commands/refresh_plugins.just'
 import 'am_just/commands/plugin_show.just'
 import 'am_just/commands/dev_help.just'
-import 'am_just/commands/core.just'
 import 'am_just/commands/official.just'
+
+# 6. ADAPTERY SYSTEMOWE (OS SPECIFIC)
 import 'am_just/platform/macos.just'
 import 'am_just/platform/linux.just'
 import 'am_just/platform/windows.just'
+
+# 7. REJESTR DYNAMICZNY (WTYCZKI: import refresh-plugins)
 import 'am_plugins/plugins.just'
 
 # =============================================================================
