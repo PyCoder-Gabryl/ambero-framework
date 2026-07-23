@@ -25,10 +25,10 @@ dir-view:
 # [EDU] Wyjaśnienie roli mapowania ścieżek
 @_dir-view-logic-edu:
     @just _ui-edu-block "Plik ambero_paths.toml to 'mapa drogowa' systemu.\n\
-        │ Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
-        │ Dzięki temu wtyczki mogą być przenoszone między folderami\n\
-        │ bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
-        │ importuje 'am_core/path.ab', aby poznać swoje otoczenie."
+        │   Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
+        │   Dzięki temu wtyczki mogą być przenoszone między folderami\n\
+        │   bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
+        │   importuje 'am_core/path.ab', aby poznać swoje otoczenie."
 
 # [DEV] Diagnostyka ścieżek (v0.3.5: kolory i ścieżka pliku)
 @_dir-view-logic-dev:

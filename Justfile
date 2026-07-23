@@ -24,8 +24,8 @@ set quiet
 #verbosity := "quiet"   # (q)   - Absolutna cisza, tylko surowy wynik.
 #verbosity := "minimal" # (min) - Tylko kluczowe statusy sukcesu/błędu.
 #verbosity := "prod"    # (p)   - Standardowe ramki i kroki operacji.
-#verbosity := "edu"     # (e)   - Tryb produkcyjny + bloki edukacyjne.
-verbosity := "dev"       # (d)   - Pełny debug (ID sesji, ścieżki, logi).
+verbosity := "edu"     # (e)   - Tryb produkcyjny + bloki edukacyjne.
+#verbosity := "dev"       # (d)   - Pełny debug (ID sesji, ścieżki, logi).
 
 # [NOWE] Modyfikatory globalne (np. "time" aby zawsze mierzyć czas)
 # Ta zmienna musi istnieć, aby wrapper core.just nie zgłaszał błędu.
