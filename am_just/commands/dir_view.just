@@ -14,19 +14,16 @@
 # CREATED:         2026-07-20
 # ============================================================================
 
-# Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami w am_config/
+
+# Generuje lub aktualizuje plik konfiguracyjny ze ścieżkami
 map-paths:
     @just _run-just "_map-paths-logic" "map-paths"
 
-# Drukuje zmapowane sekcje i ścieżki w czytelny sposób (widok drzewa)
+# Drukuje zmapowane sekcje i ścieżki w czytelny sposób
 dir-view:
     @just _run-just "_dir-view-logic" "dir-view"
 
-# ============================================================================
-# SEKCJA: EDUKACJA I DIAGNOSTYKA (EDU & DEV BLOCKS)
-# ============================================================================
-
-# [EDU] Wyjaśnienie roli mapowania ścieżek w architekturze frameworku.
+# [EDU] Wyjaśnienie roli mapowania ścieżek
 @_dir-view-logic-edu:
     @just _ui-edu-block "Plik ambero_paths.toml to 'mapa drogowa' systemu.\n\
         │ Pozwala on na uniknięcie sztywnych ścieżek w kodzie Amber.\n\
@@ -34,15 +31,12 @@ dir-view:
         │ bez konieczności zmiany logiki skryptów. Każdy moduł Ambero\n\
         │ importuje 'am_core/path.ab', aby poznać swoje otoczenie."
 
-# [DEV] Diagnostyka ścieżek dla dewelopera.
+# [DEV] Diagnostyka ścieżek (v0.3.5: kolory i ścieżka pliku)
 @_dir-view-logic-dev:
-    @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"
-    @echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"
-    @echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just [dir-view]"
-
-# ============================================================================
-# SEKCJA: LOGIKA WEWNĘTRZNA (UKRYTA)
-# ============================================================================
+    @echo -e "{{clr_amber}}│{{style_reset}} {{clr_b_red}}DEBUG:{{style_reset}} {{clr_yellow}}Lokalizacja pliku ścieżek:{{style_reset}}"; \
+    @echo -e "{{clr_amber}}│{{style_reset}} 📂 {{AMBERO_DIR}}/am_config/ambero_paths.toml"; \
+    @echo -e "{{clr_amber}}│{{style_reset}} 🛠️  Generator: am_just/commands/dir_view.just [dir-view]"; \
+    @echo -e "{{clr_amber}}│{{style_reset}} 📄 Plik zadania: am_just/commands/dir_view.just"
 
 [no-cd]
 _map-paths-logic:
@@ -53,7 +47,6 @@ _map-paths-logic:
     TMP_FILE=$(mktemp)
     GEN_DATE=$(date "+%Y-%m-%d %H:%M:%S")
     DESC="Automatyczny rejestr ścieżek systemowych frameworku Ambero."
-
     if test -f "$HEADER_TMPL"; then
         sed -e "s/{{ "{{" }}PROJECT_NAME}}/{{AMBERO_NAME}}/g" \
             -e "s/{{ "{{" }}GEN_DATE}}/$GEN_DATE/g" \
@@ -64,7 +57,6 @@ _map-paths-logic:
     else
         echo "# Generated: $GEN_DATE" > "$TMP_FILE"
     fi
-
     printf "\n[system]\ncore = \"am_core\"\nconfig = \"am_config\"\nlogs = \"logs\"\n" >> "$TMP_FILE"
     printf "\n[install]\nroot = \"am_install\"\nplatforms = \"am_install/lib/platforms\"\n" >> "$TMP_FILE"
     printf "\n[just]\nroot = \"am_just\"\ncommands = \"am_just/commands\"\nlib = \"am_just/lib\"\n" >> "$TMP_FILE"
@@ -74,7 +66,6 @@ _map-paths-logic:
     printf "en_official = \"i18n/en/official\"\nen_user = \"i18n/en/user\"\n" >> "$TMP_FILE"
     printf "pl_experimental = \"i18n/pl/experimental\"\npl_official = \"i18n/pl/official\"\n" >> "$TMP_FILE"
     printf "pl_user = \"i18n/pl/user\"\n" >> "$TMP_FILE"
-
     mv "$TMP_FILE" "$TARGET"
     echo -e "{{clr_success}}✅ Gotowe! Zapisano w: am_config/ambero_paths.toml{{style_reset}}"
     just _dir-view-logic
@@ -85,57 +76,42 @@ _dir-view-logic:
     set -euo pipefail
     TARGET="{{AMBERO_DIR}}/am_config/ambero_paths.toml"
     W=${AMBERO_VERBOSITY_WEIGHT:-2}
-
-    if test ! -f "$TARGET"; then
-        echo -e "{{clr_error}}❌ Błąd: Plik konfiguracyjny nie istnieje!{{style_reset}}"
-        exit 1
-    fi
-
-    # --- NAGŁÓWEK RAPORTU ---
-    echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:"
-    echo "=================================================="
-
+    if test ! -f "$TARGET"; then echo -e "{{clr_error}}❌ Błąd: Brak pliku!{{style_reset}}"; exit 1; fi
+    [ "$W" -ge 2 ] && echo -e "\n📂 STRUKTURA ŚCIEŻEK FRAMEWORKU AMBERO:\n=================================================="
     LAST_LANG=""
     while IFS= read -r line || [ -n "$line" ]; do
         [[ "$line" =~ ^# ]] && continue
         [[ -z "$(echo "$line" | tr -d '[:space:]')" ]] && continue
-
         if [[ "$line" =~ ^\[.*\]$ ]]; then
-            section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
-            ICON="🔷 "
-            if [ "$W" -ge 1 ]; then
+            if [ "$W" -ge 2 ]; then
+                section=$(echo "$line" | tr -d "[]" | tr "[:lower:]" "[:upper:]")
                 case "$section" in
                     SYSTEM) ICON="🖥️ " ;; INSTALL) ICON="📦 " ;; JUST) ICON="⚙️ " ;;
-                    PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;;
+                    PLUGINS) ICON="🔌 " ;; I18N) ICON="🌐 " ;; *) ICON="🔷 " ;;
                 esac
-            else
-                ICON="" # W trybie quiet (0) brak emotek sekcji
+                echo -e "\n${ICON}SEKCJA: $section\n--------------------------------------------------"
             fi
-            echo -e "\n${ICON}SEKCJA: $section"
-            echo "--------------------------------------------------"
             LAST_LANG=""
         elif [[ "$line" =~ = ]]; then
-            key=$(echo "$line" | cut -d"=" -f1 | tr -d " ")
-            val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"" | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")
-
-            # --- LOGIKA WNIOSKOWANIA HIERARCHII ---
+            key=$(echo "$line" | cut -d"=" -f1 | tr -d " "); val=$(echo "$line" | cut -d"=" -f2- | tr -d "\"")
             if [[ "$val" =~ ^i18n/([a-z]{2})/(.*) ]]; then
                 CUR_LANG="${BASH_REMATCH[1]}"; SUB_PATH="${BASH_REMATCH[2]}"
                 if [ "$CUR_LANG" != "$LAST_LANG" ]; then
                     L_ICO=$( [ "$W" -ge 1 ] && echo "🌎 " || echo "" )
-                    printf "  ├── %sJĘZYK: \x1b[1;35m%s\x1b[0m\n" "$L_ICO" "$CUR_LANG"
+                    [ "$W" -ge 2 ] && printf "  ├── %sJĘZYK: \x1b[1;35m%s\x1b[0m\n" "$L_ICO" "$CUR_LANG"
                     LAST_LANG="$CUR_LANG"
                 fi
-                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
+                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$SUB_PATH"
+                [ "$W" -lt 2 ] && printf "%s%s.%s ➡️  %s\n" "$( [ "$W" -eq 1 ] && echo "🌎 " )" "$CUR_LANG" "$key" "$SUB_PATH"
             elif [[ "$key" =~ ^(root|core|config|logs)$ ]]; then
-                printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+                [ "$W" -ge 2 ] && printf "  ├── \x1b[36m%-20s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+                [ "$W" -lt 2 ] && printf "%s%s ➡️  %s\n" "$( [ "$W" -eq 1 ] && echo "📦 " )" "$key" "$val"
             else
-                printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+                [ "$W" -ge 2 ] && printf "  │   └── \x1b[36m%-16s\x1b[0m ➡️  \x1b[32m%s\x1b[0m\n" "$key" "$val"
+                [ "$W" -lt 2 ] && printf "  └── %s ➡️  %s\n" "$key" "$val"
             fi
         fi
     done < "$TARGET"
-    echo -e "==================================================\n"
-
-    # [NOWE] Wywołanie sekcji EDU i DEV wewnątrz logiki (nad stopką)
+    [ "$W" -ge 2 ] && echo -e "==================================================\n"
     if [ "$W" -ge 3 ]; then just --allow-missing "_dir-view-logic-edu" 2>/dev/null || true; fi
     if [ "$W" -ge 4 ]; then just --allow-missing "_dir-view-logic-dev" 2>/dev/null || true; fi
